@@ -30,7 +30,7 @@ export default function HomeScreen() {
               Linking.openURL(emailIntent)
                 .catch(err => console.error('An error occurred', err));
             } else {
-              Alert.alert('Error', 'No email app available');
+              Alert.alert('Error', 'No email app available if this persists please mail directly instead to brianali427@gmail.com');
             }
           })
           .catch(err => console.error('An error occurred', err));
@@ -41,9 +41,9 @@ export default function HomeScreen() {
           .then((supported) => {
             if (supported) {
               Linking.openURL(mailtoLink)
-                .catch(err => console.error('An error occurred', err));
+                .catch(err => console.error('An error occurred' , err));
             } else {
-              Alert.alert('Error', 'No email app available');
+              Alert.alert('Error', 'No email app available if this persists please mail directly instead to brianali427@gmail.com');
             }
           })
           .catch(err => console.error('An error occurred', err));
@@ -55,7 +55,7 @@ export default function HomeScreen() {
 
         <SafeAreaView>
             <ThemedText style={styles.text}>
-                  REPORT BUG
+                  Report a bug
             </ThemedText>
         </SafeAreaView>
          

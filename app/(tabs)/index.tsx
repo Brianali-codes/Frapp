@@ -2,7 +2,6 @@ import { ScrollView, StyleSheet, Image } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useState, useEffect } from 'react';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Button } from 'react-native-paper';
 import { Linking } from 'react-native';
 import { Alert } from 'react-native';
@@ -160,12 +159,14 @@ export default function HomeScreen() {
   ];
   const monthName = monthNames[now.getMonth()];
 
+  
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView>
+       <SafeAreaView style={styles.heading}>
         <ThemedText style={styles.text}>
-          GIVEAWAYS
+          Giveaways
         </ThemedText>
+        
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -176,8 +177,7 @@ export default function HomeScreen() {
         </>
         ) : (
           <ThemedView style={styles.container}>
-            <ThemedText style={styles.text1}>We have found <ThemedText style={styles.themeTexts}>{prices}</ThemedText> giveaways as of <ThemedText style={styles.themeTexts3}>{day} {monthName} {year}</ThemedText></ThemedText>
-            <ThemedText style={styles.text1}>Total Prices of Giveaways : <ThemedText style={styles.themeTexts}>${worth}</ThemedText>.</ThemedText>
+            <ThemedText style={styles.text1}>We have found <ThemedText style={styles.themeTexts}>{prices}</ThemedText> video game giveaways as of <ThemedText style={styles.themeTexts3}>{day} {monthName} {year}</ThemedText>With a total Price of <ThemedText style={styles.themeTexts}>${worth}</ThemedText>for you to take advantage of before time expires</ThemedText>
           </ThemedView>
         )
         }
@@ -237,13 +237,13 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif',
     fontWeight: 'bold',
     fontSize: 15,
-    marginBottom: 10,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    padding: 5,
-    gap: 3,
+    marginBottom:10,
+    padding:5,
+    gap:5,
   },
   text1: {
     color: 'white',
@@ -252,6 +252,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     padding: 3,
     gap: 3,
+  },
+  heading: {
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
   },
   themeTexts: {
     color: '#00FF00',
@@ -271,7 +277,7 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   themeTexts3: {
-    color: 'red',
+    color: 'lime',
     fontFamily: 'sans-serif',
     fontWeight: 'bold',
     fontSize: 15,
@@ -284,7 +290,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   skeletonImage2: {
-    width: '100%',
     height: 50,
     borderRadius: 10,
   },
@@ -303,7 +308,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   cardImage: {
-    width: '90%',
+    width: '95%',
     height: 150,
     alignSelf:'center',
     borderTopLeftRadius: 10,
@@ -317,12 +322,17 @@ const styles = StyleSheet.create({
   },
   giveawayText: {
     color: 'white',
-    fontSize: 13,
+    fontSize: 14,
   },
   thumbnail: {
     width: 50,
     height: 60,
     marginBottom: 5,
+  },
+  icons: {
+    padding:5,
+    fontSize:23,
+    marginBottom:10,
   },
 });
 

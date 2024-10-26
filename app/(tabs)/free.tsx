@@ -2,17 +2,14 @@ import { ScrollView, StyleSheet, Image } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useState, useEffect } from 'react';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Button, Divider } from 'react-native-paper';
 import { Linking } from 'react-native';
 import { Skeleton } from '@rneui/themed';
 import { Alert } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Platform } from 'react-native';
-
-const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
-
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Or Ionicons
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 //initital typescript magic for better error handling.
 interface Giveaway {
@@ -50,7 +47,10 @@ export default function HomeScreen() {
       Alert.alert('Unable to fetch games check your connection or relaunch the app.');
     }
   };
-
+  const handleMenuPress = () => {
+    // Handle the menu press event
+    console.log('Menu pressed');
+  };
   // Use useEffect to fetch the data on component mount
   useEffect(() => {
     fetchData();
@@ -58,11 +58,11 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView>
+      <SafeAreaView style={styles.heading}>
         <ThemedText style={styles.text}>
-          FREE GAMES
+          Free Games
         </ThemedText>
-
+        <MaterialCommunityIcons name="dots-vertical" size={24} color="white" style={styles.icons} />
       </SafeAreaView>
       
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -115,11 +115,11 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif',
     fontWeight: 'bold',
     fontSize: 15,
-    marginBottom: 10,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
+    marginBottom:10,
     padding:5,
     gap:5,
   },
@@ -130,6 +130,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     padding:3,
     gap:3,
+  },
+  heading: {
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+
   },
   skeletonImage:{
     width:'100%',
@@ -166,8 +173,9 @@ const styles = StyleSheet.create({
     color:'white',
   },
   icons: {
-    marginBottom: 2,
-    fontSize:18,
+    padding:5,
+    fontSize:23,
+    marginBottom:10,
   },
   scrollViewContent: {
     paddingBottom: 20, 
