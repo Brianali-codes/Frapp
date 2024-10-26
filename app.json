@@ -4,7 +4,7 @@
     "slug": "Frapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/FRAPP_ICON.png",
+    "icon": "./assets/images/FRAPP_ICON.jpg",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -12,15 +12,17 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/FRAPP_ICON.jpg",
+        "foregroundImage": "./assets/images/FRAPP_ICON.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.brianali.Frapp"
+      "package": "com.brianali.Frapp",
+      "enableProguardInReleaseBuilds": true
     },
     "web": {
       "bundler": "metro",

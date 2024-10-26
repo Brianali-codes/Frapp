@@ -9,9 +9,12 @@ import { Skeleton } from '@rneui/themed';
 import { Alert } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
+
+const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
+
+
 //initital typescript magic for better error handling.
-
-
 interface Giveaway {
   id: number;
   title: string;
@@ -30,6 +33,8 @@ export default function HomeScreen() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]); // Define state with type
+  const [fontsize, setFontSize] = useState('small')
+
 
   const url = 'https://corsproxy.io/?https://www.freetogame.com/api/games';
 
@@ -55,9 +60,9 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView>
         <ThemedText style={styles.text}>
-          <TabBarIcon name={'game-controller'} style={styles.icons}/>
           FREE GAMES
         </ThemedText>
+
       </SafeAreaView>
       
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -109,7 +114,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'sans-serif',
     fontWeight: 'bold',
-    fontSize: 13,
+    fontSize: 15,
     marginBottom: 10,
     display: 'flex',
     flexDirection: 'row',
@@ -167,11 +172,14 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     paddingBottom: 20, 
     gap: 10,
+    backgroundColor:'#1b2838',
   },
   giveawayText: {
     color: 'white',
     fontSize: 16,
     marginBottom: 10,
+    fontFamily: 'sans-serif',
+
   },
   thumbnail: {
     width: 100,

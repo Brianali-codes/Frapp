@@ -2,7 +2,6 @@ import { StyleSheet, Platform } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ScrollView } from 'react-native-gesture-handler';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Button, Divider } from 'react-native-paper';
 import { Linking } from 'react-native';
 import { Alert } from 'react-native';
@@ -26,23 +25,21 @@ export default function HomeScreen() {
       <ThemedView style={styles.stepContainer}>
 
         <SafeAreaView>
-          <ThemedText style={styles.text}>
-          <TabBarIcon name={'settings'} style={styles.icons}/>
-            SETTINGS
-          </ThemedText>
+            <ThemedText style={styles.text}>
+                  SETTINGS
+            </ThemedText>
         </SafeAreaView>
         
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <ThemedText style={styles.text}>Like The app? star us on github.</ThemedText>
           <Button mode="contained"
-                  onPress={() => Linking.openURL('https://github.com/Brianali-codes/FRAPP')}
+                  onPress={() => Linking.openURL('https://github.com/Brianali-codes/Frapp1.0.0official')}
           >Star Us</Button>
           <Button mode="contained"
                   onPress={openNotificationSettings}
           >Change notification settings</Button>
 
           <ThemedText style={styles.text}>This Project is made and maintained by an individual therefore any act of support is appreciated, The project is also open source therefore any person(s) can contribute to maintain as well as formulate new ideas regarding the project.</ThemedText>
-          <Divider/>
           <ThemedText style={styles.text}>In order to view the official site for the API provider (Gamepower api) who provides all games in the app you can find them by clicking the button below.</ThemedText>
           
           <Button mode="contained"
@@ -63,7 +60,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   stepContainer: {
-    backgroundColor:'#1b2838',
+    backgroundColor:'black',
     gap: 8,
     marginBottom: 8,
     padding:5,
@@ -73,13 +70,15 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif',
     fontWeight: 'bold',
     fontSize: 15,
+    marginBottom: 10,
+    display: 'flex',
     padding:5,
     gap:5,
   },
   scrollViewContent: {
     paddingBottom: 20, // Space at the bottom of the scrollable content
     gap: 10,
-    backgroundColor:'#1b2838',
+    backgroundColor:'black',
   },
   icons: {
     fontSize:18,

@@ -55,7 +55,6 @@ export default function HomeScreen() {
 
         <SafeAreaView>
             <ThemedText style={styles.text}>
-                <TabBarIcon name={'bug'} style={styles.icons}/>
                   REPORT BUG
             </ThemedText>
         </SafeAreaView>
@@ -110,7 +109,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'sans-serif',
     fontWeight: 'bold',
-    fontSize: 13,
+    fontSize: 15,
     marginBottom: 10,
     display: 'flex',
     flexDirection: 'row',
