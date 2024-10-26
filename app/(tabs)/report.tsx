@@ -23,7 +23,8 @@ export default function HomeScreen() {
     
       if (Platform.OS === 'android') {
         // Using Intent for Android
-        const emailIntent = `mailto:?to=gamingbruv34@gmail.com&subject=${subject}&body=${body}`;
+        const emailIntent = `mailto:?to=brianali427@gmail.com&subject=${subject}&body=${body}`;
+
         Linking.canOpenURL(emailIntent)
           .then((supported) => {
             if (supported) {
@@ -35,8 +36,11 @@ export default function HomeScreen() {
           })
           .catch(err => console.error('An error occurred', err));
       } else {
+        
         // For iOS
-        const mailtoLink = `mailto:gamingbruv34@gmail.com?subject=${subject}&body=${body}`;
+        
+        const mailtoLink = `mailto:brianali427@gmail.com?subject=${subject}&body=${body}`;
+
         Linking.canOpenURL(mailtoLink)
           .then((supported) => {
             if (supported) {
