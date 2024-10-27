@@ -8,7 +8,6 @@ import { Skeleton } from '@rneui/themed';
 import { Alert } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Or Ionicons
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 //initital typescript magic for better error handling.
@@ -24,6 +23,7 @@ interface Giveaway {
   game_url:string;
   genre:string;
   publisher:string;
+  release_date:string;
 }
 
 export default function HomeScreen() {
@@ -47,10 +47,6 @@ export default function HomeScreen() {
       Alert.alert('Unable to fetch games check your connection or relaunch the app.');
     }
   };
-  const handleMenuPress = () => {
-    // Handle the menu press event
-    console.log('Menu pressed');
-  };
   // Use useEffect to fetch the data on component mount
   useEffect(() => {
     fetchData();
@@ -62,7 +58,6 @@ export default function HomeScreen() {
         <ThemedText style={styles.text}>
           Free Games
         </ThemedText>
-        <MaterialCommunityIcons name="dots-vertical" size={24} color="white" style={styles.icons} />
       </SafeAreaView>
       
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -83,11 +78,13 @@ export default function HomeScreen() {
                   {giveaway.title}
                 </ThemedText>  
                 <Image source={{ uri: giveaway.thumbnail }} style={styles.cardImage} />
+                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
                 <ThemedText style={styles.giveawayText}>
                   {giveaway.short_description}
                 </ThemedText>
                 <ThemedText style={styles.giveawayText}>Genre: <ThemedText style={styles.themeTexts}>{giveaway.genre}</ThemedText></ThemedText>
                   <ThemedText style={styles.giveawayText}>Publisher: <ThemedText style={styles.themeTexts}>{giveaway.publisher}</ThemedText></ThemedText>
+                  <ThemedText style={styles.giveawayText}>Release Date : <ThemedText style={styles.themeTexts}>{giveaway.release_date}</ThemedText></ThemedText>
                   <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
                 <Button 
                   mode="contained" 
@@ -163,10 +160,13 @@ const styles = StyleSheet.create({
     padding:20,
   },
   cardImage: {
-    width: '100%',
-    height: 200,
+    width: '95%',
+    height: 150,
+    alignSelf:'center',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   worth:{
     textDecorationLine:'line-through',
@@ -184,10 +184,7 @@ const styles = StyleSheet.create({
   },
   giveawayText: {
     color: 'white',
-    fontSize: 16,
-    marginBottom: 10,
-    fontFamily: 'sans-serif',
-
+    fontSize: 14,
   },
   thumbnail: {
     width: 100,

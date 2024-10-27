@@ -26,7 +26,7 @@ export default function HomeScreen() {
 
         <SafeAreaView>
             <ThemedText style={styles.text}>
-                  SETTINGS
+                  Settings
             </ThemedText>
         </SafeAreaView>
         
@@ -75,8 +75,11 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif',
     fontWeight: 'bold',
     fontSize: 15,
-    marginBottom: 10,
     display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginBottom:10,
     padding:5,
     gap:5,
   },

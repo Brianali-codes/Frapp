@@ -80,16 +80,8 @@ export default function HomeScreen() {
             <Button mode="contained" onPress={handleBugReport}>
               File A Report
             </Button>
-
-            
             <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
             <ThemedText style={styles.text2}>if you have a more detailed report you can file an issue at the github repository and feedback will be provided as soon as possible.</ThemedText>
-            <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-            <ThemedText style={styles.text2}>This Project is open source and can be found on github if you encounter any issues or have ideas for improving the app please do so by going to the github repository and create a new issue.</ThemedText>
-            <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-            <Button mode="contained"onPress={() => Linking.openURL('https://github.com/Brianali-codes/FRAPP')}>
-              Go to the Github page
-            </Button>
             <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
             <ThemedText style={styles.text2}>This Project utilizes the gamepower Api as well as the Free To Game Api for fetching data and dynamically providing it to the user who downloaded the app. this is to declare that none of these APis belong to me as well as FRAPP.</ThemedText>
         </ScrollView>
