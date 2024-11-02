@@ -38,7 +38,7 @@ const openNotificationSettings = async () => {
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <ThemedText style={styles.text}>Like The app? star us on github.</ThemedText>
           <Button mode="contained"
-                  onPress={() => Linking.openURL('https://github.com/Brianali-codes/Frapp1.0.0official')}
+                  onPress={() => Linking.openURL('https://github.com/Brianali-codes/Frapp')}
           >Star Us</Button>
           <Button mode="contained"
                   onPress={openNotificationSettings}
