@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/FRAPP_ICON.jpg",
-        "backgroundColor": "#1b2838"
+        "backgroundColor": "#000000"
       },
       "package": "com.brianali.Frapp",
       "enableProguardInReleaseBuilds": true

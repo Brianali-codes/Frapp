@@ -9,18 +9,23 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function HomeScreen() {
 
 
-  const openNotificationSettings = async () => {
-    const url =
-      Platform.OS === 'ios'
-        ? 'app-settings:' // For iOS
-        : 'android.settings.APP_NOTIFICATION_SETTINGS'; // For Android 
   
-    try {
-      await Linking.openURL(url);
-    } catch (error) {
-      Alert.alert('Error', 'Unable to open settings');
-    }
-  };
+const openNotificationSettings = async () => {
+  let url = '';
+
+  if (Platform.OS === 'ios') {
+    url = 'app-settings:'; // iOS general app settings
+  } else if (Platform.OS === 'android') {
+    const packageName = 'com.brianali.Frapp'; // replace this with your actual package name
+    url = `android.settings.APP_NOTIFICATION_SETTINGS?package=${packageName}`;
+  }
+
+  try {
+    await Linking.openURL(url);
+  } catch (error) {
+    Alert.alert('Error', 'Unable to open settings please set them manually.');
+  }
+};
   return (
       <ThemedView style={styles.stepContainer}>
 

@@ -177,7 +177,7 @@ export default function HomeScreen() {
         </>
         ) : (
           <ThemedView style={styles.container}>
-            <ThemedText style={styles.text1}>We have found <ThemedText style={styles.themeTexts}>{prices}</ThemedText> video game giveaways as of <ThemedText style={styles.themeTexts3}> {day} {monthName} {year} </ThemedText> With a total Price of <ThemedText style={styles.themeTexts}> ${worth} </ThemedText> for you to take advantage of before time expires.</ThemedText>
+            <ThemedText style={styles.text1}>We have found <ThemedText style={styles.themeTexts}>{prices}</ThemedText> video game giveaways as of <ThemedText style={styles.themeTexts3}> {day} {monthName} {year} </ThemedText> With a total Price of <ThemedText style={styles.themeTexts}>${worth} </ThemedText> for you to take advantage of before time expires.</ThemedText>
           </ThemedView>
         )
         }
