@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   stepContainer: {
-    backgroundColor: '#1b2838',
+    backgroundColor: 'black',
     gap: 8,
     marginBottom: 8,
     padding:10,
@@ -128,6 +128,6 @@ const styles = StyleSheet.create({
     margin:5,
     display:'flex',
     flexDirection:'column',
-    backgroundColor: '#1b2838',
+    backgroundColor: 'black',
   },
 });
