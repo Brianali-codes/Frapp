@@ -72,4 +72,21 @@ Start the server using expo.
   expo start
 ```
 
+## Screenshots
+
+![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
