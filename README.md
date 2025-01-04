@@ -2,6 +2,10 @@
 # FRAPP 
 Frapp (freebie radar APP) is an app that enables you to get the latest video game giveaways as well as the latest free games. The app acts as a messenger as it dives into different sites such as Gog , itch.io, Epic games, Steam and so much more using the power of the gamepower API.
 
+<div style="display: flex;"; align="center">
+  ![FRAPP_ICON](https://github.com/user-attachments/assets/294bdb15-96cc-4a79-8405-38dd4da566ec)
+  ![FRAPP_ICON](https://github.com/user-attachments/assets/4ab133fe-4ee3-4ee4-b831-3818d921bca0)
+</div>
 
 ## Developers
 
