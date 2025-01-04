@@ -100,7 +100,7 @@ export default function HomeScreen() {
 
   const checkWorth = async () => {
 
-    const url = 'https://corsproxy.io/?https://www.gamerpower.com/api/worth'
+    const url = 'https://api.codetabs.com/v1/proxy?quest=https://www.gamerpower.com/api/worth';
 
     try {
       const worthResponse = await fetch(url);
@@ -126,7 +126,7 @@ export default function HomeScreen() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]); // Define state with type
-  const url = 'https://corsproxy.io/?https://www.gamerpower.com/api/giveaways';
+  const url = 'https://api.codetabs.com/v1/proxy?quest=https://www.gamerpower.com/api/giveaways';
 
 
 

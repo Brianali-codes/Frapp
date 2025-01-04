@@ -33,7 +33,7 @@ export default function HomeScreen() {
   const [fontsize, setFontSize] = useState('small')
 
 
-  const url = 'https://corsproxy.io/?https://www.freetogame.com/api/games';
+  const url = 'https://api.codetabs.com/v1/proxy?quest=https://www.freetogame.com/api/games';
 
   const fetchData = async () => {
     try {
