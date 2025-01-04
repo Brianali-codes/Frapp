@@ -4,7 +4,8 @@ Frapp (freebie radar APP) is an app that enables you to get the latest video gam
 
 <div style="display: flex;"; align="start">
   
-  ![FRAPP_ICON](https://github.com/user-attachments/assets/294bdb15-96cc-4a79-8405-38dd4da566ec)
+  ![Untitled design](https://github.com/user-attachments/assets/7f2a2f71-a1cf-4e3d-bcbd-37beab10c3ed)
+
 
   if you want to contribute to the project you can do so by following the steps below
 
