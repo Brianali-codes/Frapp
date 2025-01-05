@@ -73,13 +73,23 @@ Start the server using expo.
 ```
 
 ## Screenshots
-
-
-<div style="display: flex;"; align="center">
   
  ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
  
   
+<div style="display: flex; justify-content: space-around;">
+  <div>
+    <h3>Item 1</h3>
+    <p>Description for Item 1</p>
+  </div>
+  <div>
+    <h3>Item 2</h3>
+    <p>Description for Item 2</p>
+  </div>
+  <div>
+    <h3>Item 3</h3>
+    <p>Description for Item 3</p>
+  </div>
 </div>
 
 
