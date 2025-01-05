@@ -76,12 +76,18 @@ Start the server using expo.
     
 <div style="display: flex; justify-content: space-between;">
   <div style="text-align: left;">
-    ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
+
+![Screenshot (38)](https://github.com/user-attachments/assets/af7232ca-0703-4e5f-aa8c-0389a3791df7)
+    
+  
   </div>
   <div style="text-align: right;">
-    ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
+
+![Screenshot (38)](https://github.com/user-attachments/assets/af7232ca-0703-4e5f-aa8c-0389a3791df7)
+    
   </div>
 </div>
+
 
 
 
