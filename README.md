@@ -77,7 +77,7 @@ Start the server using expo.
  ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
  
   
-<div style="display: flex; justify-content: space-around;">
+<div style="display: flex; gap: 20px;">
   <div>
     <h3>Item 1</h3>
     <p>Description for Item 1</p>
