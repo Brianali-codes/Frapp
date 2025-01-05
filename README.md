@@ -73,21 +73,15 @@ Start the server using expo.
 ```
 
 ## Screenshots
-  
- 
- 
-  
-<table>
-  <tr>
-    <td align="left">
+    
+<div style="display: flex; justify-content: space-between;">
+  <div style="text-align: left;">
     ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
-    </td>
-    <td align="right">
-       ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
-    </td>
-  </tr>
-</table>
-
+  </div>
+  <div style="text-align: right;">
+    ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
+  </div>
+</div>
 
 
 
