@@ -74,19 +74,19 @@ Start the server using expo.
 
 ## Screenshots
   
- ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
+ 
  
   
-<div style="display: flex; justify-content: space-between;">
-  <div>
-    <h3>Item 1</h3>
-    <p>Description for Item 1</p>
-  </div>
-  <div>
-    <h3>Item 2</h3>
-    <p>Description for Item 2</p>
-  </div>
-</div>
+<table>
+  <tr>
+    <td align="left">
+    ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
+    </td>
+    <td align="right">
+       ![Screenshot (38)](https://github.com/user-attachments/assets/b597cd06-5168-4720-9ab5-5ce0029c083f)
+    </td>
+  </tr>
+</table>
 
 
 
