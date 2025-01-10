@@ -73,9 +73,14 @@ Start the server using expo.
 ```
 
 ## Screenshots
+<div style="display: flex;"; align="center">
+  <img alt="rian's Github Stats" src="https://github.com/user-attachments/assets/633c0536-2ef0-484f-86d3-7a9c0cf3b6fd">
+  <img alt="SBrian's Top Languages" src="https://github-readme-stats.vercel.app/api/top-langs/?username=brianali-codes&langs_count=8&count_private=true&layout=compact&theme=dark&hide_border=true&hide=Jupyter%20notebook,less&bg_color=151515&title_color=f2f2f2&icon_color=79fe96" style="height: 192px;">
+</div>
+
 
 <div style="display: flex;"; align="center">
-  <img alt="screenshot1" src="https://github.com/user-attachments/assets/633c0536-2ef0-484f-86d3-7a9c0cf3b6fd">
+  <img alt="screenshot1" src="">
   <img alt="screenshot1" src="https://github.com/user-attachments/assets/0890e860-cac3-477e-8f0c-b06c97603962">  
 </div>
 
