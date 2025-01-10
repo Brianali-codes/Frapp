@@ -76,6 +76,7 @@ Start the server using expo.
 <div style="display: flex;"; align="center">
   <img alt="Brian's Github Stats" src="https://github.com/user-attachments/assets/f3ad257d-5f03-401c-a045-809a9ba7ace8">
   <img alt="Brian's Top Languages" src="https://github.com/user-attachments/assets/f3ad257d-5f03-401c-a045-809a9ba7ace8">
+  <img alt="Brian's Github Stats" src="https://github.com/user-attachments/assets/f3ad257d-5f03-401c-a045-809a9ba7ace8">
 </div>
 
 
