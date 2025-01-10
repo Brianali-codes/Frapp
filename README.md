@@ -77,21 +77,3 @@ Start the server using expo.
   <img alt="Brian's Github Stats" src="https://github.com/user-attachments/assets/2510ec04-f68c-4fda-97a1-4fc26684b558">
   <img alt="Brian's Top Languages" src="https://github.com/user-attachments/assets/c8d4fa85-5ae1-47bd-b7cb-4f27bbd39596">
 </div>
-
-
-
-![WhatsApp Image 2025-01-10 at 17 10 02 (1) (1)]()
-
-![WhatsApp Image 2025-01-10 at 17 10 02 (2) (1)]()
-
-
-
-
-
-
-
-
-
-
-
-
