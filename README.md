@@ -75,11 +75,14 @@ Start the server using expo.
 ## Screenshots
 
 <div style="display: flex;"; align="center">
-  <img alt="screenshot1" src="https://github.com/user-attachments/assets/ee1764ed-951e-4401-9fc1-ee25474f2288">
   <img alt="screenshot1" src="https://github.com/user-attachments/assets/633c0536-2ef0-484f-86d3-7a9c0cf3b6fd">
   <img alt="screenshot1" src="https://github.com/user-attachments/assets/0890e860-cac3-477e-8f0c-b06c97603962">  
 </div>
 
+<div style="display: flex;"; align="center">
+  <img alt="screenshot1" src="https://github.com/user-attachments/assets/ee1764ed-951e-4401-9fc1-ee25474f2288">
+  <img alt="screenshot1" src="https://github.com/user-attachments/assets/633c0536-2ef0-484f-86d3-7a9c0cf3b6fd">
+</div>
 
 
 
