@@ -74,11 +74,11 @@ Start the server using expo.
 
 ## Screenshots
 
-<p align="center">
+<div align="center">
   ![Screenshot (38)](https://github.com/user-attachments/assets/af7232ca-0703-4e5f-aa8c-0389a3791df7)
   ![Screenshot (38)](https://github.com/user-attachments/assets/af7232ca-0703-4e5f-aa8c-0389a3791df7)
   ![Screenshot (38)](https://github.com/user-attachments/assets/af7232ca-0703-4e5f-aa8c-0389a3791df7)
-</p>
+</div>
 
 
 
