@@ -2,7 +2,7 @@
   "expo": {
     "name": "Frapp",
     "slug": "Frapp",
-    "version": "1.0.0",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/FRAPP_ICON.jpg",
     "scheme": "myapp",
@@ -14,7 +14,8 @@
     },
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.brianali.Frapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +23,8 @@
         "backgroundColor": "#000000"
       },
       "package": "com.brianali.Frapp",
-      "enableProguardInReleaseBuilds": true
+      "enableProguardInReleaseBuilds": true,
+      "useNextNotificationsApi": true
     },
     "web": {
       "bundler": "metro",
@@ -32,13 +34,23 @@
     "plugins": [
       "expo-router"
     ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "experiments": {
       "typedRoutes": true
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
     },
     "extra": {
       "eas": {
         "projectId": "5101bc22-4bca-4375-bec7-4e1a4c143d06"
-      }
+      },
+      "castarSdkClientId": "cskfmx+CSswYnR"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }

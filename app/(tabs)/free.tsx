@@ -56,7 +56,7 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.heading}>
         <ThemedText style={styles.text}>
-          Free Games
+          Free Games.
         </ThemedText>
       </SafeAreaView>
       
@@ -86,12 +86,22 @@ export default function HomeScreen() {
                   <ThemedText style={styles.giveawayText}>Publisher: <ThemedText style={styles.themeTexts}>{giveaway.publisher}</ThemedText></ThemedText>
                   <ThemedText style={styles.giveawayText}>Release Date : <ThemedText style={styles.themeTexts}>{giveaway.release_date}</ThemedText></ThemedText>
                   <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-                <Button 
-                  mode="contained" 
-                  onPress={() => Linking.openURL(giveaway.game_url)}
-                >
-                  Get Game for free
-                </Button>
+                <ThemedView style={styles.view4}>
+                    <Button 
+                      mode="contained-tonal" 
+                      onPress={() => Linking.openURL(giveaway.game_url)}
+                      style={styles.btns}
+                    >
+                      Get Game for free
+                    </Button>
+                    <Button 
+                      mode="contained" 
+                      onPress={() => Linking.openURL(giveaway.game_url)}
+                      style={styles.btns}
+                    >
+                      View game on site
+                    </Button>
+                </ThemedView>
               </ThemedView>
             </React.Fragment>
           ))
@@ -101,11 +111,25 @@ export default function HomeScreen() {
   );
 }
 
+
+
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1, // Takes the full screen height to enable scrolling.
     backgroundColor: '#1b2838',
     padding: 10,
+  },
+  btns:{
+    width:'49%',
+  },
+  view4: {
+    display:'flex',
+    flexDirection:'row',
+    backgroundColor:'#2C415A',
+    justifyContent:'space-between',
   },
   text: {
     color: 'white',

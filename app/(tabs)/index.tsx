@@ -215,9 +215,15 @@ export default function HomeScreen() {
                 Ends on : {giveaway.end_date}
               </ThemedText>
               <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-              <Button mode="contained"
-                onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}
-              >Get Giveaway</Button>
+              <ThemedView style={styles.view4}>
+                <Button mode="contained-tonal" style={styles.btns}
+                  onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}
+                >Get Giveaway</Button>
+                <Button mode="contained" textColor="white" buttonColor='#6200ee'  style={styles.btns}
+                  onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}
+                >View on site</Button>
+              </ThemedView>
+              
             </ThemedView>
           ))
         )}
@@ -293,6 +299,12 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 10,
   },
+  view4: {
+    display:'flex',
+    flexDirection:'row',
+    backgroundColor:'#2C415A',
+    justifyContent:'space-between',
+  },
   cards: {
     borderColor: 'white',
     backgroundColor: '#2C415A',
@@ -306,6 +318,9 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginHorizontal: 5,
     padding: 15,
+  },
+  btns:{
+    width:'49%',
   },
   cardImage: {
     width: '95%',
