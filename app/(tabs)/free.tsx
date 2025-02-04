@@ -22,6 +22,7 @@ interface Giveaway {
   genre: string;
   publisher: string;
   release_date: string;
+  margin:string;
 }
 
 export default function HomeScreen() {
@@ -143,16 +144,19 @@ const styles = StyleSheet.create({
   skeletonImage: {
     width: '100%',
     height: 300,
+    margin:'5px',
     borderRadius: 10,
   },
   skeletonImage2: {
     width: '100%',
+    margin:'5px',
     height: 50,
     borderRadius: 10,
   },
   cards: {
+    borderColor: 'white',
     backgroundColor: '#2C415A',
-    marginBottom: 10,
+    marginBottom: 5,
     borderRadius: 7,
     elevation: 5,
     shadowColor: '#000',
@@ -160,7 +164,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     marginVertical: 5,
-    padding: 20,
+    marginHorizontal: 5,
+    padding: 15,
   },
   cardImage: {
     width: '95%',

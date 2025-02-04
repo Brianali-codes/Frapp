@@ -11,7 +11,6 @@ import { Skeleton } from '@rneui/base';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const NOTIFICATIONS = async () => {
-
   await notifee.createChannel({
     id: 'default',
     name: 'Default Channel',
@@ -21,7 +20,6 @@ const NOTIFICATIONS = async () => {
   const now = new Date();
   const nextTriggerTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0, 0);
 
-  //this schedules the notification for specific times that are ruled out
   await notifee.createTriggerNotification(
     {
       title: 'FRAPP',
@@ -36,12 +34,12 @@ const NOTIFICATIONS = async () => {
     }
   );
 };
+
 const checkNotificationPermission = async () => {
   const settings = await notifee.requestPermission();
 
-  // Check the authorization status from the returned settings
   if (settings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
-    NOTIFICATIONS(); // Schedule notifications if permission granted
+    NOTIFICATIONS();
   } else {
     Alert.alert(
       'Notifications Disabled',
@@ -50,7 +48,6 @@ const checkNotificationPermission = async () => {
     );
   }
 };
-
 
 interface Giveaway {
   id: number;
@@ -65,122 +62,82 @@ interface Giveaway {
 }
 
 export default function HomeScreen() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const calculateTimeDifference = (startDate: string, endDate: string): { days: number; hours: number; minutes: number; seconds: number } => {
-    // Convert the date strings into Date objects
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    // Calculate the difference in milliseconds
-    const differenceInMilliseconds = end.getTime() - start.getTime();
-
-    // Calculate time units
-    const seconds = Math.floor((differenceInMilliseconds / 1000) % 60);
-    const minutes = Math.floor((differenceInMilliseconds / (1000 * 60)) % 60);
-    const hours = Math.floor((differenceInMilliseconds / (1000 * 60 * 60)) % 24);
-    const days = Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24));
-
-    return {
-      days,
-      hours,
-      minutes,
-      seconds,
-    };
-  };
-
-  // Example usage
-  const startDate = '2024-10-11 12:14:19';
-  const endDate = '2024-11-30 23:59:00';
-  const difference = calculateTimeDifference(startDate, endDate);
-
-  //will be used in future versions to calculate time left for respective giveaways.
-
-  const [prices, setPrices] = useState(0)
-  const [worth, setWorth] = useState(0)
+  const [prices, setPrices] = useState(0);
+  const [worth, setWorth] = useState(0);
 
   const checkWorth = async () => {
-
     const url = 'https://api.codetabs.com/v1/proxy?quest=https://www.gamerpower.com/api/worth';
 
     try {
       const worthResponse = await fetch(url);
       const worthRes = await worthResponse.json();
-      const worthness = worthRes.active_giveaways_number
-      const worthPrices = worthRes.worth_estimation_usd
-      setPrices(worthness)
-      setWorth(worthPrices)
+      const worthness = worthRes.active_giveaways_number;
+      const worthPrices = worthRes.worth_estimation_usd;
+      setPrices(worthness);
+      setWorth(worthPrices);
+    } catch (e) {
+      Alert.alert("Couldn't fetch prices");
     }
-    catch (e) {
-      Alert.alert("couldnt fetch prices")
-    }
-  }
-
-  useEffect(() => {
-    checkWorth()
-
-  }), ([])
-  useEffect(() => {
-    //affects when prices and worth variables are going to change.
-  }, [prices, worth]);
-
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [giveaways, setGiveaways] = useState<Giveaway[]>([]); // Define state with type
-  const url = 'https://api.codetabs.com/v1/proxy?quest=https://www.gamerpower.com/api/giveaways';
-
-
-
+  };
 
   const fetchData = async () => {
     try {
-      const response = await fetch(url);
+      const response = await fetch('https://api.codetabs.com/v1/proxy?quest=https://www.gamerpower.com/api/giveaways');
       const finalData: Giveaway[] = await response.json();
       setGiveaways(finalData);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      Alert.alert('Unable to fetch giveaways check your connection or relaunch the app.');
+      Alert.alert('Unable to fetch giveaways. Check your connection or relaunch the app.');
     }
   };
 
-  // Use useEffect to fetch data on component mount
   useEffect(() => {
     fetchData();
-    checkNotificationPermission()
+    checkNotificationPermission();
+    checkWorth();
   }, []);
+
+  const loadMoreItems = () => {
+    setCurrentPage(prevPage => prevPage + 1);
+  };
 
   const now = new Date();
   const day = now.getDate();
   const year = now.getFullYear();
-
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December',
   ];
   const monthName = monthNames[now.getMonth()];
 
-  
   return (
     <ThemedView style={styles.container}>
-       <SafeAreaView style={styles.heading}>
-        <ThemedText style={styles.text}>
-          Giveaways
-        </ThemedText>
-        
+      <SafeAreaView style={styles.heading}>
+        <ThemedText style={styles.text}>Giveaways</ThemedText>
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-
-        {isLoading ? (<>
-          <Skeleton animation="wave" style={styles.skeletonImage2} />
-          <Skeleton animation="wave" style={styles.skeletonImage2} />
-        </>
+        {isLoading ? (
+          <>
+            <Skeleton animation="wave" style={styles.skeletonImage2} />
+            <Skeleton animation="wave" style={styles.skeletonImage2} />
+          </>
         ) : (
           <ThemedView style={styles.container}>
-            <ThemedText style={styles.text1}>We have found <ThemedText style={styles.themeTexts}>{prices}</ThemedText> video game giveaways as of <ThemedText style={styles.themeTexts3}> {day} {monthName} {year} </ThemedText> With a total Price of <ThemedText style={styles.themeTexts}>${worth} </ThemedText> for you to take advantage of before time expires.</ThemedText>
+            <ThemedText style={styles.text1}>
+              We have found <ThemedText style={styles.themeTexts}>{prices}</ThemedText> video game giveaways as of{' '}
+              <ThemedText style={styles.themeTexts3}>{day} {monthName} {year}</ThemedText> with a total price of{' '}
+              <ThemedText style={styles.themeTexts}>${worth}</ThemedText> for you to take advantage of before time expires.
+            </ThemedText>
           </ThemedView>
-        )
-        }
+        )}
+
         {isLoading ? (
           <>
             <Skeleton animation="wave" style={styles.skeletonImage} />
@@ -191,41 +148,40 @@ export default function HomeScreen() {
             <Skeleton animation="wave" style={styles.skeletonImage2} />
           </>
         ) : (
-          giveaways.map(giveaway => (
-
-            <ThemedView key={giveaway.id} style={styles.cards}>
-              <ThemedText style={styles.text1}>
-                {giveaway.title}
-              </ThemedText>
-              <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-              <Image source={{ uri: giveaway.thumbnail }} style={styles.cardImage} />
-              <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-              <ThemedText style={styles.giveawayText}>
-                {giveaway.description}
-              </ThemedText>
-              <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-              <ThemedText style={styles.giveawayText}>Original Price : <ThemedText style={styles.themeTexts2}>
-                {giveaway.worth}
-              </ThemedText>
-              </ThemedText>
-              <ThemedText style={styles.giveawayText}>
-                Current Price : <ThemedText style={styles.themeTexts}>Free</ThemedText>
-              </ThemedText>
-              <ThemedText style={styles.giveawayText}>
-                Ends on : {giveaway.end_date}
-              </ThemedText>
-              <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-              <ThemedView style={styles.view4}>
-                <Button mode="contained-tonal" style={styles.btns}
-                  onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}
-                >Get Giveaway</Button>
-                <Button mode="contained" textColor="white" buttonColor='#6200ee'  style={styles.btns}
-                  onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}
-                >View on site</Button>
+          giveaways
+            .slice(0, currentPage * itemsPerPage)
+            .map(giveaway => (
+              <ThemedView key={giveaway.id} style={styles.cards}>
+                <ThemedText style={styles.text1}>{giveaway.title}</ThemedText>
+                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+                <Image source={{ uri: giveaway.thumbnail }} style={styles.cardImage} />
+                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+                <ThemedText style={styles.giveawayText}>{giveaway.description}</ThemedText>
+                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+                <ThemedText style={styles.giveawayText}>
+                  Original Price: <ThemedText style={styles.themeTexts2}>{giveaway.worth}</ThemedText>
+                </ThemedText>
+                <ThemedText style={styles.giveawayText}>
+                  Current Price: <ThemedText style={styles.themeTexts}>Free</ThemedText>
+                </ThemedText>
+                <ThemedText style={styles.giveawayText}>Ends on: {giveaway.end_date}</ThemedText>
+                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+                <ThemedView style={styles.view4}>
+                  <Button mode="contained-tonal" style={styles.btns} onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}>
+                    Get Giveaway
+                  </Button>
+                  <Button mode="contained" textColor="white" buttonColor="#6200ee" style={styles.btns} onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}>
+                    View on Site
+                  </Button>
+                </ThemedView>
               </ThemedView>
-              
-            </ThemedView>
-          ))
+            ))
+        )}
+
+        {!isLoading && currentPage * itemsPerPage < giveaways.length && (
+          <Button mode="outlined" onPress={loadMoreItems} style={{ marginTop: 10 }}>
+            Load More
+          </Button>
         )}
       </ScrollView>
     </ThemedView>
@@ -234,7 +190,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Takes the full screen height to enable scrolling.
+    flex: 1,
     backgroundColor: '#1b2838',
     padding: 10,
   },
@@ -247,9 +203,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    marginBottom:10,
-    padding:5,
-    gap:5,
+    marginBottom: 10,
+    padding: 5,
+    gap: 5,
   },
   text1: {
     color: 'white',
@@ -260,10 +216,10 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   heading: {
-    display:'flex',
-    flexDirection:'row',
-    justifyContent:'space-between',
-    alignItems:'center',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   themeTexts: {
     color: '#00FF00',
@@ -300,18 +256,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   view4: {
-    display:'flex',
-    flexDirection:'row',
-    backgroundColor:'#2C415A',
-    justifyContent:'space-between',
+    display: 'flex',
+    flexDirection: 'row',
+    backgroundColor: '#2C415A',
+    justifyContent: 'space-between',
   },
   cards: {
     borderColor: 'white',
     backgroundColor: '#2C415A',
     marginBottom: 5,
     borderRadius: 7,
-    elevation: 5, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
+    elevation: 5,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -319,37 +275,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     padding: 15,
   },
-  btns:{
-    width:'49%',
+  btns: {
+    width: '49%',
   },
   cardImage: {
     width: '95%',
     height: 150,
-    alignSelf:'center',
+    alignSelf: 'center',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
   },
   scrollViewContent: {
-    paddingBottom: 20, // Space at the bottom of the scrollable content
+    paddingBottom: 20,
     gap: 10,
   },
   giveawayText: {
     color: 'white',
     fontSize: 14,
   },
-  thumbnail: {
-    width: 50,
-    height: 60,
-    marginBottom: 5,
-  },
-  icons: {
-    padding:5,
-    fontSize:23,
-    marginBottom:10,
-  },
 });
-
-
-
