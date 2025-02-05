@@ -46,6 +46,13 @@ export default function HomeScreen() {
         <ThemedText style={styles.text2}>
           This project utilizes the Gamepower API as well as the Free To Game API for fetching data and dynamically providing it to users. None of these APIs, as well as FRAPP, belong to me.
         </ThemedText>
+        <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+        <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'white' }} />
+
+        <ThemedText style={styles.text3}>
+          Frapp v1.0.8.
+        </ThemedText>
+
       </ScrollView>
     </ThemedView>
   );
@@ -68,6 +75,10 @@ const styles = StyleSheet.create({
   },
   text2: {
     color: 'white',
+  },
+  text3: {
+    color: 'white',
+    textAlign:'center',
   },
   scrollViewContent: {
     paddingBottom: 20,

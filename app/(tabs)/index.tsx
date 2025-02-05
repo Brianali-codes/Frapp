@@ -119,7 +119,7 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.heading}>
-        <ThemedText style={styles.text}>Giveaways</ThemedText>
+        <ThemedText style={styles.text}>Free to Redeem</ThemedText>
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -168,7 +168,7 @@ export default function HomeScreen() {
                 <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
                 <ThemedView style={styles.view4}>
                   <Button mode="contained-tonal" style={styles.btns} onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}>
-                    Get Giveaway
+                    Redeem
                   </Button>
                   <Button mode="contained" textColor="white" buttonColor="#6200ee" style={styles.btns} onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}>
                     View on Site
@@ -206,6 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 5,
     gap: 5,
+    margin:'auto',
   },
   text1: {
     color: 'white',

@@ -24,7 +24,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="free"
         options={{
-          title: 'Free',
+          title: 'F2P',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'game-controller' : 'game-controller-outline'} color={color} />
           ),

@@ -57,7 +57,9 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.heading}>
-        <ThemedText style={styles.text}>Free Games.</ThemedText>
+        <ThemedText style={styles.text}>
+          
+          Free to Play</ThemedText>
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -86,7 +88,7 @@ export default function HomeScreen() {
                   <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
                   <ThemedView style={styles.view4}>
                     <Button mode="contained-tonal" onPress={() => Linking.openURL(giveaway.game_url)} style={styles.btns}>
-                      Get Game for Free
+                      Get for Free
                     </Button>
                     <Button mode="contained" onPress={() => Linking.openURL(giveaway.game_url)} style={styles.btns}>
                       View Game on Site
@@ -127,6 +129,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 15,
     marginBottom: 10,
+    margin:'auto',
     padding: 5,
   },
   themeTexts: {
