@@ -66,11 +66,8 @@ export default function HomeScreen() {
         {isLoading ? (
           <>
             <Skeleton animation="wave" style={styles.skeletonImage} />
-            <Skeleton animation="wave" style={styles.skeletonImage2} />
-            <Skeleton animation="wave" style={styles.skeletonImage2} />
-            <Skeleton animation="wave" style={styles.skeletonImage2} />
+            <Divider style={{ marginVertical: 10, height: 0.5, backgroundColor: 'transparent' }} />
             <Skeleton animation="wave" style={styles.skeletonImage} />
-            <Skeleton animation="wave" style={styles.skeletonImage2} />
           </>
         ) : (
           giveaways
@@ -145,8 +142,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   skeletonImage: {
-    width: '100%',
-    height: 300,
+    width: '97%',
+    height: 500,
     margin:'5px',
     borderRadius: 10,
   },
