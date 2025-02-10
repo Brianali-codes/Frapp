@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Image } from 'react-native';
+import { ScrollView, StyleSheet, Image, View } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useState, useEffect } from 'react';
@@ -119,14 +119,22 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.heading}>
-        <ThemedText style={styles.text}>Free to Redeem</ThemedText>
+        <ThemedText style={styles.text}>Free to Redeem.</ThemedText>
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         {isLoading ? (
           <>
-            <Skeleton animation="wave" style={styles.skeletonImage2} />
-            <Skeleton animation="wave" style={styles.skeletonImage2} />
+            {Array.from({ length: 5 }).map((_, index) => (
+              <ThemedView key={index} style={styles.cards}>
+                <Skeleton animation="wave" style={styles.skeletonImage} />
+                
+                <Skeleton animation="wave" style={styles.skeletonImage2} />
+                <Skeleton animation="wave" style={styles.skeletonImage2} />
+                <Skeleton animation="wave" style={styles.skeletonImage2} />
+                
+              </ThemedView>
+            ))}
           </>
         ) : (
           <ThemedView style={styles.container}>
@@ -139,38 +147,39 @@ export default function HomeScreen() {
         )}
 
         {isLoading ? (
-          <>
+          <ThemedView style={styles.cards}>
             <Skeleton animation="wave" style={styles.skeletonImage} />
+            <View style={{ marginVertical: 10 }} />
             <Skeleton animation="wave" style={styles.skeletonImage2} />
+            <View style={{ marginVertical: 10 }} />
             <Skeleton animation="wave" style={styles.skeletonImage2} />
-            <Skeleton animation="wave" style={styles.skeletonImage2} />
-            <Skeleton animation="wave" style={styles.skeletonImage} />
-            <Skeleton animation="wave" style={styles.skeletonImage2} />
-          </>
+            <View style={{ marginVertical: 10 }} />
+          </ThemedView>
         ) : (
           giveaways
             .slice(0, currentPage * itemsPerPage)
             .map(giveaway => (
               <ThemedView key={giveaway.id} style={styles.cards}>
-                <ThemedText style={styles.text1}>{giveaway.title}</ThemedText>
-                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+                <ThemedText style={styles.text}>{giveaway.title}</ThemedText>
+                <View style={{ marginVertical: 10 }} />
                 <Image source={{ uri: giveaway.thumbnail }} style={styles.cardImage} />
-                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+                <View style={{ marginVertical: 10 }} />
                 <ThemedText style={styles.giveawayText}>{giveaway.description}</ThemedText>
-                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
                 <ThemedText style={styles.giveawayText}>
+                <View style={{ marginVertical: 10 }} />
+                <View style={{ marginVertical: 10 }} />
                   Original Price: <ThemedText style={styles.themeTexts2}>{giveaway.worth}</ThemedText>
                 </ThemedText>
                 <ThemedText style={styles.giveawayText}>
                   Current Price: <ThemedText style={styles.themeTexts}>Free</ThemedText>
                 </ThemedText>
                 <ThemedText style={styles.giveawayText}>Ends on: {giveaway.end_date}</ThemedText>
-                <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+                <View style={{ marginVertical: 10 }} />
                 <ThemedView style={styles.view4}>
-                  <Button mode="contained-tonal" style={styles.btns} onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}>
+                  <Button mode="contained-tonal" onPress={() => Linking.openURL(giveaway.open_giveaway_url)} style={styles.btns}>
                     Redeem
                   </Button>
-                  <Button mode="contained" textColor="white" buttonColor="#6200ee" style={styles.btns} onPress={() => Linking.openURL(giveaway.open_giveaway_url || giveaway.open_giveaway)}>
+                  <Button mode="contained" onPress={() => Linking.openURL(giveaway.open_giveaway_url)} style={styles.btns}>
                     View on Site
                   </Button>
                 </ThemedView>
@@ -192,7 +201,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1b2838',
-    padding: 10,
+    padding: 3,
   },
   text: {
     color: 'white',
@@ -203,7 +212,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    marginBottom: 10,
+    marginBottom: 5,
     padding: 5,
     gap: 5,
     margin:'auto',
@@ -249,12 +258,17 @@ const styles = StyleSheet.create({
   },
   skeletonImage: {
     width: '100%',
-    height: 300,
+    height: 150,
     borderRadius: 10,
+    alignSelf: 'center',
+    marginBottom: 10,
   },
   skeletonImage2: {
-    height: 50,
-    borderRadius: 10,
+    width: '100%',
+    height: 30,
+    borderRadius: 5,
+    alignSelf: 'center',
+    marginVertical: 5,
   },
   view4: {
     display: 'flex',
@@ -280,7 +294,7 @@ const styles = StyleSheet.create({
     width: '49%',
   },
   cardImage: {
-    width: '95%',
+    width: '100%',
     height: 150,
     alignSelf: 'center',
     borderTopLeftRadius: 10,

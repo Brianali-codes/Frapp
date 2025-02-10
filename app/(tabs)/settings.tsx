@@ -6,6 +6,7 @@ import { Button, Divider } from 'react-native-paper';
 import { Linking } from 'react-native';
 import { Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 export default function HomeScreen() {
 
 
@@ -23,7 +24,7 @@ const openNotificationSettings = async () => {
   try {
     await Linking.openURL(url);
   } catch (error) {
-    Alert.alert('Error', 'Unable to open settings please set them manually.');
+    Alert.alert('Error', 'Unable to open settings, please set them manually.');
   }
 };
   return (
@@ -42,7 +43,7 @@ const openNotificationSettings = async () => {
           >✨ Star Us</Button>
           <Button mode="contained"
                   onPress={openNotificationSettings}
-          >Change notification settings</Button>
+          >Change Notification Settings</Button>
 
           <ThemedText style={styles.text}>This Project is made and maintained by an individual therefore any act of support is appreciated, The project is also open source therefore any person(s) can contribute to maintain as well as formulate new ideas regarding the project.</ThemedText>
           <ThemedText style={styles.text}>In order to view the official site for the API provider (Gamepower api) who provides all games in the app you can find them by clicking the button below. the APi for free games on the other hand is the Free to game API</ThemedText>

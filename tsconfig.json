@@ -1,8 +1,8 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "esModuleInterop": true,
     "strict": true,
-    "jsx": "react-jsx",   // Use the new JSX Transform from React 17+
+    "jsx": "react-jsx",
     "paths": {
       "@/*": [
         "./*"
@@ -12,9 +12,10 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "**/*.js",  // Include JavaScript files
-    "**/*.jsx", // Include JSX files
+    "**/*.js",
+    "**/*.jsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

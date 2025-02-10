@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Image } from 'react-native';
+import { ScrollView, StyleSheet, Image, View } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useState, useEffect } from 'react';
@@ -39,6 +39,11 @@ export default function HomeScreen() {
       const finalData: Giveaway[] = await response.json();
       setGiveaways(finalData);
       setIsLoading(false);
+
+      // Notify the user that a game is available
+      if (finalData.length > 0) {
+        Alert.alert('Game Available', `A game has been fetched from the API: ${finalData[0].title}`);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       setIsLoading(false);
@@ -54,45 +59,59 @@ export default function HomeScreen() {
     setCurrentPage(prevPage => prevPage + 1);
   };
 
+  const additionalStyles = {
+    // Add any additional styles you want to apply
+    // Example:
+    resizeMode: 'cover', // or any other ImageStyle properties
+  };
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.heading}>
         <ThemedText style={styles.text}>
-          
-          Free to Play</ThemedText>
+          Free to Play.</ThemedText>
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         {isLoading ? (
           <>
-            <Skeleton animation="wave" style={styles.skeletonImage} />
-            <Divider style={{ marginVertical: 10, height: 0.5, backgroundColor: 'transparent' }} />
-            <Skeleton animation="wave" style={styles.skeletonImage} />
+            {Array.from({ length: 5 }).map((_, index) => (
+              <ThemedView key={index} style={styles.cards}>
+                <Skeleton animation="wave" style={styles.skeletonImage} />
+                
+                <Skeleton animation="wave" style={styles.skeletonImage2} />
+                <Skeleton animation="wave" style={styles.skeletonImage2} />
+                <Skeleton animation="wave" style={styles.skeletonImage2} />
+                
+              </ThemedView>
+            ))}
           </>
         ) : (
           giveaways
             .slice(0, currentPage * itemsPerPage)
             .map(giveaway => (
-              <React.Fragment key={giveaway.id}>
-                <ThemedView style={styles.cards}>
-                  <ThemedText style={styles.text}>{giveaway.title}</ThemedText>
-                  <Image source={{ uri: giveaway.thumbnail }} style={styles.cardImage} />
-                  <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-                  <ThemedText style={styles.giveawayText}>{giveaway.short_description}</ThemedText>
-                  <ThemedText style={styles.giveawayText}>Genre: <ThemedText style={styles.themeTexts}>{giveaway.genre}</ThemedText></ThemedText>
-                  <ThemedText style={styles.giveawayText}>Publisher: <ThemedText style={styles.themeTexts}>{giveaway.publisher}</ThemedText></ThemedText>
-                  <ThemedText style={styles.giveawayText}>Release Date: <ThemedText style={styles.themeTexts}>{giveaway.release_date}</ThemedText></ThemedText>
-                  <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-                  <ThemedView style={styles.view4}>
-                    <Button mode="contained-tonal" onPress={() => Linking.openURL(giveaway.game_url)} style={styles.btns}>
-                      Get for Free
-                    </Button>
-                    <Button mode="contained" onPress={() => Linking.openURL(giveaway.game_url)} style={styles.btns}>
-                      View Game on Site
-                    </Button>
-                  </ThemedView>
+              <ThemedView key={giveaway.id} style={styles.cards}>
+                <ThemedText style={styles.text}>{giveaway.title}</ThemedText>
+                <View style={{ marginVertical: 10 }} />
+                <Image source={{ uri: giveaway.thumbnail }} style={styles.cardImage} />
+                <View style={{ marginVertical: 10 }} />
+                <ThemedText style={styles.giveawayText}>{giveaway.short_description}</ThemedText>
+                
+                <ThemedText style={styles.giveawayText}>Genre: <ThemedText style={styles.themeTexts}>{giveaway.genre}</ThemedText></ThemedText>
+                
+                <ThemedText style={styles.giveawayText}>Publisher: <ThemedText style={styles.themeTexts}>{giveaway.publisher}</ThemedText></ThemedText>
+                
+                <ThemedText style={styles.giveawayText}>Release Date: <ThemedText style={styles.themeTexts}>{giveaway.release_date}</ThemedText></ThemedText>
+                <View style={{ marginVertical: 10 }} />
+                <ThemedView style={styles.view4}>
+                  <Button mode="contained-tonal" onPress={() => Linking.openURL(giveaway.game_url)} style={styles.btns}>
+                    Get for Free
+                  </Button>
+                  <Button mode="contained" onPress={() => Linking.openURL(giveaway.game_url)} style={styles.btns}>
+                    View Game on Site
+                  </Button>
                 </ThemedView>
-              </React.Fragment>
+              </ThemedView>
             ))
         )}
 
@@ -110,7 +129,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1b2838',
-    padding: 10,
+    padding: 3,
   },
   btns: {
     width: '49%',
@@ -125,7 +144,7 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif',
     fontWeight: 'bold',
     fontSize: 15,
-    marginBottom: 10,
+    marginBottom: 5,
     margin:'auto',
     padding: 5,
   },
@@ -142,16 +161,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   skeletonImage: {
-    width: '97%',
-    height: 500,
-    margin:'5px',
+    width: '100%',
+    height: 150,
     borderRadius: 10,
+    alignSelf: 'center',
+    marginBottom: 10,
   },
   skeletonImage2: {
     width: '100%',
-    margin:'5px',
-    height: 50,
-    borderRadius: 10,
+    height: 30,
+    borderRadius: 5,
+    alignSelf: 'center',
+    marginVertical: 5,
   },
   cards: {
     borderColor: 'white',
@@ -168,7 +189,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   cardImage: {
-    width: '95%',
+    width: '100%',
     height: 150,
     alignSelf: 'center',
     borderRadius: 10,
