@@ -73,10 +73,8 @@ Start the server using expo.
 ```
 
 ## Screenshots
-<div style="display: flex;"; align="center">
   <img alt="giveaways" src="https://github.com/user-attachments/assets/3a9ce1d7-562c-4ae3-8861-4ee50cf02489">
   <img alt="f2p" src="https://github.com/user-attachments/assets/45231a1b-5482-4988-b41f-580a40168da4">
-</div>
 
 
 
