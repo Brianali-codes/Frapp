@@ -74,6 +74,12 @@ Start the server using expo.
 
 ## Screenshots
 <div style="display: flex;"; align="center">
-  <img alt="Brian's Github Stats" src="https://github.com/user-attachments/assets/2510ec04-f68c-4fda-97a1-4fc26684b558">
-  <img alt="Brian's Top Languages" src="https://github.com/user-attachments/assets/c8d4fa85-5ae1-47bd-b7cb-4f27bbd39596">
+  <img alt="Brian's Github Stats" src="https://github.com/user-attachments/assets/3a9ce1d7-562c-4ae3-8861-4ee50cf02489">
+  <img alt="Brian's Top Languages" src="https://github.com/user-attachments/assets/51a0c6e8-eb1c-43ad-8e0e-574874e83acd">
 </div>
+
+
+
+
+
+
