@@ -1,23 +1,45 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Platform } from 'react-native';
+
+import { HapticTab } from '@/components/HapticTab';
+import { Colors, appDarkColor } from '@/constants/colors';
+// import { useColorScheme } from '@/hooks/useColorScheme';
+import { Game, Gift, Setting2, Warning2 } from 'iconsax-react-nativejs';
+
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  // const colorScheme = useColorScheme();
+  const colorScheme = "dark"
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'dark'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
+        tabBarButton: HapticTab,
+        // tabBarBackground: ,
+        tabBarStyle: Platform.select({
+          ios: {
+            // Use a transparent background on iOS to show the blur effect
+            position: 'absolute',
+          },
+          default: {
+            backgroundColor: appDarkColor
+          },
+        }),
+
+        // tabBarActiveTintColor: primaryColor,
+        // tabBarStyle: { paddingTop: 10, height: 80 },
+
+        // headerShown: false,
+        // tabBarShowLabel: false,
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Giveaways',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'gift-sharp' : 'gift-outline'} color={color} />
+            <Gift variant={focused ? 'Outline' : 'Bold'} color={color} />
           ),
         }}
       />
@@ -26,7 +48,7 @@ export default function TabLayout() {
         options={{
           title: 'F2P',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'game-controller' : 'game-controller-outline'} color={color} />
+            <Game variant={focused ? 'Outline' : 'Bold'} color={color} />
           ),
         }}
       />
@@ -35,7 +57,7 @@ export default function TabLayout() {
         options={{
           title: 'Report bug',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'bug' : 'bug-outline'} color={color} />
+            <Warning2 variant={focused ? 'Outline' : 'Bold'} color={color} />
           ),
         }}
       />
@@ -44,7 +66,7 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
+            <Setting2 variant={focused ? 'Outline' : 'Bold'} color={color} />
           ),
         }}
       />

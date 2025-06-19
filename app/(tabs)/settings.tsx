@@ -1,95 +1,62 @@
-import { StyleSheet, Platform } from 'react-native';
+import Button from '@/components/custom/Button';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { ScrollView } from 'react-native-gesture-handler';
-import { Button, Divider } from 'react-native-paper';
-import { Linking } from 'react-native';
-import { Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { APP_REPO_URL, APP_URLS, DEVICE_SETTINGS_URL } from '@/constants/app';
+import { Alert, Linking, View } from 'react-native';
 
-export default function HomeScreen() {
+export default function SetttingsScreen() {
+  const openNotificationSettings = async () => {
+    try {
+      await Linking.openURL(DEVICE_SETTINGS_URL);
+    } catch (error) {
+      Alert.alert('Error', 'Unable to open settings, please set them manually.');
+    }
+  };
 
-
-  
-const openNotificationSettings = async () => {
-  let url = '';
-
-  if (Platform.OS === 'ios') {
-    url = 'app-settings:'; // iOS general app settings
-  } else if (Platform.OS === 'android') {
-    const packageName = 'com.brianali.Frapp'; // replace this with your actual package name
-    url = `android.settings.APP_NOTIFICATION_SETTINGS?package=${packageName}`;
-  }
-
-  try {
-    await Linking.openURL(url);
-  } catch (error) {
-    Alert.alert('Error', 'Unable to open settings, please set them manually.');
-  }
-};
   return (
-      <ThemedView style={styles.stepContainer}>
+    <View className="flex-1 pt-16 bg-black pb-32 px-4">
+      <ThemedText className="text-white text-base font-bold p-2 text-center">
+        Settings
+      </ThemedText>
 
-        <SafeAreaView>
-            <ThemedText style={styles.text}>
-                  Settings
-            </ThemedText>
-        </SafeAreaView>
-        
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          <ThemedText style={styles.text}>Like The app? star us on github.</ThemedText>
-          <Button mode="contained"
-                  onPress={() => Linking.openURL('https://github.com/Brianali-codes/Frapp')}
-          >✨ Star Us</Button>
-          <Button mode="contained"
-                  onPress={openNotificationSettings}
-          >Change Notification Settings</Button>
+      <ThemedText className="text-white text-base font-bold mb-4">
+        Like the app? Star us on GitHub.
+      </ThemedText>
 
-          <ThemedText style={styles.text}>This Project is made and maintained by an individual therefore any act of support is appreciated, The project is also open source therefore any person(s) can contribute to maintain as well as formulate new ideas regarding the project.</ThemedText>
-          <ThemedText style={styles.text}>In order to view the official site for the API provider (Gamepower api) who provides all games in the app you can find them by clicking the button below. the APi for free games on the other hand is the Free to game API</ThemedText>
-          <Button mode="contained"
-                  onPress={() => Linking.openURL('https://www.gamerpower.com/')}
-          >Go to Gamepower.com</Button>
-          <Button mode="contained"
-                  onPress={() => Linking.openURL('https://www.freetogame.com/')}
-          >Go to freetogame.com</Button>
-        </ScrollView>
-      </ThemedView>
-    
+      <View className='gap-6 mb-6'>
+        <Button
+          onPress={() => Linking.openURL(APP_REPO_URL)}
+          text="✨ Star Us"
+        />
+
+        <Button
+          onPress={openNotificationSettings}
+          text="Change Notification Settings"
+        />
+      </View>
+
+      <View className='my-6'>
+        <ThemedText className="text-white text-base font-bold mb-4">
+          This project is made and maintained by an individual. Any act of support is appreciated.
+          The project is open source, so anyone can contribute to maintenance or bring in new ideas.
+        </ThemedText>
+
+        <ThemedText className="text-white text-base font-bold">
+          To view the official site for the Gamepower API (used to fetch all games), click below.
+          The free games API used is the FreeToGame API.
+        </ThemedText>
+      </View>
+
+      <View className='gap-6 mb-6'>
+        <Button
+          onPress={() => Linking.openURL(APP_URLS.GAME_POWER_URL)}
+          text="Go to Gamepower.com"
+        />
+
+        <Button
+          onPress={() => Linking.openURL(APP_URLS.FREE_TO_GAME_URL)}
+          text="Go to freetogame.com"
+        />
+      </View>
+    </View>
   );
 }
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    backgroundColor:'black',
-    gap: 8,
-    marginBottom: 8,
-    padding:5,
-  },
-  text: {
-    color: 'white',
-    fontFamily: 'sans-serif',
-    fontWeight: 'bold',
-    fontSize: 15,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    marginBottom:10,
-    margin:'auto',
-    padding:5,
-    gap:5,
-  },
-  scrollViewContent: {
-    paddingBottom: 20, // Space at the bottom of the scrollable content
-    gap: 10,
-    backgroundColor:'black',
-  },
-  icons: {
-    fontSize:18,
-  },
-});

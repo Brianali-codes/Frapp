@@ -1,17 +1,15 @@
-import { StyleSheet } from 'react-native';
+import Button from '@/components/custom/Button';
+import { Divider } from '@/components/custom/Divider';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { ScrollView, Linking, Alert } from 'react-native';
-import { Divider, Button } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { APP_URLS } from '@/constants/app';
+import { Alert, Linking, View } from 'react-native';
 
-export default function HomeScreen() {
+export default function ReportScreen() {
   const handleGitHubIssue = () => {
-    const githubIssuesLink = 'https://github.com/Brianali-codes/Frapp/issues';
-    Linking.canOpenURL(githubIssuesLink)
+    Linking.canOpenURL(APP_URLS.GITHUB_ISSUES)
       .then((supported) => {
         if (supported) {
-          Linking.openURL(githubIssuesLink);
+          Linking.openURL(APP_URLS.GITHUB_ISSUES);
         } else {
           Alert.alert('Error', 'Unable to open the GitHub issues page. Please try again later.');
         }
@@ -20,72 +18,43 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemedView style={styles.stepContainer}>
-      <SafeAreaView>
-        <ThemedText style={styles.text}>Report a bug</ThemedText>
-      </SafeAreaView>
-
-      <ScrollView style={styles.scrollViewContent}>
-        <ThemedText style={styles.text2}>
+    <View
+      className="flex-1 pt-16 bg-black pb-32">
+      <ThemedText className="text-white font-bold text-base mb-2 text-center p-1">
+        Report a bug
+      </ThemedText>
+      <View className='px-4'>
+        <ThemedText className="text-white">
           Having trouble with the app or noticed some bugs? Please file a report to let us know.
         </ThemedText>
-        <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
 
-        <Button mode="contained" onPress={handleGitHubIssue}>
-          File a Report
-        </Button>
+        <Divider className="my-2 h-px bg-transparent" />
 
-        <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+        <Button onPress={handleGitHubIssue} text='File a Report' />
 
-        <ThemedText style={styles.text2}>
+        <Divider className="my-2 h-px bg-transparent" />
+
+        <ThemedText className="text-white">
           For more detailed reports, file an issue at the GitHub repository. Feedback will be provided as soon as possible.
         </ThemedText>
 
-        <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
+        <Divider className="my-2 h-px bg-transparent" />
 
-        <ThemedText style={styles.text2}>
+        <ThemedText className="text-white">
           This project utilizes the Gamepower API as well as the Free To Game API for fetching data and dynamically providing it to users. None of these APIs, as well as FRAPP, belong to me.
         </ThemedText>
-        <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'transparent' }} />
-        <Divider style={{ marginVertical: 10, height: 1, backgroundColor: 'white' }} />
 
-        <ThemedText style={styles.text3}>
+        <Divider className="my-2 h-px bg-transparent" />
+      </View>
+
+      <View className='absolute bottom-[100px] left-0 right-0 w-full'>
+        <Divider className="my-2 h-px bg-white" />
+
+        <ThemedText className="text-white text-center">
           Frapp v1.0.8.
         </ThemedText>
 
-      </ScrollView>
-    </ThemedView>
+      </View>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  stepContainer: {
-    backgroundColor: 'black',
-    gap: 8,
-    marginBottom: 8,
-    padding: 10,
-  },
-  text: {
-    color: 'white',
-    fontFamily: 'sans-serif',
-    fontWeight: 'bold',
-    fontSize: 15,
-    marginBottom: 10,
-    margin:'auto',
-    padding: 5,
-  },
-  text2: {
-    color: 'white',
-  },
-  text3: {
-    color: 'white',
-    textAlign:'center',
-  },
-  scrollViewContent: {
-    paddingBottom: 20,
-    gap: 10,
-    padding: 5,
-    margin: 5,
-    backgroundColor: 'black',
-  },
-});
