@@ -76,8 +76,8 @@ Start the server using expo.
 ## Screenshots
 
 <div style="display: flex;"; align="center">
-  <img alt="giveaways" src="https://github.com/user-attachments/assets/3a9ce1d7-562c-4ae3-8861-4ee50cf02489">
-  <img alt="f2p" src="https://github.com/user-attachments/assets/b2483781-bf81-43c2-98c6-1a3714e428b5">
+  <img alt="giveaways" src="[https://github.com/user-attachments/assets/3a9ce1d7-562c-4ae3-8861-4ee50cf02489](https://raw.githubusercontent.com/Brianali-codes/Frapp/refs/heads/main/assets/images/screenshot1.webp)">
+  <img alt="f2p" src="[https://github.com/user-attachments/assets/b2483781-bf81-43c2-98c6-1a3714e428b5](https://raw.githubusercontent.com/Brianali-codes/Frapp/refs/heads/main/assets/images/screenshot2.webp)">
 </div>
   
 
