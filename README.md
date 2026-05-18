@@ -19,9 +19,8 @@
   <strong>FRAPP (Freebie Radar App) aggregates the latest video game giveaways and free titles in one clean interface.</strong><br>
   Never miss a limited-time offer across major distribution platforms, powered by the GamerPower API.
 </p>
-<div style="display: flex;"; align="start">
-  
-  ![Untitled design](https://github.com/user-attachments/assets/7f2a2f71-a1cf-4e3d-bcbd-37beab10c3ed)
+<div style="display: flex;"; align="center">
+ <img width="1920" height="1078" alt="A New Design - Made with PosterMyWall" src="https://github.com/user-attachments/assets/5cd9c0fb-ff56-4710-b33c-3cf981abaafc" />
 
 </div>
 
@@ -105,11 +104,7 @@ This project contains the MIT LICENCE
 
 ## Screenshots
 
-<div style="display: flex;"; align="center">
-  https://raw.githubusercontent.com/Brianali-codes/Frapp/refs/heads/main/assets/images/screenshot1.webp
-  https://raw.githubusercontent.com/Brianali-codes/Frapp/refs/heads/main/assets/images/screenshot2.webp
-  https://raw.githubusercontent.com/Brianali-codes/Frapp/refs/heads/main/assets/images/screenshot3.webp
-</div>
+
   
 
 
