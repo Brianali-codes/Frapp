@@ -11,7 +11,8 @@
   <a href="#about">About</a> •
   <a href="#deployment">Deployment</a> •
   <a href="#running-locally">Running Locally</a> •
-  <a href="https://github.com/brianali-codes/frapp/issues" target="_blank">Request Feature</a> •
+  <a href="https://github.com/brianali-codes/frapp/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md" target="_blank">Request Feature</a> •
+  <a href="https://github.com/brianali-codes/frapp/issues/new?assignees=&labels=bug&projects=&template=feature_request.md" target="_blank">Report Bug</a> •
   <a href="https://choosealicense.com/licenses/mit/" target="_blank">License</a>
 </p>
 <p align="center">
