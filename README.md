@@ -11,7 +11,6 @@
   <a href="#about">About</a> •
   <a href="#deployment">Deployment</a> •
   <a href="#running-locally">Running Locally</a> •
-  <a href="#screenshots">Screenshots</a> •
   <a href="https://github.com/brianali-codes/frapp/issues" target="_blank">Report Bug</a> •
   <a href="https://choosealicense.com/licenses/mit/" target="_blank">License</a>
 </p>
@@ -51,10 +50,17 @@ To get started, fork this repository to your own GitHub account and clone it to 
 Follow these steps to set up the development environment:
 
 1. **Clone the project**
-   ```bash
-   git clone [https://github.com/Brianali-codes/Frapp.git](https://github.com/Brianali-codes/Frapp.git)
-   cd Frapp
+
+
+  ```bash
+   git clone https://github.com/Brianali-codes/Frapp.git
+  ```
+- or if you forked the project 
+ 
   
+  ```bash
+  git clone https://github.com/YourUsername/Brianali-codes/Frapp.git
+  ```
 2. **Go to the project directory**
 
   ```bash
@@ -96,21 +102,3 @@ Follow these steps to set up the development environment:
 ## License
 
 This project contains the MIT LICENCE
-
-
-
-
-
-
-## Screenshots
-
-
-  
-
-
-
-
-
-
-
-
