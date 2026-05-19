@@ -16,6 +16,11 @@ export const cn = (...classes: any[]) => {
   return result.reverse().join(" ");
 };
 
+export const theme = {
+  light: "bg-white text-black",
+  dark: "bg-gray-900 text-white",
+};
+
 export const formatDate = (date: string | Date) => {
   if (!date || date === "N/A") return date
   const d = new Date(date);

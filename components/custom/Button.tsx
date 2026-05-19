@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 import { ThemedText } from '../ThemedText';
 
+// 1. Import your custom theme hook
+import { useThemeColor } from '@/hooks/useThemeColor';
+
 interface ButtonProps extends PressableProps {
     text?: string;
     style?: StyleProp<ViewStyle>;
@@ -30,27 +33,43 @@ export default function Button(props: ButtonProps) {
         onPress = () => { },
         ...rest
     } = props;
+
+    // 2. Fetch primary text and background colors to make variants dynamic
+    const textColor = useThemeColor({}, 'text');
+
     return (
         <Pressable
-            style={[style]}
             onPress={onPress}
             disabled={loading || disabled}
             className={cn(
                 'rounded-lg justify-center items-center h-[43px]',
                 (type === 'primary') ? 'bg-purple-600' : null,
                 (type === 'muted') ? 'bg-background border-border border' : null,
-                (type === 'dark') ? 'bg-black border-black border' : null,
-                (type === 'outline') ? 'bg-black border-white border' : null,
+                (type === 'dark') ? 'bg-zinc-900 dark:bg-black' : null, 
+                (type === 'outline') ? 'bg-transparent border' : null,
                 className
             )}
-            {...rest}>
+            // 3. Merged into a single style attribute accepting a state callback function
+            style={({ pressed }) => [
+                style as ViewStyle, 
+                type === 'outline' && { borderColor: textColor },
+                pressed && { opacity: 0.7 } 
+            ]}
+            {...rest}
+        >
             {text ? (
                 <ThemedText
-                    style={textStyle}
                     className={cn(
                         "font-medium",
-                        ['outline', 'muted'].includes(type) ? 'text-black' : 'text-white'
-                    )}>
+                        type === 'primary' || type === 'dark' ? 'text-white' : null,
+                        type === 'muted' ? 'text-zinc-500' : null
+                    )}
+                    // 4. Merged text styles into a single style array attribute
+                    style={[
+                        textStyle,
+                        type === 'outline' && { color: textColor }
+                    ]}
+                >
                     {loading ? 'Loading...' : text}
                 </ThemedText>
             ) : (

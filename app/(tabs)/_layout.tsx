@@ -1,45 +1,50 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-
 import { HapticTab } from '@/components/HapticTab';
-import { Colors, appDarkColor } from '@/constants/colors';
-// import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import { useCustomTheme } from '@/context/ThemeContext'; // 1. Import your custom context hook
 import { Game, Gift, Setting2, Warning2 } from 'iconsax-react-nativejs';
 
+
 export default function TabLayout() {
-  // const colorScheme = useColorScheme();
-  const colorScheme = "dark"
+  // 2. Consume the global theme state instead of hardcoding "dark"
+  const { themeMode } = useCustomTheme();
+
+  // 3. Resolve dynamic background and inactive tint colors based on current mode
+  const tabBgColor = Colors[themeMode].background;
+  
+  // Optional: Define an explicit inactive color if it isn't in your Colors constant.
+  // Generally, dark gray for light mode, light gray for dark mode.
+  const inactiveTintColor = themeMode === 'dark' ? '#9ca3af' : '#6b7280'; 
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        // 4. Dynamically set the active color based on 'light' or 'dark'
+        tabBarActiveTintColor: Colors[themeMode].tint,
+        tabBarInactiveTintColor: inactiveTintColor, 
         headerShown: false,
         tabBarButton: HapticTab,
-        // tabBarBackground: ,
+        
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
           },
           default: {
-            backgroundColor: appDarkColor
+            // 5. Dynamically change the background color of the bar
+            backgroundColor: tabBgColor,
           },
         }),
-
-        // tabBarActiveTintColor: primaryColor,
-        // tabBarStyle: { paddingTop: 10, height: 80 },
-
-        // headerShown: false,
-        // tabBarShowLabel: false,
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Giveaways',
           tabBarIcon: ({ color, focused }) => (
-            <Gift variant={focused ? 'Outline' : 'Bold'} color={color} />
+            <Gift variant={focused ? 'Broken' : 'Bold'} color={color} />
           ),
         }}
       />
@@ -48,7 +53,7 @@ export default function TabLayout() {
         options={{
           title: 'F2P',
           tabBarIcon: ({ color, focused }) => (
-            <Game variant={focused ? 'Outline' : 'Bold'} color={color} />
+            <Game variant={focused ? 'Broken' : 'Bold'} color={color} />
           ),
         }}
       />
@@ -57,7 +62,7 @@ export default function TabLayout() {
         options={{
           title: 'Report bug',
           tabBarIcon: ({ color, focused }) => (
-            <Warning2 variant={focused ? 'Outline' : 'Bold'} color={color} />
+            <Warning2 variant={focused ? 'Broken' : 'Bold'} color={color} />
           ),
         }}
       />
@@ -66,7 +71,7 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color, focused }) => (
-            <Setting2 variant={focused ? 'Outline' : 'Bold'} color={color} />
+            <Setting2 variant={focused ? 'Broken' : 'Bold'} color={color} />
           ),
         }}
       />

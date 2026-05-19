@@ -7,11 +7,17 @@ import { FreeGiveaway } from '@/types';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView } from 'react-native';
 
+// 1. IMPORT YOUR CUSTOM THEME HOOK
+import { useThemeColor } from '@/hooks/useThemeColor';
+
 export default function FreeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [giveaways, setGiveaways] = useState<FreeGiveaway[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // 2. FETCH THE CURRENT DYNAMIC BACKGROUND COLOR
+  const backgroundColor = useThemeColor({}, 'background');
 
   const fetchData = async () => {
     try {
@@ -39,8 +45,21 @@ export default function FreeScreen() {
   };
 
   return (
-    <ScrollView className='flex-1 px-4 pt-16 bg-black pb-32' contentContainerStyle={{ paddingBottom: 100 }}>
-      <ThemedText className="text-white font-bold text-base text-center mb-4">Free to Play.</ThemedText>
+    <ScrollView 
+      // 3. REMOVED 'bg-black' from the utility classes
+      className='flex-1 px-4 pt-16 pb-32' 
+      // 4. INJECTED the dynamic background color style
+      style={{ backgroundColor }}
+      contentContainerStyle={{ paddingBottom: 100 }}
+    >
+      {/* 
+        Note: REMOVED 'text-white' assuming <ThemedText> automatically 
+        handles its color via useThemeColor internally. 
+      */}
+      <ThemedText className="font-bold text-base text-center mb-4">
+        Free to Play.
+      </ThemedText>
+      
       <GiveawaySkeleton loading={isLoading}>
         {giveaways
           .slice(0, currentPage * itemsPerPage)

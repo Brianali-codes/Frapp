@@ -1,21 +1,18 @@
-/**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
- */
-
-import { Colors } from '@/constants/colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import { useCustomTheme } from '@/context/ThemeContext'; // 1. Import our new context hook
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-  const theme = useColorScheme() ?? 'light';
-  const colorFromProps = props[theme];
+  // 2. Instead of checking the device, check our global state app context
+  const { themeMode } = useCustomTheme(); 
+  
+  const colorFromProps = props[themeMode];
 
   if (colorFromProps) {
     return colorFromProps;
   } else {
-    return Colors[theme][colorName];
+    return Colors[themeMode][colorName];
   }
 }
