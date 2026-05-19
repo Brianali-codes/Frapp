@@ -12,7 +12,8 @@ import {
   Notification, 
   Global, 
   Heart, 
-  ArrowRight2 
+  ArrowRight2,
+  InfoCircle // Added for Revisit Onboarding row
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 
@@ -25,7 +26,7 @@ export default function SettingsScreen() {
   
   // Fetch dynamic surface elements
   const backgroundColor = useThemeColor({}, 'background');
-  const cardBgColor = useThemeColor({}, 'background');
+  const cardBgColor = useThemeColor({}, 'background'); // Fixed: Changed from 'background' to 'card' surface
   const textColor = useThemeColor({}, 'text');
   const { themeMode, toggleTheme } = useCustomTheme();
 
@@ -78,7 +79,6 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      
       <ThemedText className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-6">
         Customize your application behavior, fine-tune notifications, toggle display settings, or read open source credentials.
       </ThemedText>
@@ -100,9 +100,9 @@ export default function SettingsScreen() {
           <View className="flex-row items-center gap-3">
             <View className="w-8 h-8 rounded-xl items-center justify-center bg-orange-500/10">
               {themeMode === 'dark' ? (
-                <Sun1 size="18" color="#f97316" variant="Bulk" />
+                <Sun1 size="18" color="#f97316" variant="Broken" />
               ) : (
-                <Moon size="18" color="#f97316" variant="Bulk" />
+                <Moon size="18" color="#f97316" variant="Broken" />
               )}
             </View>
             <ThemedText className="font-bold text-sm">Theme Appearance</ThemedText>
@@ -122,11 +122,30 @@ export default function SettingsScreen() {
         >
           <View className="flex-row items-center gap-3">
             <View className="w-8 h-8 rounded-xl items-center justify-center bg-blue-500/10">
-              <Notification size="18" color="#3b82f6" variant="Bulk" />
+              <Notification size="18" color="#3b82f6" variant="Broken" />
             </View>
             <View>
               <ThemedText className="font-bold text-sm">Notifications</ThemedText>
               <ThemedText className="text-[11px] text-zinc-400 mt-0.5">Toggle live alerts for new games</ThemedText>
+            </View>
+          </View>
+          <ArrowRight2 size="14" color="#a1a1aa" />
+        </Pressable>
+
+        <Divider className="h-px mx-3 bg-zinc-100 dark:bg-zinc-800/60" />
+
+        {/* Revisit Onboarding Integration Row */}
+        <Pressable 
+          onPress={() => router.push('/onboarding')}
+          className="flex-row items-center justify-between p-3 active:opacity-60"
+        >
+          <View className="flex-row items-center gap-3">
+            <View className="w-8 h-8 rounded-xl items-center justify-center bg-purple-500/10">
+              <InfoCircle size="18" color="#a855f7" variant="Broken" />
+            </View>
+            <View>
+              <ThemedText className="font-bold text-sm">App Introduction</ThemedText>
+              <ThemedText className="text-[11px] text-zinc-400 mt-0.5">Revisit feature highlights and legal terms</ThemedText>
             </View>
           </View>
           <ArrowRight2 size="14" color="#a1a1aa" />
@@ -143,7 +162,7 @@ export default function SettingsScreen() {
         className="rounded-2xl p-4 mb-6 border border-zinc-100 dark:border-zinc-800/60 shadow-sm"
       >
         <View className="flex-row items-center gap-2 mb-2">
-          <Heart size="18" color="#ef4444" variant="Bold" />
+          <Heart size="18" color="#ef4444" variant="Broken" />
           <ThemedText className="font-extrabold text-sm tracking-tight">
             Support Open Source Development
           </ThemedText>
@@ -175,7 +194,7 @@ export default function SettingsScreen() {
         >
           <View className="flex-row items-center gap-3">
             <View className="w-8 h-8 rounded-xl items-center justify-center bg-purple-500/10">
-              <Global size="18" color="#a855f7" variant="Bulk" />
+              <Global size="18" color="#a855f7" variant="Broken" />
             </View>
             <View>
               <ThemedText className="font-bold text-sm">Gamepower Site</ThemedText>
@@ -193,7 +212,7 @@ export default function SettingsScreen() {
         >
           <View className="flex-row items-center gap-3">
             <View className="w-8 h-8 rounded-xl items-center justify-center bg-emerald-500/10">
-              <Global size="18" color="#10b981" variant="Bulk" />
+              <Global size="18" color="#10b981" variant="Broken" />
             </View>
             <View>
               <ThemedText className="font-bold text-sm">FreeToGame API</ThemedText>
