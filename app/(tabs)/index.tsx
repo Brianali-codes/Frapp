@@ -88,7 +88,7 @@ export default function GiveawayScreen() {
           </View>
 
           <ThemedText className="text-xl font-extrabold tracking-tight">
-            Free to Redeem<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
+            Free to Redeem.<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
           </ThemedText>
         </View>
 

@@ -68,7 +68,7 @@ export default function FreeScreen() {
           </View>
 
           <ThemedText className="text-xl font-extrabold tracking-tight">
-            Free to redeem<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
+            Free Games.<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
           </ThemedText>
         </View>
 
