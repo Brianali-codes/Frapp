@@ -95,7 +95,7 @@ export default function GiveawayItem({ giveaway }: { giveaway: Giveaway }) {
           onPress={() => Linking.openURL(giveaway.open_giveaway_url)}
           className="flex-1"
           type="primary"
-          text="Claim Now 🎮"
+          text="Claim Now"
         />
       </ThemedView>
     </ThemedView>

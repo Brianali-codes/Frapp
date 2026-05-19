@@ -71,7 +71,7 @@ export default function GiveawayScreen() {
 
   return (
     <ScrollView
-      className='flex-1 px-4 pt-14 pb-2'
+      className='flex-1 px-4 pt-10 pb-2'
       style={{ backgroundColor }}
       contentContainerStyle={{ paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
@@ -88,7 +88,7 @@ export default function GiveawayScreen() {
           </View>
 
           <ThemedText className="text-xl font-extrabold tracking-tight">
-            Frapp<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
+            Free to Redeem<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
           </ThemedText>
         </View>
 
@@ -132,16 +132,14 @@ export default function GiveawayScreen() {
       </View>
       {/* --- END OF BRAND HEADER ROW --- */}
 
-      <ThemedText className="text-2xl font-black text-left mb-2 tracking-tight">
-        🎮 Free to Redeem
-      </ThemedText>
+     
 
       {/* Summary Section */}
       {!isLoading && (
         <View style={{ backgroundColor: cardColor }} className="rounded-xl p-4 mb-4 border border-zinc-100 dark:border-zinc-800/50 shadow-sm">
           <ThemedText className="font-medium text-sm leading-6 opacity-90">
             We have found{' '}
-            <ThemedText className="text-green-500 font-extrabold">${prices}</ThemedText> video game giveaways as of{' '}
+            <ThemedText className="text-green-500 font-extrabold">{prices}</ThemedText> video game giveaways as of{' '}
             <ThemedText className="text-purple-500 font-bold">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
             <ThemedText className="text-green-500 font-extrabold">${worth}</ThemedText>. Claim them before time runs out!
           </ThemedText>
