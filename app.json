@@ -2,7 +2,7 @@
   "expo": {
     "name": "Frapp",
     "slug": "Frapp",
-    "version": "1.0.9",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/FRAPP_ICON1.jpg",
     "scheme": "myapp",

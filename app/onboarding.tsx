@@ -187,7 +187,7 @@ export default function OnboardingScreen() {
         </Pressable>
         
         <ThemedText className="text-zinc-400 dark:text-zinc-600 text-[10px] uppercase text-center font-montBold tracking-widest mt-5">
-          Frapp Architecture Distribution • v1.0.9
+          Frapp Architecture Distribution • v1.1.0
         </ThemedText>
       </View>
 
