@@ -4,7 +4,7 @@
     "slug": "Frapp",
     "version": "1.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/FRAPP_ICON1.jpg",
+    "icon": "./assets/images/FRAPP_ICON1.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -19,17 +19,15 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/FRAPP_ICON1.jpg",
+        "foregroundImage": "./assets/images/FRAPP_ICON1.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.brianali.Frapp",
-      "enableProguardInReleaseBuilds": true,
-      "useNextNotificationsApi": true
+      "package": "com.brianali.Frapp"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/FRAPP_ICON1.jpg"
+      "favicon": "./assets/images/FRAPP_ICON1.png"
     },
     "plugins": [
       "expo-router",
