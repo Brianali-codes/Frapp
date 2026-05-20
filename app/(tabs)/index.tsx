@@ -7,10 +7,10 @@ import { API_ENDPOINTS } from '@/constants/api';
 import { checkNotificationPermission } from '@/lib/notifications';
 import { Giveaway } from '@/types';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, View, Pressable } from 'react-native';
+import { Alert, ScrollView, View, Pressable, Image, Platform } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
-import { useRouter } from 'expo-router'; // Used to route to your settings screen
+import { useRouter } from 'expo-router';
 
 export default function GiveawayScreen() {
   const router = useRouter();
@@ -23,10 +23,19 @@ export default function GiveawayScreen() {
   const [worth, setWorth] = useState(0);
 
   const backgroundColor = useThemeColor({}, 'background');
-  const cardColor = useThemeColor({}, 'background'); // Used for button circle backgrounds
   const textColor = useThemeColor({}, 'text');
 
   const { themeMode, toggleTheme } = useCustomTheme();
+
+  // Unified color layout:
+  // Light mode uses a sleek cool-grey (#f1f2f6) against pure white.
+  // Dark mode uses a lighter slate-zinc layer (#2c2c35) to clearly float off pure dark backgrounds.
+  const cardBgColor = themeMode === 'dark' ? '#2c2c35' : '#f1f2f6';
+
+  // Tweaked border profiles to lock down the new light/dark frame depths perfectly
+  const adaptiveBorderColor = themeMode === 'dark'
+    ? 'rgba(255, 255, 255, 0.07)'
+    : 'rgba(0, 0, 0, 0.07)';
 
   const checkWorth = async () => {
     try {
@@ -71,30 +80,35 @@ export default function GiveawayScreen() {
 
   return (
     <ScrollView
-      className='flex-1 px-4 pt-10 pb-2'
+      className='flex-1 px-4 pt-10 pb-2 mb-20'
       style={{ backgroundColor }}
       contentContainerStyle={{ paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
     >
-      {/* --- PREMIUM BRAND HEADER ROW (Matches Screenshot Layout) --- */}
+      {/* --- PREMIUM BRAND HEADER ROW --- */}
       <View className="flex-row items-center justify-between w-full mb-6">
 
-        {/* Left Side: Brand Logo and Title */}
+        {/* Left Side: Brand Logo with Asset Image and Title */}
         <View className="flex-row items-center gap-3">
-          {/* Logo Brand Box Placeholder */}
-          <View className="w-10 h-10 bg-purple-600 rounded-xl items-center justify-center shadow-md">
-            {/* REPLACE THIS TEXT WITH YOUR LOGO SVG OR ICON */}
-            <ThemedText className="text-white font-black text-lg">▲</ThemedText>
+          <View
+            style={{ backgroundColor: '#9333ea' }}
+            className="w-10 h-10 rounded-xl overflow-hidden items-center justify-center shadow-md"
+          >
+            <Image
+              source={require('../../assets/images/FRAPP_ICON1.png')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
           </View>
 
-          <ThemedText className="text-xl font-extrabold tracking-tight">
-            Free to Redeem.<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
+          {/* Integrated Montserrat Black for a solid clean geometric header */}
+          <ThemedText className="text-xl font-montBlack tracking-tight">
+            Free to Redeem.
           </ThemedText>
         </View>
 
         {/* Right Side: Circular Utility Actions Group */}
         <View className="flex-row items-center gap-2.5">
-
           <Pressable
             onPress={() => router.push('/(tabs)/settings')}
             style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
@@ -107,41 +121,49 @@ export default function GiveawayScreen() {
             />
           </Pressable>
 
-          {/* Theme State Switcher Trigger */}
           <Pressable
             onPress={toggleTheme}
             style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
           >
             {themeMode === 'dark' ? (
-              <Sun1
-                size="22"
-                color="#f4f4f5" // Clean off-white for Dark Mode
-                variant="Broken"
-              />
+              <Sun1 size="22" color="#f4f4f5" variant="Broken" />
             ) : (
-              <Moon
-                size="22"
-                color="#3f3f46" // Deep zinc/slate gray for Light Mode
-                variant="Broken"
-              />
+              <Moon size="22" color="#3f3f46" variant="Broken" />
             )}
           </Pressable>
-
         </View>
       </View>
       {/* --- END OF BRAND HEADER ROW --- */}
 
-     
-
-      {/* Summary Section */}
+      {/* Summary Section with dynamic Montserrat mappings */}
       {!isLoading && (
-        <View style={{ backgroundColor: cardColor }} className="rounded-xl p-4 mb-4 border border-zinc-100 dark:border-zinc-800/50 shadow-sm">
-          <ThemedText className="font-medium text-sm leading-6 opacity-90">
+        <View
+          style={[
+            {
+              backgroundColor: cardBgColor,
+              borderWidth: 1,
+              borderColor: adaptiveBorderColor,
+            },
+            Platform.select({
+              ios: {
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
+                shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10,
+                shadowRadius: themeMode === 'dark' ? 10 : 16,
+              },
+              android: {
+                elevation: themeMode === 'dark' ? 4 : 5,
+              }
+            })
+          ]}
+          className="rounded-2xl p-4 mb-6"
+        >
+          <ThemedText className="font-mont text-sm leading-relaxed opacity-90">
             We have found{' '}
-            <ThemedText className="text-green-500 font-extrabold">{prices}</ThemedText> video game giveaways as of{' '}
-            <ThemedText className="text-purple-500 font-bold">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
-            <ThemedText className="text-green-500 font-extrabold">${worth}</ThemedText>. Claim them before time runs out!
+            <ThemedText className="text-green-500 font-montBlack">{prices}</ThemedText> video game giveaways as of{' '}
+            <ThemedText className="text-purple-500 font-montBold">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
+            <ThemedText className="text-green-500 font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
           </ThemedText>
         </View>
       )}
@@ -160,7 +182,7 @@ export default function GiveawayScreen() {
         <Button
           type="outline"
           onPress={loadMoreItems}
-          className="mt-2 w-full"
+          className="mt-2 w-full font-montBold" // Added font class support reference
           text="Load More Giveaways"
         />
       )}

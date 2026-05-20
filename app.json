@@ -2,13 +2,13 @@
   "expo": {
     "name": "Frapp",
     "slug": "Frapp",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "orientation": "portrait",
-    "icon": "./assets/images/FRAPP_ICON.jpg",
+    "icon": "./assets/images/FRAPP_ICON1.jpg",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/FRAPP_ICON.png",
+      "image": "./assets/images/FRAPP_ICON1.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/FRAPP_ICON.jpg",
+        "foregroundImage": "./assets/images/FRAPP_ICON1.jpg",
         "backgroundColor": "#000000"
       },
       "package": "com.brianali.Frapp",
@@ -29,7 +29,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/FRAPP_ICON.jpg"
+      "favicon": "./assets/images/FRAPP_ICON1.jpg"
     },
     "plugins": [
       "expo-router",

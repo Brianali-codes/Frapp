@@ -5,11 +5,10 @@ import { ThemedText } from '@/components/ThemedText';
 import { API_ENDPOINTS } from '@/constants/api';
 import { FreeGiveaway } from '@/types';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, View, Pressable } from 'react-native';
-import { Setting, Moon, Sun, Sun1 } from 'iconsax-react-nativejs'; // Icons for the utility cluster
+import { Alert, ScrollView, View, Pressable, Image, Platform } from 'react-native';
+import { Setting, Moon, Sun1 } from 'iconsax-react-nativejs'; 
 import { useRouter } from 'expo-router';
 
-// 1. IMPORT YOUR CUSTOM THEME HOOKS
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 
@@ -20,10 +19,19 @@ export default function FreeScreen() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 2. FETCH THE DYNAMIC COLORS
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const { themeMode, toggleTheme } = useCustomTheme();
+
+  // Unified color layout:
+  // Light mode uses a sleek cool-grey (#f1f2f6) against pure white.
+  // Dark mode uses a lighter slate-zinc layer (#2c2c35) to clearly float off pure dark backgrounds.
+  const cardBgColor = themeMode === 'dark' ? '#2c2c35' : '#f1f2f6';
+
+  // Tweaked border profiles to lock down the new light/dark frame depths perfectly
+  const adaptiveBorderColor = themeMode === 'dark'
+    ? 'rgba(255, 255, 255, 0.07)'
+    : 'rgba(0, 0, 0, 0.07)';
 
   const fetchData = async () => {
     try {
@@ -60,22 +68,27 @@ export default function FreeScreen() {
       {/* --- MATCHING BRAND HEADER ROW --- */}
       <View className="flex-row items-center justify-between w-full mb-6">
 
-        {/* Left Side: Brand Logo and Title */}
+        {/* Left Side: Fixed Asset Logo and Title */}
         <View className="flex-row items-center gap-3">
-          {/* Logo Brand Box */}
-          <View className="w-10 h-10 bg-purple-600 rounded-xl items-center justify-center shadow-md">
-            <ThemedText className="text-white font-black text-lg">▲</ThemedText>
+          <View
+            style={{ backgroundColor: '#9333ea' }}
+            className="w-10 h-10 rounded-xl overflow-hidden items-center justify-center shadow-md"
+          >
+            <Image
+              source={require('../../assets/images/FRAPP_ICON1.png')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
           </View>
 
-          <ThemedText className="text-xl font-extrabold tracking-tight">
-            Free Games.<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
+          {/* Integrated Montserrat Black for header cohesion */}
+          <ThemedText className="text-xl font-montBlack tracking-tight">
+            Free Games.
           </ThemedText>
         </View>
 
         {/* Right Side: Circular Utility Actions Group */}
         <View className="flex-row items-center gap-2.5">
-
-          {/* Settings Nav Trigger */}
           <Pressable
             onPress={() => router.push('/(tabs)/settings')}
             style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
@@ -88,7 +101,6 @@ export default function FreeScreen() {
             />
           </Pressable>
 
-          {/* Theme State Switcher Trigger */}
           <Pressable
             onPress={toggleTheme}
             style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
@@ -100,22 +112,38 @@ export default function FreeScreen() {
               <Moon size="22" color="#3f3f46" variant="Broken" />
             )}
           </Pressable>
-
         </View>
       </View>
       {/* --- END OF BRAND HEADER ROW --- */}
 
-      {/* Summary Section */}
-      {/* Summary Section for Free to Play Games */}
+      {/* Summary Section with exact matching lighter dark mode configurations */}
       {!isLoading && (
         <View
-          style={{ backgroundColor: useThemeColor({}, 'background') }}
-          className="rounded-xl p-4 mb-4 border border-zinc-100 dark:border-zinc-800/50 shadow-sm"
+          style={[
+            {
+              backgroundColor: cardBgColor,
+              borderWidth: 1,
+              borderColor: adaptiveBorderColor,
+            },
+            Platform.select({
+              ios: {
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
+                shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10,
+                shadowRadius: themeMode === 'dark' ? 10 : 16,
+              },
+              android: {
+                elevation: themeMode === 'dark' ? 4 : 5,
+              }
+            })
+          ]}
+          className="rounded-2xl p-4 mb-6"
         >
-          <ThemedText className="font-medium text-sm leading-6 opacity-90">
+          {/* Re-aligned typography stack using Montserrat helper weights */}
+          <ThemedText className="font-mont text-sm leading-6 opacity-90">
             We discovered{' '}
-            <ThemedText className="text-purple-500 font-extrabold">{giveaways.length}</ThemedText> fully free-to-play games available as of{' '}
-            <ThemedText className="text-zinc-500 dark:text-zinc-400 font-bold">
+            <ThemedText className="text-purple-500 font-montBlack">{giveaways.length}</ThemedText> fully free-to-play games available as of{' '}
+            <ThemedText className="text-zinc-800 dark:text-zinc-200 font-montBold">
               {new Date().getDate()} {[
                 'January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'
@@ -124,6 +152,8 @@ export default function FreeScreen() {
           </ThemedText>
         </View>
       )}
+
+      {/* List Layout Component Stack */}
       <GiveawaySkeleton loading={isLoading}>
         {giveaways
           .slice(0, currentPage * itemsPerPage)
@@ -132,11 +162,12 @@ export default function FreeScreen() {
           ))}
       </GiveawaySkeleton>
 
+      {/* Paginated Footer Trigger */}
       {!isLoading && currentPage * itemsPerPage < giveaways.length && (
         <Button
           type="outline"
           onPress={loadMoreItems}
-          className="mt-2 w-full"
+          className="mt-2 w-full font-montBold"
           text="Load More Games"
         />
       )}

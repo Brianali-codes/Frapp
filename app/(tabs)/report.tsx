@@ -3,7 +3,7 @@ import { Divider } from '@/components/custom/Divider';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_URLS } from '@/constants/app';
 import React, { useState } from 'react';
-import { Alert, Linking, View, ScrollView, Pressable, Platform } from 'react-native';
+import { Alert, Linking, View, ScrollView, Pressable, Platform, Image } from 'react-native';
 import { 
   Setting, 
   Moon, 
@@ -27,9 +27,19 @@ export default function ReportScreen() {
 
   // Fetch dynamic theme parameters
   const backgroundColor = useThemeColor({}, 'background');
-  const cardBgColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const { themeMode, toggleTheme } = useCustomTheme();
+
+  // Unified color layering layout configuration:
+  const cardBgColor = themeMode === 'dark' ? '#2c2c35' : '#f1f2f6';
+
+  // Tweaked border profiles to lock down the light/dark frame depths perfectly
+  const adaptiveBorderColor = themeMode === 'dark'
+    ? 'rgba(255, 255, 255, 0.07)'
+    : 'rgba(0, 0, 0, 0.07)';
+
+  // Adaptive standard icon colors to avoid orange color tint accenting
+  const unselectedIconColor = themeMode === 'dark' ? '#ffffff' : '#000000';
 
   // Dynamic Array mapping your custom components directly to their keys
   const bugCategories = [
@@ -89,15 +99,25 @@ export default function ReportScreen() {
     >
       {/* --- MATCHING BRAND HEADER ROW --- */}
       <View className="flex-row items-center justify-between w-full mb-6">
+        
+        {/* Left Side: Fixed Asset Logo and Title */}
         <View className="flex-row items-center gap-3">
-          <View className="w-10 h-10 bg-purple-600 rounded-xl items-center justify-center shadow-md">
-            <ThemedText className="text-white font-black text-lg">▲</ThemedText>
+          <View
+            style={{ backgroundColor: '#9333ea' }}
+            className="w-10 h-10 rounded-xl overflow-hidden items-center justify-center shadow-md"
+          >
+            <Image
+              source={require('../../assets/images/FRAPP_ICON1.png')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
           </View>
-          <ThemedText className="text-xl font-extrabold tracking-tight">
-            Report Bug.<ThemedText className="text-purple-500 font-extrabold text-xl"></ThemedText>
+          <ThemedText className="text-xl font-montBlack tracking-tight">
+            Report Bug.
           </ThemedText>
         </View>
 
+        {/* Right Side: Circular Utility Actions Group */}
         <View className="flex-row items-center gap-2.5">
           <Pressable 
             onPress={() => router.push('/(tabs)/settings')}
@@ -121,12 +141,12 @@ export default function ReportScreen() {
         </View>
       </View>
       
-      <ThemedText className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-6">
+      <ThemedText className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-6 font-mont">
         Having trouble with the application or noticed inconsistent pricing or values? Pick a category below and file a live report.
       </ThemedText>
 
       {/* Interactive Custom Vector Category Grid */}
-      <ThemedText className="text-[11px] uppercase font-bold tracking-widest text-zinc-400 mb-3 ml-1">
+      <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-3 ml-1">
         Select Bug Category
       </ThemedText>
       <View className="flex-row flex-wrap justify-between gap-y-3 mb-6">
@@ -138,24 +158,38 @@ export default function ReportScreen() {
             <Pressable
               key={category.id}
               onPress={() => setSelectedCategory(category.label)}
-              style={{ 
-                backgroundColor: isSelected ? '#9333ea' : cardBgColor,
-                borderColor: isSelected ? '#a855f7' : (themeMode === 'dark' ? '#27272a' : '#e4e4e7'),
-                width: '48.5%', // Displays neatly in a 2x2 grid layout
-                height: 90
-              }}
-              className="p-3 rounded-2xl border active:opacity-85 flex-col items-center justify-center gap-2 text-center"
+              style={[
+                { 
+                  backgroundColor: isSelected ? '#9333ea' : cardBgColor,
+                  borderColor: isSelected ? '#a855f7' : adaptiveBorderColor,
+                  borderWidth: 1,
+                  width: '48.5%', // Displays neatly in a 2x2 grid layout
+                  height: 90
+                },
+                Platform.select({
+                  ios: {
+                    shadowColor: '#000000',
+                    shadowOffset: { width: 0, height: isSelected ? 4 : (themeMode === 'dark' ? 3 : 4) },
+                    shadowOpacity: isSelected ? 0.30 : (themeMode === 'dark' ? 0.20 : 0.06), 
+                    shadowRadius: isSelected ? 8 : (themeMode === 'dark' ? 6 : 8),     
+                  },
+                  android: {
+                    elevation: isSelected ? 4 : (themeMode === 'dark' ? 2 : 3), 
+                  }
+                })
+              ]}
+              className="p-3 rounded-2xl active:opacity-85 flex-col items-center justify-center gap-2 text-center"
             >
-              {/* Dynamic Icon Rendering with active color state fallback */}
+              {/* Dynamic Icon Rendering - No more orange. Black in Light mode, White in Dark mode. */}
               <IconComponent 
                 size="26" 
-                color={isSelected ? '#ffffff' : '#FF8A65'} 
+                color={isSelected ? '#ffffff' : unselectedIconColor} 
                 variant={isSelected ? 'Bold' : 'Broken'} 
               />
               
               <ThemedText 
                 style={{ color: isSelected ? '#ffffff' : undefined }} 
-                className="text-[11px] font-extrabold text-center tracking-tight"
+                className="text-[11px] font-montBlack text-center tracking-tight"
                 numberOfLines={1}
               >
                 {category.label}
@@ -167,17 +201,34 @@ export default function ReportScreen() {
 
       {/* Primary Action Card */}
       <View 
-        style={{ backgroundColor: cardBgColor }} 
-        className="rounded-xl p-5 mb-5 border border-zinc-100 dark:border-zinc-800/60 shadow-sm"
+        style={[
+          { 
+            backgroundColor: cardBgColor,
+            borderWidth: 1,
+            borderColor: adaptiveBorderColor,
+          },
+          Platform.select({
+            ios: {
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
+              shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10, 
+              shadowRadius: themeMode === 'dark' ? 10 : 16,     
+            },
+            android: {
+              elevation: themeMode === 'dark' ? 4 : 5, 
+            }
+          })
+        ]} 
+        className="rounded-2xl p-5 mb-5"
       >
         <View className="flex-row items-center gap-2 mb-2">
-          <Flag size="18" color="#a855f7" variant="Bold" />
-          <ThemedText className="font-extrabold text-base tracking-tight">
+          <Flag size="18" color="#a855f7" variant="Broken" />
+          <ThemedText className="font-montBlack text-base tracking-tight">
             Submit directly via GitHub Issues
           </ThemedText>
         </View>
         
-        <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4">
+        <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
           Clicking the button below will securely bundle your selection template, local device OS parameters, and open the GitHub tracker instantly.
         </ThemedText>
 
@@ -185,21 +236,39 @@ export default function ReportScreen() {
           onPress={handleGitHubIssue} 
           text={`File ${selectedCategory}`} 
           type="primary"
+          className="font-montBold"
         />
       </View>
 
       {/* API Attribution Disclosure Block */}
       <View 
-        style={{ backgroundColor: cardBgColor }} 
-        className="rounded-xl p-4 border border-zinc-100 dark:border-zinc-800/60 shadow-sm"
+        style={[
+          { 
+            backgroundColor: cardBgColor,
+            borderWidth: 1,
+            borderColor: adaptiveBorderColor,
+          },
+          Platform.select({
+            ios: {
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
+              shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10, 
+              shadowRadius: themeMode === 'dark' ? 10 : 16,     
+            },
+            android: {
+              elevation: themeMode === 'dark' ? 4 : 5, 
+            }
+          })
+        ]} 
+        className="rounded-2xl p-4"
       >
         <View className="flex-row items-center gap-2 mb-2">
           <InfoCircle size="18" color="#71717a" variant="Broken" />
-          <ThemedText className="font-bold text-xs uppercase tracking-wider text-zinc-400">
+          <ThemedText className="font-montBold text-xs uppercase tracking-wider text-zinc-400 dark:text-zinc-400">
             API & Project Attribution
           </ThemedText>
         </View>
-        <ThemedText className="text-zinc-400 dark:text-zinc-500 text-[11px] leading-relaxed">
+        <ThemedText className="text-zinc-400 dark:text-zinc-400 text-[11px] leading-relaxed font-mont">
           This open source distribution relies completely on structural feeds provided by the Gamepower and Free To Game architectures. None of these independent APIs or associated content entities belong directly to FRAPP.
         </ThemedText>
       </View>
@@ -210,8 +279,8 @@ export default function ReportScreen() {
           style={{ backgroundColor: textColor }} 
           className="w-12 h-0.5 rounded-full opacity-10 mb-3" 
         />
-        <ThemedText className="text-center font-bold text-[11px] uppercase tracking-widest text-zinc-400">
-          Frapp Build v1.0.8
+        <ThemedText className="text-center font-montBold text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          Frapp Build v1.0.9
         </ThemedText>
       </View>
     </ScrollView>

@@ -4,7 +4,7 @@ import { Platform, View } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { Colors } from '@/constants/Colors';
 import { useCustomTheme } from '@/context/ThemeContext'; 
-import { ThemedText } from '@/components/ThemedText'; // Imported to cleanly handle dynamic text colors
+import { ThemedText } from '@/components/ThemedText'; 
 import { Game, Gift, Setting2, Warning2 } from 'iconsax-react-nativejs';
 
 export default function TabLayout() {
@@ -12,7 +12,7 @@ export default function TabLayout() {
 
   // Capsule container background colors matching the theme depth
   const tabBgColor = themeMode === 'dark' ? '#18181b' : '#ffffff'; 
-  const activeCapsuleColor = '#6366f1'; // Premium purple color from screenshot
+  const activeCapsuleColor = '#9333ea'; // Updated to your requested purple color
   const inactiveTintColor = themeMode === 'dark' ? '#a1a1aa' : '#71717a';
 
   // Dynamic crisp border color to separate the floating bar from content underneath
@@ -25,21 +25,20 @@ export default function TabLayout() {
         tabBarInactiveTintColor: inactiveTintColor, 
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarShowLabel: false, // Standard labels hidden since we are creating custom active pill items
+        tabBarShowLabel: false, 
 
         tabBarStyle: {
           position: 'absolute',
           bottom: Platform.OS === 'ios' ? 30 : 20, 
-          left: 10,
-          right: 10,
+          left: 20, 
+          right: 20,
           height: 56, 
           borderRadius: 100, 
           backgroundColor: tabBgColor,
           paddingBottom: 0,  
           
-          
           // --- FLOATING VISUAL SEPARATION CONFIGS ---
-          borderTopWidth: 1, // Restored and set to 1 to work with custom coloring
+          borderTopWidth: 1, 
           borderWidth: 1,
           borderColor: tabBorderColor,
           borderTopColor: tabBorderColor,
@@ -50,16 +49,16 @@ export default function TabLayout() {
           // iOS Smooth Floating Glow & Shadow Depth
           ...Platform.select({
             ios: {
-              shadowColor: themeMode === 'dark' ? activeCapsuleColor : '#000000',
+              shadowColor: activeCapsuleColor, // Updated to glow with your custom purple theme
               shadowOffset: { width: 0, height: 12 },
-              shadowOpacity: themeMode === 'dark' ? 0.4 : 0.12,
+              shadowOpacity: themeMode === 'dark' ? 0.45 : 0.18, // Adjusted opacity slightly for the new purple look
               shadowRadius: 16,
             },
           }),
         },
         
         tabBarItemStyle: {
-          margin: 7, // Keeps padding proportional inside a thinner bar frame
+          margin: 7, 
           borderRadius: 100,
         },
       }}
@@ -72,12 +71,12 @@ export default function TabLayout() {
             <View 
               style={[
                 focused && { backgroundColor: activeCapsuleColor },
-               { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
+               { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
               ]}
             >
               <Gift variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
               {focused && (
-                <ThemedText className="text-white font-extrabold text-xs tracking-tight">
+                <ThemedText className="text-white font-montBlack text-xs tracking-tight">
                   Get
                 </ThemedText>
               )}
@@ -85,6 +84,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      
       <Tabs.Screen
         name="free"
         options={{
@@ -93,12 +93,12 @@ export default function TabLayout() {
             <View 
               style={[
                 focused && { backgroundColor: activeCapsuleColor },
-               { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
+               { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
               ]}
             >
               <Game variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
               {focused && (
-                <ThemedText className="text-white font-extrabold text-xs tracking-tight">
+                <ThemedText className="text-white font-montBlack text-xs tracking-tight">
                   Free
                 </ThemedText>
               )}
@@ -106,6 +106,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      
       <Tabs.Screen
         name="report"
         options={{
@@ -114,38 +115,25 @@ export default function TabLayout() {
             <View 
               style={[
                 focused && { backgroundColor: activeCapsuleColor },
-               { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
+               { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
               ]}
             >
               <Warning2 variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
               {focused && (
-                <ThemedText className="text-white font-extrabold text-xs tracking-tight">
-                  Report
+                <ThemedText className="text-white font-montBlack text-xs tracking-tight">
+                  Bug
                 </ThemedText>
               )}
             </View>
           ),
         }}
       />
+
+      {/* Hiding Settings screen from the visible layout tab UI entirely */}
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, focused }) => (
-            <View 
-              style={[
-                focused && { backgroundColor: activeCapsuleColor },
-                { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
-              ]}
-            >
-              <Setting2 variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
-              {focused && (
-                <ThemedText className="text-white font-extrabold text-xs tracking-tight">
-                  Config
-                </ThemedText>
-              )}
-            </View>
-          ),
+          href: null, 
         }}
       />
     </Tabs>

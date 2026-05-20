@@ -8,9 +8,16 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
-      colors:{
-        background:"#121212"
-      }
+      colors: {
+        background: "#121212"
+      },
+      // Integrated your custom Montserrat font family strings:
+      fontFamily: {
+        mont: ["Mont-Regular"],
+        montBold: ["Mont-Bold"],
+        montExtra: ["Mont-ExtraBold"],
+        montBlack: ["Mont-Black"],
+      },
     },
   },
   plugins: [],

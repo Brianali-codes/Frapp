@@ -11,7 +11,9 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo-google-fonts/montserrat": "^0.4.2",
     "@expo/vector-icons": "^14.1.0",
+    "@lottiefiles/dotlottie-react": "^0.19.3",
     "@notifee/react-native": "^9.1.8",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
@@ -31,6 +33,7 @@
     "expo-system-ui": "~5.0.8",
     "expo-web-browser": "~14.1.6",
     "iconsax-react-nativejs": "^0.0.8",
+    "lottie-react-native": "7.2.2",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
     "react-dom": "19.0.0",
