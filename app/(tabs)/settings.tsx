@@ -169,7 +169,7 @@ export default function SettingsScreen() {
         <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
           Help keep the servers running and the coffee flowing! A small donation helps us maintain the project and add new features.
         </ThemedText>
-        <Button onPress={() => Linking.openURL('https://ko-fi.com/brianali-codes')} text="Donate on Ko-fi" type="primary" className="font-montBold" />
+        <Button onPress={() => Linking.openURL('https://ko-fi.com/brianalicodes')} text="Donate on Ko-fi" type="primary" className="font-montBold" />
       </View>
 
       {/* SECTION: DATA PROVIDERS */}

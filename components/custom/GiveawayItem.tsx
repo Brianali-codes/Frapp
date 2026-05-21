@@ -13,8 +13,8 @@ export default function GiveawayItem({ giveaway }: { giveaway: Giveaway }) {
 
   const cardBgColor = themeMode === 'dark' ? '#2c2c35' : '#f1f2f6';
 
-  const adaptiveBorderColor = themeMode === 'dark' 
-    ? 'rgba(255, 255, 255, 0.07)' 
+  const adaptiveBorderColor = themeMode === 'dark'
+    ? 'rgba(255, 255, 255, 0.07)'
     : 'rgba(0, 0, 0, 0.07)';
 
   const dividerColor = themeMode === 'dark'
@@ -22,11 +22,11 @@ export default function GiveawayItem({ giveaway }: { giveaway: Giveaway }) {
     : 'rgba(0, 0, 0, 0.06)';
 
   return (
-    <ThemedView 
-      key={giveaway.id} 
-      className="rounded-2xl mb-6 p-4" 
+    <ThemedView
+      key={giveaway.id}
+      className="rounded-2xl mb-6 p-4"
       style={[
-        { 
+        {
           backgroundColor: cardBgColor,
           borderWidth: 1,
           borderColor: adaptiveBorderColor,
@@ -35,11 +35,11 @@ export default function GiveawayItem({ giveaway }: { giveaway: Giveaway }) {
           ios: {
             shadowColor: '#000000',
             shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
-            shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10, 
-            shadowRadius: themeMode === 'dark' ? 10 : 16,     
+            shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10,
+            shadowRadius: themeMode === 'dark' ? 10 : 16,
           },
           android: {
-            elevation: themeMode === 'dark' ? 4 : 5, 
+            elevation: themeMode === 'dark' ? 4 : 5,
           }
         })
       ]}
@@ -63,24 +63,31 @@ export default function GiveawayItem({ giveaway }: { giveaway: Giveaway }) {
         <ThemedText className="font-montBlack text-lg leading-tight tracking-tight mb-1">
           {giveaway.title}
         </ThemedText>
-        
+
         <ThemedText className="text-zinc-500 dark:text-zinc-300 text-sm leading-relaxed mb-3 font-mont" numberOfLines={2}>
           {giveaway.description}
         </ThemedText>
-        
+
         {/* Price & Meta Dashboard Row */}
-        <View 
+        <View
           style={{ borderColor: dividerColor, borderTopWidth: 1, borderBottomWidth: 1 }}
           className="flex-row items-center justify-between py-3 my-1"
         >
           <View>
             <ThemedText className="text-[10px] uppercase font-montBold tracking-widest text-zinc-400 dark:text-zinc-400">Value</ThemedText>
             <View className="flex-row items-center gap-1.5 mt-0.5">
-              <ThemedText className="text-zinc-400 dark:text-zinc-400 text-xs font-montBold line-through">
+              <ThemedText
+                style={{ color: '#ef4444' }}
+                className="text-xs font-montBold line-through"
+              >
                 {giveaway.worth}
               </ThemedText>
-              {/* TARGETED GREEN VALUE LIGHTING */}
-              <ThemedText className="text-green-500 font-montBlack text-base">
+
+              {/* FORCE THE COLOR BYPASSING INLINE THEME CONSTANTS */}
+              <ThemedText
+                style={{ color: '#22c55e' }}
+                className="font-montBlack text-base"
+              >
                 Free
               </ThemedText>
             </View>
@@ -94,13 +101,13 @@ export default function GiveawayItem({ giveaway }: { giveaway: Giveaway }) {
           </View>
         </View>
       </View>
-      
+
       {/* Premium Buttons Container */}
       <View className="flex-row justify-between gap-3">
         <Button
           onPress={() => Linking.openURL(giveaway.open_giveaway_url)}
           className="flex-1 font-montBold"
-          type="dark" 
+          type="dark"
           text="View Details"
         />
         <Button

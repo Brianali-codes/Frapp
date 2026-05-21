@@ -2,21 +2,17 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, View } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
-import { Colors } from '@/constants/Colors';
 import { useCustomTheme } from '@/context/ThemeContext'; 
 import { ThemedText } from '@/components/ThemedText'; 
-import { Game, Gift, Setting2, Warning2 } from 'iconsax-react-nativejs';
+import { Game, Gift, Warning2 } from 'iconsax-react-nativejs';
 
 export default function TabLayout() {
   const { themeMode } = useCustomTheme();
 
-  // Capsule container background colors matching the theme depth
   const tabBgColor = themeMode === 'dark' ? '#18181b' : '#ffffff'; 
-  const activeCapsuleColor = '#9333ea'; // Updated to your requested purple color
+  const activeCapsuleColor = '#9333ea';
   const inactiveTintColor = themeMode === 'dark' ? '#a1a1aa' : '#71717a';
-
-  // Dynamic crisp border color to separate the floating bar from content underneath
-  const tabBorderColor = themeMode === 'dark' ? '#c1c1c9' : '#9d9da3';
+  const tabBorderColor = themeMode === 'dark' ? '#3f3f46' : '#e4e4e7';
 
   return (
     <Tabs
@@ -26,116 +22,74 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarShowLabel: false, 
-
         tabBarStyle: {
           position: 'absolute',
           bottom: Platform.OS === 'ios' ? 30 : 20, 
-          left: 20, 
-          right: 20,
+          // Increased horizontal padding (left/right) makes the bar smaller
+          left: 60, 
+          right: 60,
           height: 56, 
           borderRadius: 100, 
           backgroundColor: tabBgColor,
-          paddingBottom: 0,  
-          
-          // --- FLOATING VISUAL SEPARATION CONFIGS ---
-          borderTopWidth: 1, 
           borderWidth: 1,
           borderColor: tabBorderColor,
-          borderTopColor: tabBorderColor,
-          
-          // Android Floating High-Contrast Depth
           elevation: 20,
-          
-          // iOS Smooth Floating Glow & Shadow Depth
           ...Platform.select({
             ios: {
-              shadowColor: activeCapsuleColor, // Updated to glow with your custom purple theme
+              shadowColor: activeCapsuleColor,
               shadowOffset: { width: 0, height: 12 },
-              shadowOpacity: themeMode === 'dark' ? 0.45 : 0.18, // Adjusted opacity slightly for the new purple look
+              shadowOpacity: 0.18,
               shadowRadius: 16,
             },
           }),
         },
         
         tabBarItemStyle: {
-          margin: 7, 
-          borderRadius: 100,
+          paddingVertical: 8,
         },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Giveaways',
-          tabBarIcon: ({ color, focused }) => (
-            <View 
-              style={[
-                focused && { backgroundColor: activeCapsuleColor },
-               { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
-              ]}
-            >
-              <Gift variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
-              {focused && (
-                <ThemedText className="text-white font-montBlack text-xs tracking-tight">
-                  Get
-                </ThemedText>
-              )}
-            </View>
-          ),
-        }}
-      />
-      
-      <Tabs.Screen
-        name="free"
-        options={{
-          title: 'F2P',
-          tabBarIcon: ({ color, focused }) => (
-            <View 
-              style={[
-                focused && { backgroundColor: activeCapsuleColor },
-               { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
-              ]}
-            >
-              <Game variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
-              {focused && (
-                <ThemedText className="text-white font-montBlack text-xs tracking-tight">
-                  Free
-                </ThemedText>
-              )}
-            </View>
-          ),
-        }}
-      />
-      
-      <Tabs.Screen
-        name="report"
-        options={{
-          title: 'Report bug',
-          tabBarIcon: ({ color, focused }) => (
-            <View 
-              style={[
-                focused && { backgroundColor: activeCapsuleColor },
-               { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 }
-              ]}
-            >
-              <Warning2 variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
-              {focused && (
-                <ThemedText className="text-white font-montBlack text-xs tracking-tight">
-                  Bug
-                </ThemedText>
-              )}
-            </View>
-          ),
-        }}
-      />
-
-      {/* Hiding Settings screen from the visible layout tab UI entirely */}
-      <Tabs.Screen
-        name="settings"
-        options={{
-          href: null, 
-        }}
-      />
+      {[
+        { name: 'index', title: 'Get', icon: Gift },
+        { name: 'free', title: 'Free', icon: Game },
+        { name: 'report', title: 'Bug', icon: Warning2 },
+      ].map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <View 
+                style={[
+                  { 
+                    paddingHorizontal: focused ? 14 : 0, // Text only appears when focused
+                    paddingVertical: 8, 
+                    borderRadius: 100, 
+                    flexDirection: 'row', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: 6,
+                    backgroundColor: focused ? activeCapsuleColor : 'transparent',
+                    // Force a minWidth to keep it from collapsing
+                    minWidth: focused ? 70 : 40,
+                  }
+                ]}
+              >
+                <tab.icon variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
+                {focused && (
+                  <ThemedText 
+                    className="text-white font-montBlack text-xs tracking-tight"
+                    numberOfLines={1} // Prevents text wrapping
+                  >
+                    {tab.title}
+                  </ThemedText>
+                )}
+              </View>
+            ),
+          }}
+        />
+      ))}
+      <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );
 }

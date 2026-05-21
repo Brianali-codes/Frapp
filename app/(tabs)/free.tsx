@@ -4,9 +4,9 @@ import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
 import { ThemedText } from '@/components/ThemedText';
 import { API_ENDPOINTS } from '@/constants/api';
 import { FreeGiveaway } from '@/types';
-import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, View, Pressable, Image, Platform } from 'react-native';
-import { Setting, Moon, Sun1 } from 'iconsax-react-nativejs'; 
+import React, { useEffect, useState, useRef } from 'react';
+import { ScrollView, View, Pressable, Image, Platform } from 'react-native';
+import { Setting, Moon, Sun1, WifiSquare } from 'iconsax-react-nativejs'; 
 import { useRouter } from 'expo-router';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -14,7 +14,9 @@ import { useCustomTheme } from '@/context/ThemeContext';
 
 export default function FreeScreen() {
   const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null); // Anchor point for automated viewport snapping
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<FreeGiveaway[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -23,30 +25,30 @@ export default function FreeScreen() {
   const textColor = useThemeColor({}, 'text');
   const { themeMode, toggleTheme } = useCustomTheme();
 
-  // Unified color layout:
-  // Light mode uses a sleek cool-grey (#f1f2f6) against pure white.
-  // Dark mode uses a lighter slate-zinc layer (#2c2c35) to clearly float off pure dark backgrounds.
-  const cardBgColor = themeMode === 'dark' ? '#2c2c35' : '#f1f2f6';
+  const isDark = themeMode === 'dark';
+  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
+  
+  const adaptiveBorderColor = isDark ? '#FFFFFF' : '#000000';
 
-  // Tweaked border profiles to lock down the new light/dark frame depths perfectly
-  const adaptiveBorderColor = themeMode === 'dark'
-    ? 'rgba(255, 255, 255, 0.07)'
-    : 'rgba(0, 0, 0, 0.07)';
+  // Calculate dynamic chunk limits for precise 10-item extraction windows
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPagedGiveaways = giveaways.slice(startIndex, endIndex);
 
   const fetchData = async () => {
+    setIsLoading(true);
+    setHasError(false);
     try {
       const response = await fetch(API_ENDPOINTS.Games);
+      if (!response.ok) throw new Error('Server returned invalid status payload');
+      
       const finalData: FreeGiveaway[] = await response.json();
       setGiveaways(finalData);
-      setIsLoading(false);
-
-      if (finalData.length > 0) {
-        Alert.alert('Game Available', `A game has been fetched from the API: ${finalData[0].title}`);
-      }
     } catch (error) {
       console.error('Error fetching data:', error);
+      setHasError(true);
+    } finally {
       setIsLoading(false);
-      Alert.alert('Unable to fetch games. Check your connection or relaunch the app.');
     }
   };
 
@@ -54,21 +56,34 @@ export default function FreeScreen() {
     fetchData();
   }, []);
 
-  const loadMoreItems = () => {
-    setCurrentPage(prevPage => prevPage + 1);
+  const handleNextPage = () => {
+    setCurrentPage(prev => prev + 1);
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
+  const now = new Date();
+  const day = now.getDate();
+  const year = now.getFullYear();
+  const monthName = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ][now.getMonth()];
 
   return (
     <ScrollView
+      ref={scrollRef}
       className='flex-1 px-4 pt-10 pb-2'
       style={{ backgroundColor }}
-      contentContainerStyle={{ paddingBottom: 100 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
       {/* --- MATCHING BRAND HEADER ROW --- */}
       <View className="flex-row items-center justify-between w-full mb-6">
-
-        {/* Left Side: Fixed Asset Logo and Title */}
         <View className="flex-row items-center gap-3">
           <View
             style={{ backgroundColor: '#9333ea' }}
@@ -80,33 +95,30 @@ export default function FreeScreen() {
               resizeMode="cover"
             />
           </View>
-
-          {/* Integrated Montserrat Black for header cohesion */}
           <ThemedText className="text-xl font-montBlack tracking-tight">
             Free Games.
           </ThemedText>
         </View>
 
-        {/* Right Side: Circular Utility Actions Group */}
         <View className="flex-row items-center gap-2.5">
           <Pressable
             onPress={() => router.push('/(tabs)/settings')}
-            style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
+            style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
           >
             <Setting
               size="22"
-              color={themeMode === 'dark' ? '#f4f4f5' : '#3f3f46'}
+              color={isDark ? '#f4f4f5' : '#3f3f46'}
               variant="Broken"
             />
           </Pressable>
 
           <Pressable
             onPress={toggleTheme}
-            style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
+            style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
           >
-            {themeMode === 'dark' ? (
+            {isDark ? (
               <Sun1 size="22" color="#f4f4f5" variant="Broken" />
             ) : (
               <Moon size="22" color="#3f3f46" variant="Broken" />
@@ -116,8 +128,8 @@ export default function FreeScreen() {
       </View>
       {/* --- END OF BRAND HEADER ROW --- */}
 
-      {/* Summary Section with exact matching lighter dark mode configurations */}
-      {!isLoading && (
+      {/* Summary Section Container */}
+      {!isLoading && !hasError && giveaways.length > 0 && (
         <View
           style={[
             {
@@ -128,48 +140,110 @@ export default function FreeScreen() {
             Platform.select({
               ios: {
                 shadowColor: '#000000',
-                shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
-                shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10,
-                shadowRadius: themeMode === 'dark' ? 10 : 16,
+                shadowOffset: { width: 0, height: isDark ? 4 : 8 },
+                shadowOpacity: isDark ? 0.35 : 0.10,
+                shadowRadius: isDark ? 10 : 16,
               },
               android: {
-                elevation: themeMode === 'dark' ? 4 : 5,
+                elevation: isDark ? 4 : 5,
               }
             })
           ]}
           className="rounded-2xl p-4 mb-6"
         >
-          {/* Re-aligned typography stack using Montserrat helper weights */}
+          {/* FIXED: Explicit Hex Colors assigned directly bypass parent string inheritance layout overrides */}
           <ThemedText className="font-mont text-sm leading-6 opacity-90">
             We discovered{' '}
-            <ThemedText className="text-purple-500 font-montBlack">{giveaways.length}</ThemedText> fully free-to-play games available as of{' '}
-            <ThemedText className="text-zinc-800 dark:text-zinc-200 font-montBold">
-              {new Date().getDate()} {[
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
-              ][new Date().getMonth()]} {new Date().getFullYear()}
+            <ThemedText style={{ color: 'green' }} className="font-montBlack">{giveaways.length}</ThemedText> fully free-to-play games available as of{' '}
+            <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">
+              {day} {monthName} {year}
             </ThemedText>. Tap any title to jump straight into the action!
           </ThemedText>
         </View>
       )}
 
-      {/* List Layout Component Stack */}
-      <GiveawaySkeleton loading={isLoading}>
-        {giveaways
-          .slice(0, currentPage * itemsPerPage)
-          .map(giveaway => (
+      {/* Primary Context Layer: Error Architecture vs Data Mapping */}
+      {hasError ? (
+        <View
+          style={[
+            {
+              backgroundColor: cardBgColor,
+              borderWidth: 1,
+              borderColor: adaptiveBorderColor,
+            },
+            Platform.select({
+              ios: {
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: isDark ? 0.30 : 0.08,
+                shadowRadius: 12,
+              },
+              android: {
+                elevation: 4,
+              }
+            })
+          ]}
+          className="rounded-3xl p-6 items-center justify-center my-6"
+        >
+          <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
+            <WifiSquare size="36" color="#9333ea" variant="Broken" />
+          </View>
+
+          <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
+            Connection Interrupted
+          </ThemedText>
+          
+          <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
+            We can't sync up with the servers right now. Make sure your device is online and let's try that again.
+          </ThemedText>
+
+          <Button
+            type="primary"
+            loading={isLoading}
+            onPress={fetchData}
+            className="w-full"
+            text="Retry Connection"
+          />
+        </View>
+      ) : isLoading ? (
+        // FIXED: Empty fragment children passed to satisfy typescript required props guidelines
+        <GiveawaySkeleton loading={true}>
+          <></>
+        </GiveawaySkeleton>
+      ) : (
+        // FIXED: Maps dynamic page chunks cleanly outside skeleton structures to prevent height stacking
+        <View className="w-full">
+          {currentPagedGiveaways.map(giveaway => (
             <FreeGiveawayItem key={giveaway.id} giveaway={giveaway} />
           ))}
-      </GiveawaySkeleton>
+        </View>
+      )}
 
-      {/* Paginated Footer Trigger */}
-      {!isLoading && currentPage * itemsPerPage < giveaways.length && (
-        <Button
-          type="outline"
-          onPress={loadMoreItems}
-          className="mt-2 w-full font-montBold"
-          text="Load More Games"
-        />
+      {/* Dual Action Pagination Footer Toolbar */}
+      {!isLoading && !hasError && (
+        <View className="flex-row items-center gap-3 mt-4 w-full">
+          {currentPage > 1 && (
+            <View className="flex-1">
+              <Button
+                type="outline"
+                onPress={handlePrevPage}
+                className="w-full font-montBold"
+                text="Previous"
+              />
+            </View>
+          )}
+          
+          {endIndex < giveaways.length && (
+            <View className="flex-1">
+              <Button
+                type="outline"
+                onPress={handleNextPage}
+                className="w-full font-montBold"
+                text="Next Games"
+              />
+            </View>
+          )}
+        </View>
       )}
     </ScrollView>
   );

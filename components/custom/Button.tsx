@@ -39,7 +39,7 @@ export default function Button(props: ButtonProps) {
     const { themeMode } = useCustomTheme();
 
     const isDark = themeMode === 'dark';
-    
+
     // Exact color layering architecture from your giveaway/report cards
     const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
     const shadowColor = isDark ? '#000000' : 'rgba(147, 51, 234, 0.15)';
@@ -51,7 +51,7 @@ export default function Button(props: ButtonProps) {
             className={cn(
                 // Maxed out rounding profiles for a smooth fluid pill shape
                 'rounded-full justify-center items-center h-[48px] px-6 flex-row gap-2.5',
-                
+
                 // Primary accents stay vibrant brand tones
                 (type === 'primary') ? 'bg-purple-600 dark:bg-purple-700' : null,
                 (type === 'destructive') ? 'bg-red-500 dark:bg-red-600' : null,
@@ -59,21 +59,21 @@ export default function Button(props: ButtonProps) {
                 // Muted & Dark variants now share your perfectly balanced floating card depths
                 (type === 'muted' || type === 'dark') ? 'border' : null,
                 (type === 'outline') ? 'bg-transparent border-2' : null,
-                
+
                 // Lock down interaction opacities safely
                 (disabled || loading) ? 'opacity-50' : null,
                 className
             )}
             style={({ pressed }) => [
                 style as ViewStyle,
-                
+
                 // Dynamic inline style injection to precisely target the card layering color spaces
                 (type === 'muted' || type === 'dark') && {
                     backgroundColor: cardBgColor,
                     borderColor: isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.07)'
                 },
                 type === 'outline' && { borderColor: textColor },
-                
+
                 // Micro haptic scale feedback curves
                 !disabled && !loading && Platform.select({
                     ios: {
@@ -92,14 +92,15 @@ export default function Button(props: ButtonProps) {
             {...rest}
         >
             {loading ? (
-                <ActivityIndicator 
-                    size="small" 
-                    color={type === 'primary' || type === 'destructive' ? '#ffffff' : textColor} 
+                <ActivityIndicator
+                    size="small"
+                    color={type === 'primary' || type === 'destructive' ? '#ffffff' : textColor}
                 />
             ) : text ? (
                 <ThemedText
                     className={cn(
-                        "font-extrabold text-sm tracking-tight",
+                        // REPLACE 'font-extrabold' with your custom Montserrat class
+                        "font-montBlack text-sm tracking-tight",
                         type === 'primary' || type === 'destructive' ? 'text-white' : null,
                         type === 'dark' ? 'text-zinc-900 dark:text-zinc-100' : null,
                         type === 'muted' ? 'text-zinc-500 dark:text-zinc-400' : null

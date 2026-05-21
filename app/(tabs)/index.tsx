@@ -1,20 +1,22 @@
 import Button from '@/components/custom/Button';
 import GiveawayItem from '@/components/custom/GiveawayItem';
-import { Setting, Moon, Sun1 } from 'iconsax-react-nativejs';
+import { Setting, Moon, Sun1, WifiSquare } from 'iconsax-react-nativejs';
 import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
 import { ThemedText } from '@/components/ThemedText';
 import { API_ENDPOINTS } from '@/constants/api';
 import { checkNotificationPermission } from '@/lib/notifications';
 import { Giveaway } from '@/types';
-import { useEffect, useState } from 'react';
-import { Alert, ScrollView, View, Pressable, Image, Platform } from 'react-native';
+import { useEffect, useState, useRef } from 'react';
+import { ScrollView, View, Pressable, Image, Platform } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { useRouter } from 'expo-router';
 
 export default function GiveawayScreen() {
   const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null); // Anchor point for automated viewport snapping
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -27,47 +29,58 @@ export default function GiveawayScreen() {
 
   const { themeMode, toggleTheme } = useCustomTheme();
 
-  // Unified color layout:
-  // Light mode uses a sleek cool-grey (#f1f2f6) against pure white.
-  // Dark mode uses a lighter slate-zinc layer (#2c2c35) to clearly float off pure dark backgrounds.
-  const cardBgColor = themeMode === 'dark' ? '#2c2c35' : '#f1f2f6';
+  const isDark = themeMode === 'dark';
+  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
+  const adaptiveBorderColor = isDark ? '#FFFFFF' : '#000000';
 
-  // Tweaked border profiles to lock down the new light/dark frame depths perfectly
-  const adaptiveBorderColor = themeMode === 'dark'
-    ? 'rgba(255, 255, 255, 0.07)'
-    : 'rgba(0, 0, 0, 0.07)';
+  // Calculate dynamic chunk limits for precise 10-item extraction windows
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPagedGiveaways = giveaways.slice(startIndex, endIndex);
 
   const checkWorth = async () => {
     try {
       const worthResponse = await fetch(API_ENDPOINTS.Worth);
+      if (!worthResponse.ok) throw new Error();
       const worthRes = await worthResponse.json();
       setPrices(worthRes.active_giveaways_number);
       setWorth(worthRes.worth_estimation_usd);
-    } catch {
-      Alert.alert("Couldn't fetch prices");
+    } catch (error) {
+      console.error("Couldn't fetch prices:", error);
     }
   };
 
   const fetchData = async () => {
+    setIsLoading(true);
+    setHasError(false);
     try {
       const response = await fetch(API_ENDPOINTS.Giveaways);
+      if (!response.ok) throw new Error('Server returned invalid status payload');
+
       const finalData: Giveaway[] = await response.json();
       setGiveaways(finalData);
+      await checkWorth();
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setHasError(true);
+    } finally {
       setIsLoading(false);
-    } catch {
-      setIsLoading(false);
-      Alert.alert('Unable to fetch giveaways. Check your connection or relaunch the app.');
     }
   };
 
   useEffect(() => {
     fetchData();
     checkNotificationPermission();
-    checkWorth();
   }, []);
 
-  const loadMoreItems = () => {
-    setCurrentPage(prevPage => prevPage + 1);
+  const handleNextPage = () => {
+    setCurrentPage(prev => prev + 1);
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
 
   const now = new Date();
@@ -80,15 +93,14 @@ export default function GiveawayScreen() {
 
   return (
     <ScrollView
-      className='flex-1 px-4 pt-10 pb-2 mb-20'
+      ref={scrollRef}
+      className='flex-1 px-4 pt-10 pb-2'
       style={{ backgroundColor }}
-      contentContainerStyle={{ paddingBottom: 24 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
       {/* --- PREMIUM BRAND HEADER ROW --- */}
       <View className="flex-row items-center justify-between w-full mb-6">
-
-        {/* Left Side: Brand Logo with Asset Image and Title */}
         <View className="flex-row items-center gap-3">
           <View
             style={{ backgroundColor: '#9333ea' }}
@@ -101,32 +113,30 @@ export default function GiveawayScreen() {
             />
           </View>
 
-          {/* Integrated Montserrat Black for a solid clean geometric header */}
           <ThemedText className="text-xl font-montBlack tracking-tight">
             Free to Redeem.
           </ThemedText>
         </View>
 
-        {/* Right Side: Circular Utility Actions Group */}
         <View className="flex-row items-center gap-2.5">
           <Pressable
             onPress={() => router.push('/(tabs)/settings')}
-            style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
+            style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
           >
             <Setting
               size="22"
-              color={themeMode === 'dark' ? '#f4f4f5' : '#3f3f46'}
+              color={isDark ? '#f4f4f5' : '#3f3f46'}
               variant="Broken"
             />
           </Pressable>
 
           <Pressable
             onPress={toggleTheme}
-            style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
+            style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
           >
-            {themeMode === 'dark' ? (
+            {isDark ? (
               <Sun1 size="22" color="#f4f4f5" variant="Broken" />
             ) : (
               <Moon size="22" color="#3f3f46" variant="Broken" />
@@ -134,10 +144,9 @@ export default function GiveawayScreen() {
           </Pressable>
         </View>
       </View>
-      {/* --- END OF BRAND HEADER ROW --- */}
 
-      {/* Summary Section with dynamic Montserrat mappings */}
-      {!isLoading && (
+      {/* Summary Section Container */}
+      {!isLoading && !hasError && giveaways.length > 0 && (
         <View
           style={[
             {
@@ -148,12 +157,12 @@ export default function GiveawayScreen() {
             Platform.select({
               ios: {
                 shadowColor: '#000000',
-                shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
-                shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10,
-                shadowRadius: themeMode === 'dark' ? 10 : 16,
+                shadowOffset: { width: 0, height: isDark ? 4 : 8 },
+                shadowOpacity: isDark ? 0.35 : 0.10,
+                shadowRadius: isDark ? 10 : 16,
               },
               android: {
-                elevation: themeMode === 'dark' ? 4 : 5,
+                elevation: isDark ? 4 : 5,
               }
             })
           ]}
@@ -161,30 +170,94 @@ export default function GiveawayScreen() {
         >
           <ThemedText className="font-mont text-sm leading-relaxed opacity-90">
             We have found{' '}
-            <ThemedText className="text-green-500 font-montBlack">{prices}</ThemedText> video game giveaways as of{' '}
-            <ThemedText className="text-purple-500 font-montBold">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
-            <ThemedText className="text-green-500 font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
+            <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{prices}</ThemedText> video game giveaways as of{' '}
+            <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
+            <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
           </ThemedText>
         </View>
       )}
 
-      {/* Skeleton / Giveaways List */}
-      <GiveawaySkeleton loading={isLoading}>
-        {giveaways
-          .slice(0, currentPage * itemsPerPage)
-          .map(giveaway => (
+      {/* Primary Context Layer: Error Architecture vs Data Mapping */}
+      {hasError ? (
+        <View
+          style={[
+            {
+              backgroundColor: cardBgColor,
+              borderWidth: 1,
+              borderColor: adaptiveBorderColor,
+            },
+            Platform.select({
+              ios: {
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: isDark ? 0.30 : 0.08,
+                shadowRadius: 12,
+              },
+              android: {
+                elevation: 4,
+              }
+            })
+          ]}
+          className="rounded-3xl p-6 items-center justify-center my-6"
+        >
+          <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
+            <WifiSquare size="36" color="#9333ea" variant="Broken" />
+          </View>
+
+          <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
+            Connection Interrupted
+          </ThemedText>
+
+          <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
+            We can't sync up with the servers right now. Make sure your device is online and let's try that again.
+          </ThemedText>
+
+          <Button
+            type="primary"
+            loading={isLoading}
+            onPress={fetchData}
+            className="w-full"
+            text="Retry Connection"
+          />
+        </View>
+      ) : isLoading ? (
+        <GiveawaySkeleton loading={true}>
+          <></>
+        </GiveawaySkeleton>
+      ) : (
+        <View className="w-full">
+          {currentPagedGiveaways.map(giveaway => (
             <GiveawayItem key={giveaway.id} giveaway={giveaway} />
           ))}
-      </GiveawaySkeleton>
+        </View>
+      )}
 
-      {/* Load More */}
-      {!isLoading && currentPage * itemsPerPage < giveaways.length && (
-        <Button
-          type="outline"
-          onPress={loadMoreItems}
-          className="mt-2 w-full font-montBold" // Added font class support reference
-          text="Load More Giveaways"
-        />
+      {/* Dual Action Pagination Footer Toolbar */}
+      {!isLoading && !hasError && (
+        <View className="flex-row items-center gap-3 mt-4 w-full">
+          {currentPage > 1 && (
+            <View className="flex-1">
+              <Button
+                type="outline"
+                onPress={handlePrevPage}
+                className="w-full font-montBold"
+                text="Previous"
+              />
+            </View>
+          )}
+          
+          {endIndex < giveaways.length && (
+            <View className="flex-1 mb-10">
+              <Button
+                type="outline"
+                onPress={handleNextPage}
+                className="w-full font-montBold"
+                text="Next Games"
+                
+              />
+            </View>
+          )}
+        </View>
       )}
     </ScrollView>
   );

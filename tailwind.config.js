@@ -14,7 +14,7 @@ module.exports = {
       // Integrated your custom Montserrat font family strings:
       fontFamily: {
         mont: ["Mont-Regular"],
-        montBold: ["Mont-Bold"],
+        montBold: ["Mont-Regular"],
         montExtra: ["Mont-ExtraBold"],
         montBlack: ["Mont-Black"],
       },
