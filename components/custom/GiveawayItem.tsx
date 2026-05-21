@@ -83,7 +83,6 @@ export default function GiveawayItem({ giveaway }: { giveaway: Giveaway }) {
                 {giveaway.worth}
               </ThemedText>
 
-              {/* FORCE THE COLOR BYPASSING INLINE THEME CONSTANTS */}
               <ThemedText
                 style={{ color: '#22c55e' }}
                 className="font-montBlack text-base"

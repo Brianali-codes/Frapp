@@ -9,10 +9,10 @@ import { Game, Gift, Warning2 } from 'iconsax-react-nativejs';
 export default function TabLayout() {
   const { themeMode } = useCustomTheme();
 
-  const tabBgColor = themeMode === 'dark' ? '#18181b' : '#ffffff'; 
+  const tabBgColor = themeMode === 'dark' ? '#2f2f36' : '#ede6e6'; 
   const activeCapsuleColor = '#9333ea';
   const inactiveTintColor = themeMode === 'dark' ? '#a1a1aa' : '#71717a';
-  const tabBorderColor = themeMode === 'dark' ? '#3f3f46' : '#e4e4e7';
+  const tabBorderColor = themeMode === 'dark' ? '#a3a3b5' : '#3c3c40';
 
   return (
     <Tabs
@@ -25,15 +25,24 @@ export default function TabLayout() {
         tabBarStyle: {
           position: 'absolute',
           bottom: Platform.OS === 'ios' ? 30 : 20, 
-          // Increased horizontal padding (left/right) makes the bar smaller
-          left: 60, 
-          right: 60,
+          
+          // FIX: Explicitly limits container width and centers it via midpoint transform offsets
+          width: 280,
+          left: '50%',
+          transform: [{ translateX: -140 }], 
+          
           height: 56, 
           borderRadius: 100, 
           backgroundColor: tabBgColor,
           borderWidth: 1,
           borderColor: tabBorderColor,
           elevation: 20,
+          
+          // Clean alignment rules inside the newly fixed 280px bounding container
+          flexDirection: 'row',
+          justifyContent: 'space-around', 
+          alignItems: 'center',
+          
           ...Platform.select({
             ios: {
               shadowColor: activeCapsuleColor,
@@ -45,7 +54,9 @@ export default function TabLayout() {
         },
         
         tabBarItemStyle: {
-          paddingVertical: 8,
+          height: 56,
+          justifyContent: 'center',
+          alignItems: 'center',
         },
       }}
     >
@@ -62,7 +73,7 @@ export default function TabLayout() {
               <View 
                 style={[
                   { 
-                    paddingHorizontal: focused ? 14 : 0, // Text only appears when focused
+                    paddingHorizontal: focused ? 14 : 0, 
                     paddingVertical: 8, 
                     borderRadius: 100, 
                     flexDirection: 'row', 
@@ -70,16 +81,16 @@ export default function TabLayout() {
                     justifyContent: 'center', 
                     gap: 6,
                     backgroundColor: focused ? activeCapsuleColor : 'transparent',
-                    // Force a minWidth to keep it from collapsing
-                    minWidth: focused ? 70 : 40,
+                    minWidth: focused ? 75 : 40,
                   }
                 ]}
               >
                 <tab.icon variant={focused ? 'Bold' : 'Broken'} color={focused ? '#ffffff' : color} size={22} />
                 {focused && (
                   <ThemedText 
-                    className="text-white font-montBlack text-xs tracking-tight"
-                    numberOfLines={1} // Prevents text wrapping
+                    style={{ color: '#ffffff' }} 
+                    className="font-montBlack text-xs tracking-tight"
+                    numberOfLines={1} 
                   >
                     {tab.title}
                   </ThemedText>
