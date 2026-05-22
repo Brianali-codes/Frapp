@@ -31,7 +31,7 @@ export default function GiveawayScreen() {
 
   const isDark = themeMode === 'dark';
   const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
-  const adaptiveBorderColor = isDark ? '#FFFFFF' : '#000000';
+  const adaptiveBorderColor = isDark ? '#a3a3b5' : '#3c3c40';
 
   // Calculate dynamic chunk limits for precise 10-item extraction windows
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -236,7 +236,7 @@ export default function GiveawayScreen() {
       {!isLoading && !hasError && (
         <View className="flex-row items-center gap-3 mt-4 w-full">
           {currentPage > 1 && (
-            <View className="flex-1 mb-10">
+            <View className="flex-1 mb-24">
               <Button
                 type="outline"
                 onPress={handlePrevPage}
@@ -247,7 +247,7 @@ export default function GiveawayScreen() {
           )}
           
           {endIndex < giveaways.length && (
-            <View className="flex-1 mb-10">
+            <View className="flex-1 mb-24">
               <Button
                 type="outline"
                 onPress={handleNextPage}

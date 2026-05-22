@@ -223,7 +223,7 @@ export default function FreeScreen() {
       {!isLoading && !hasError && (
         <View className="flex-row items-center gap-3 mt-4 w-full">
           {currentPage > 1 && (
-            <View className="flex-1">
+            <View className="flex-1 mb-24">
               <Button
                 type="outline"
                 onPress={handlePrevPage}
@@ -234,7 +234,7 @@ export default function FreeScreen() {
           )}
           
           {endIndex < giveaways.length && (
-            <View className="flex-1">
+            <View className="flex-1 mb-24">
               <Button
                 type="outline"
                 onPress={handleNextPage}

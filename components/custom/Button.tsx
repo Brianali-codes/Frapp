@@ -43,6 +43,7 @@ export default function Button(props: ButtonProps) {
     // Exact color layering architecture from your giveaway/report cards
     const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
     const shadowColor = isDark ? '#000000' : 'rgba(147, 51, 234, 0.15)';
+    const borderColor = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.07)';
 
     return (
         <Pressable
