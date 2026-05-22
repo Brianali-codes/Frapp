@@ -1,11 +1,15 @@
-const BASE_API_ENDPOINT = "https://api.codetabs.com/v1/proxy?quest=https://www.gamerpower.com/api"
-//This will be: Games: `https://www.gamerpower.com/api"
-export const API_ENDPOINTS = {
-    Worth: `${BASE_API_ENDPOINT}/worth`,
-    Giveaways: `${BASE_API_ENDPOINT}/giveaways`,
-    Games: `https://api.codetabs.com/v1/proxy?quest=https://www.freetogame.com/api/games`,
-    //This will be: Games: `https://www.freetogame.com/api/games`,
+const IS_DEV = __DEV__;
 
-}
-//on release we should remove cors proxy since they only apply when using apis on the web, on a native device the api is free from http problems thus crossing out the need for a cors proxy.
-//we are only using this for debuging and previewing progress
+const GAMERPOWER_BASE = IS_DEV
+  ? 'https://api.codetabs.com/v1/proxy?quest=https://www.gamerpower.com/api'
+  : 'https://www.gamerpower.com/api';
+
+const FREETOGAME_BASE = IS_DEV
+  ? 'https://api.codetabs.com/v1/proxy?quest=https://www.freetogame.com/api'
+  : 'https://www.freetogame.com/api';
+
+export const API_ENDPOINTS = {
+  Worth: `${GAMERPOWER_BASE}/worth`,
+  Giveaways: `${GAMERPOWER_BASE}/giveaways`,
+  Games: `${FREETOGAME_BASE}/games`,
+};

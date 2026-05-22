@@ -6,9 +6,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Image } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import * as SplashScreen from 'expo-splash-screen'; 
+import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
 import "../global.css";
+import { checkNotificationPermission, initNotifications } from '@/lib/notifications';
 import { useAssets } from 'expo-asset'; // Pre-load asset reference
 
 import {
@@ -46,7 +47,7 @@ function RootLayoutContent() {
     async function checkFirstLaunch() {
       try {
         const hasLaunchedBefore = await SecureStore.getItemAsync('frapp_has_launched');
-        
+
         if (hasLaunchedBefore === null) {
           await SecureStore.setItemAsync('frapp_has_launched', 'true');
           setTargetRoute('/onboarding');
@@ -71,10 +72,12 @@ function RootLayoutContent() {
   // 5. Hide native splash ONLY when fonts, storage, AND assets are confirmed ready together
   useEffect(() => {
     const isAppReady = !isCheckingStorage && (fontsLoaded || fontError) && (assets || assetsError);
-    
+
     if (isAppReady && isNavigationReady) {
-      SplashScreen.hideAsync(); 
-      
+      SplashScreen.hideAsync();
+      initNotifications();
+      checkNotificationPermission();
+
       if (targetRoute === '/onboarding') {
         router.replace('/onboarding');
       }
@@ -86,13 +89,13 @@ function RootLayoutContent() {
   if (isCheckingStorage || !fontsLoaded || !assets) {
     return (
       <View className="flex-1 items-center justify-center bg-zinc-950">
-        <Image 
+        <Image
           source={require('@/assets/images/FRAPP_ICON1.png')}
           style={{ width: 96, height: 96, borderRadius: 16 }}
           className="w-24 h-24"
           resizeMode="cover" // Clean crop edges over rounded corners
         />
-        
+
         {/* Rendered at the exact same fraction of a second with no delay */}
         <ActivityIndicator size="small" color="#a855f7" className="mt-8" />
         <StatusBar style="light" />
@@ -107,7 +110,7 @@ function RootLayoutContent() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ headerShown: true }} />
       </Stack>
-      
+
       <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
   );

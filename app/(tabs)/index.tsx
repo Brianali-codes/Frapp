@@ -70,7 +70,6 @@ export default function GiveawayScreen() {
 
   useEffect(() => {
     fetchData();
-    checkNotificationPermission();
   }, []);
 
   const handleNextPage = () => {
