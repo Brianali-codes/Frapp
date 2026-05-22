@@ -1,7 +1,7 @@
 import Button from '@/components/custom/Button';
 import { Divider } from '@/components/custom/Divider';
 import { ThemedText } from '@/components/ThemedText';
-import { APP_REPO_URL, APP_URLS, DEVICE_SETTINGS_URL } from '@/constants/app';
+import { APP_REPO_URL, APP_URLS } from '@/constants/app';
 import React from 'react';
 import { Alert, Linking, View, ScrollView, Pressable, Platform, Image } from 'react-native';
 import { 
@@ -36,13 +36,31 @@ export default function SettingsScreen() {
   const monochromeIconColor = themeMode === 'dark' ? '#ffffff' : '#000000';
   const iconWrapperBg = 'bg-zinc-500/10 dark:bg-zinc-400/10';
 
-  const openNotificationSettings = async () => {
-    try {
-      await Linking.openURL(DEVICE_SETTINGS_URL);
-    } catch (error) {
-      Alert.alert('Error', 'Unable to open settings, please set them manually.');
+const openNotificationSettings = async () => {
+  try {
+    const settingsUrl = Platform.select({
+      ios: 'app-settings:',
+      android: `android.settings.APP_NOTIFICATION_SETTINGS`,
+    });
+
+    if (!settingsUrl) return;
+
+    const canOpen = await Linking.canOpenURL(settingsUrl);
+
+    if (canOpen) {
+      await Linking.openURL(settingsUrl);
+    } else {
+      // Fallback to general device settings if deep link fails
+      await Linking.openSettings();
     }
-  };
+  } catch (error) {
+    Alert.alert(
+      'Unable to Open Settings',
+      'Go to your device Settings → Apps → FRAPP → Notifications to manage alerts.',
+      [{ text: 'Got It' }]
+    );
+  }
+};
 
   return (
     <ScrollView 
