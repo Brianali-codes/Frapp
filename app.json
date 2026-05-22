@@ -20,7 +20,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/FRAPP_ICON1.png",
-        "backgroundColor": "#000000"
+        "monochromeImage": "./assets/images/FRAPP_ICON2.png",
+        "backgroundColor": "#9333ea"
       },
       "package": "com.brianali.Frapp"
     },
@@ -31,7 +32,9 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "@notifee/react-native",
+      "expo-font"
     ],
     "assetBundlePatterns": [
       "**/*"
