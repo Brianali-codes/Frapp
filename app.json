@@ -33,8 +33,17 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "@notifee/react-native",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraMavenRepos": [
+              "../../node_modules/@notifee/react-native/android/libs"
+            ]
+          }
+        }
+      ]
     ],
     "assetBundlePatterns": [
       "**/*"
