@@ -2,8 +2,8 @@ import Button from '@/components/custom/Button';
 import { Divider } from '@/components/custom/Divider';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_REPO_URL, APP_URLS } from '@/constants/app';
-import React, { useState } from 'react';
-import { Linking, View, ScrollView, Pressable, Platform, Image, Modal } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Linking, View, ScrollView, Pressable, Platform, Image, Modal, Switch } from 'react-native';
 import { 
   Setting, 
   Moon, 
@@ -18,17 +18,26 @@ import {
   CloseCircle
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
+import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
 
 // Import custom theme hooks
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
+
+// Import notification controllers
+import { checkNotificationPermission } from '@/lib/notifications';
 
 const CURRENT_VERSION = 'v1.1.0';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   
+  // --- TRACKING FOR EASTER EGG TRIPLE TAP ---
+  const tapCountRef = useRef(0);
+  const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // --- STATE FOR DYNAMIC CUSTOM MODAL ---
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState<{
@@ -49,9 +58,89 @@ export default function SettingsScreen() {
   const monochromeIconColor = isDark ? '#ffffff' : '#000000';
   const iconWrapperBg = 'bg-zinc-500/10 dark:bg-zinc-400/10';
 
-  // Strips prefixes like "Frappv" or "v" to safely parse pure numbers (e.g. "1.1.0")
+  // Synchronize internal state toggle switches with system notification authorization states
+  useEffect(() => {
+    async function getInitialPermissionState() {
+      const settings = await notifee.getNotificationSettings();
+      const isGranted = 
+        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+      setNotificationsEnabled(isGranted);
+    }
+    getInitialPermissionState();
+
+    // Cleanup tap timeout on unmount
+    return () => {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    };
+  }, []);
+
   const cleanVersion = (versionStr: string) => {
     return versionStr.replace(/[^0-9.]/g, '');
+  };
+
+  const handleNotificationToggle = async (newValue: boolean) => {
+    if (newValue) {
+      await checkNotificationPermission();
+      const settings = await notifee.getNotificationSettings();
+      setNotificationsEnabled(
+        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
+      );
+    } else {
+      await notifee.cancelAllNotifications();
+      setNotificationsEnabled(false);
+    }
+  };
+
+  // --- LOCAL NOTIFICATION TEST TRIGGER ---
+  const triggerTestNotification = async () => {
+    try {
+      await notifee.requestPermission();
+
+      const channelId = await notifee.createChannel({
+        id: 'frapp-test-channel',
+        name: 'FRAPP Radar Updates',
+        importance: AndroidImportance.HIGH,
+      });
+
+      await notifee.displayNotification({
+        title: '🎯 FRAPP Radar Active',
+        body: 'Local notification pipeline responding. System verification test passed!',
+        android: {
+          channelId,
+          importance: AndroidImportance.HIGH,
+          pressAction: { id: 'default' },
+        },
+      });
+    } catch (error) {
+      setModalConfig({
+        title: 'Test Trigger Failed',
+        message: 'Could not execute instantaneous payload render. Confirm local application target permissions.',
+        type: 'error',
+        actionText: 'Dismiss',
+        onAction: () => setModalVisible(false)
+      });
+      setModalVisible(true);
+    }
+  };
+
+  // --- EASTER EGG INTERACTION HANDLER ---
+  const handleSettingsCogTap = () => {
+    tapCountRef.current += 1;
+
+    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+
+    if (tapCountRef.current === 3) {
+      // Secret combo unlocked! Run the test notification
+      triggerTestNotification();
+      tapCountRef.current = 0;
+    } else {
+      // Reset the tap counter if the user delays between clicks (1000ms threshold)
+      tapTimeoutRef.current = setTimeout(() => {
+        tapCountRef.current = 0;
+      }, 1000);
+    }
   };
 
   const handleCheckVersion = async () => {
@@ -61,14 +150,14 @@ export default function SettingsScreen() {
       if (!response.ok) throw new Error();
       
       const data = await response.json();
-      const rawLatestVersion = data.tag_name; // This captures whatever label string GitHub sends back
+      const rawLatestVersion = data.tag_name;
 
       const localClean = cleanVersion(CURRENT_VERSION);
       const remoteClean = cleanVersion(rawLatestVersion);
 
       if (remoteClean && remoteClean !== localClean) {
         setModalConfig({
-          title: 'Update Available! 🎉',
+          title: 'Update Available! ',
           message: `A newer build version (${rawLatestVersion}) is out. Upgrade from your current version (${CURRENT_VERSION}) to get access to all the latest optimization patches!`,
           type: 'update',
           actionText: 'Update Now',
@@ -95,32 +184,6 @@ export default function SettingsScreen() {
       setModalVisible(true);
     } finally {
       setIsCheckingUpdate(false);
-    }
-  };
-
-  const openNotificationSettings = async () => {
-    try {
-      const settingsUrl = Platform.select({
-        ios: 'app-settings:',
-        android: `android.settings.APP_NOTIFICATION_SETTINGS`,
-      });
-
-      if (!settingsUrl) return;
-      const canOpen = await Linking.canOpenURL(settingsUrl);
-      if (canOpen) {
-        await Linking.openURL(settingsUrl);
-      } else {
-        await Linking.openSettings();
-      }
-    } catch (error) {
-      setModalConfig({
-        title: 'Unable to Open Settings',
-        message: 'Go to your device Settings → Apps → FRAPP → Notifications to manage alerts.',
-        type: 'error',
-        actionText: 'Got It',
-        onAction: () => setModalVisible(false)
-      });
-      setModalVisible(true);
     }
   };
 
@@ -151,12 +214,14 @@ export default function SettingsScreen() {
           </View>
 
           <View className="flex-row items-center gap-2.5">
-            <View 
+            {/* Hidden Easter Egg: Triple-tap this icon rapidly to trigger the push test */}
+            <Pressable 
+              onPress={handleSettingsCogTap}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-10 h-10 rounded-full items-center justify-center shadow-sm"
+              className="w-10 h-10 rounded-full items-center justify-center shadow-sm active:opacity-70"
             >
               <Setting size="22" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
-            </View>
+            </Pressable>
 
             <Pressable 
               onPress={toggleTheme}
@@ -200,18 +265,26 @@ export default function SettingsScreen() {
           
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
           
-          <Pressable onPress={openNotificationSettings} className="flex-row items-center justify-between p-3 active:opacity-60">
-            <View className="flex-row items-center gap-3">
+          {/* DYNAMIC TIMING ALERTS INTERACTION ROW */}
+          <View className="flex-row items-center justify-between p-3">
+            <View className="flex-row items-center gap-3 flex-1 pr-4">
               <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
                 <Notification size="18" color={monochromeIconColor} variant="Broken" />
               </View>
-              <View>
-                <ThemedText className="font-montBold text-sm">Notifications</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Toggle live alerts for new games</ThemedText>
+              <View className="flex-1">
+                <ThemedText className="font-montBold text-sm">Automated Loot Radar</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont" numberOfLines={2}>
+                  Receive multi-window updates (9AM, 1PM, 8PM)
+                </ThemedText>
               </View>
             </View>
-            <ArrowRight2 size="14" color="#a1a1aa" />
-          </Pressable>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={handleNotificationToggle}
+              trackColor={{ false: '#71717a', true: '#a855f7' }}
+              thumbColor={Platform.OS === 'android' ? '#ffffff' : undefined}
+            />
+          </View>
           
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
           

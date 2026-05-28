@@ -6,7 +6,7 @@ import { Giveaway } from '@/types';
 import { Image, Linking, View, Platform, Pressable } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
-import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 
 interface GiveawayItemProps {
   giveaway: Giveaway;
@@ -14,7 +14,6 @@ interface GiveawayItemProps {
 }
 
 export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayItemProps) {
-  const router = useRouter();
   const textColor = useThemeColor({}, 'text');
   const { themeMode } = useCustomTheme();
 
@@ -38,14 +37,27 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
     if (platformStr.toLowerCase().includes('gog')) return 'GOG';
     if (platformStr.toLowerCase().includes('ps') || platformStr.toLowerCase().includes('playstation')) return 'PS';
     
-    // Check if it's a generic PC tag to completely filter it out
     if (platformStr.toLowerCase() === 'pc') return '';
     return platformStr;
   };
 
   const displayPlatform = normalizePlatform(giveaway.platform);
-  const handleNavigateDetails = () => {
-    router.push({ pathname: '/giveaway/[id]', params: { id: giveaway.id } });
+
+  // Reusable utility to safely hook up all trigger points straight to the system's interactive sheet
+  const handleOpenClaimSite = async () => {
+    if (!giveaway.open_giveaway_url) return;
+    try {
+      await WebBrowser.openBrowserAsync(giveaway.open_giveaway_url, {
+        toolbarColor: isDark ? '#2c2c35' : '#f1f2f6',
+        controlsColor: '#9333ea', 
+        secondaryToolbarColor: isDark ? '#1c1c1e' : '#ffffff',
+        enableBarCollapsing: true,
+        showTitle: true,
+      });
+    } catch (error) {
+      console.error('Failed to launch in-app web view layer:', error);
+      Linking.openURL(giveaway.open_giveaway_url);
+    }
   };
 
   // =========================================================================
@@ -70,10 +82,9 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
         ]}
       >
         {/* Left Side: Thumbnail Panel */}
-        <Pressable onPress={handleNavigateDetails} className="relative w-28 h-32 rounded-xl overflow-hidden bg-zinc-800 active:opacity-95">
+        <Pressable onPress={handleOpenClaimSite} className="relative w-28 h-32 rounded-xl overflow-hidden bg-zinc-800 active:opacity-95">
           <Image source={{ uri: giveaway.thumbnail }} className="w-full h-full" resizeMode="cover" />
           
-          {/* Platform Tag Render Guard */}
           {displayPlatform !== '' && (
             <View className="absolute top-1.5 left-1.5 bg-black/75 px-1.5 py-0.5 rounded border border-white/10">
               <ThemedText className="text-white font-montBold text-[8px] tracking-wide">{displayPlatform}</ThemedText>
@@ -89,7 +100,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
 
         {/* Right Side: Meta Data & Fast Actions */}
         <View className="flex-1 justify-between">
-          <Pressable onPress={handleNavigateDetails} className="active:opacity-90">
+          <Pressable onPress={handleOpenClaimSite} className="active:opacity-90">
             <ThemedText numberOfLines={1} className="font-montBlack text-base tracking-tight mb-0.5">
               {giveaway.title}
             </ThemedText>
@@ -114,8 +125,8 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
           </View>
 
           <View className="flex-row items-center gap-2">
-            <Button onPress={handleNavigateDetails} className="h-8 flex-1 font-montBold text-xs" type="dark" text="Details" />
-            <Button onPress={() => Linking.openURL(giveaway.open_giveaway_url)} className="h-8 flex-1 font-montBold text-xs" type="primary" text="Claim" />
+            <Button onPress={handleOpenClaimSite} className="h-8 flex-1 font-montBold text-xs" type="dark" text="Details" />
+            <Button onPress={handleOpenClaimSite} className="h-8 flex-1 font-montBold text-xs" type="primary" text="Claim" />
           </View>
         </View>
       </ThemedView>
@@ -142,10 +153,9 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
         })
       ]}
     >
-      <Pressable onPress={handleNavigateDetails} className="relative w-full h-48 rounded-xl overflow-hidden mb-4 bg-zinc-800 active:opacity-95">
+      <Pressable onPress={handleOpenClaimSite} className="relative w-full h-48 rounded-xl overflow-hidden mb-4 bg-zinc-800 active:opacity-95">
         <Image source={{ uri: giveaway.thumbnail }} className="w-full h-full" resizeMode="cover" />
         
-        {/* Platform Tag Render Guard */}
         {displayPlatform !== '' && (
           <View className="absolute top-3 left-3 bg-black/70 px-2.5 py-1 rounded-md backdrop-blur-md border border-white/10">
             <ThemedText className="text-white font-montBold text-[10px] tracking-wide">{displayPlatform}</ThemedText>
@@ -188,8 +198,8 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
       </View>
 
       <View className="flex-row items-center gap-3">
-        <Button onPress={handleNavigateDetails} className="flex-1 font-montBold" type="dark" text="View Details" />
-        <Button onPress={() => Linking.openURL(giveaway.open_giveaway_url)} className="flex-1 font-montBold" type="primary" text="Claim Now" />
+        <Button onPress={handleOpenClaimSite} className="flex-1 font-montBold" type="dark" text="View Details" />
+        <Button onPress={handleOpenClaimSite} className="flex-1 font-montBold" type="primary" text="Claim Now" />
       </View>
     </ThemedView>
   );

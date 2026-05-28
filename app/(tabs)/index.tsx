@@ -331,7 +331,7 @@ export default function GiveawayScreen() {
           style={[
             {
               position: 'absolute',
-              bottom: 60,
+              bottom: 70,
               right: 20,
               backgroundColor: glassBgColor,
               borderWidth: 1.5,

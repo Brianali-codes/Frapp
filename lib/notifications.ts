@@ -11,7 +11,13 @@ import { API_ENDPOINTS } from '@/constants/api';
 import { Giveaway } from '@/types';
 
 const CHANNEL_ID = 'default';
-const NOTIFICATION_ID = 'daily-giveaway';
+
+// Unique Notification ID hooks for our best target times
+const NOTIFICATION_IDS = {
+  MORNING: 'morning-giveaway',
+  LUNCH: 'lunch-giveaway',
+  EVENING: 'evening-giveaway',
+};
 
 const createChannel = async () => {
   await notifee.createChannel({
@@ -47,25 +53,38 @@ const downloadImage = async (url: string): Promise<string | null> => {
   }
 };
 
-const scheduleDailyNotification = async () => {
-  await notifee.cancelNotification(NOTIFICATION_ID);
+/**
+ * Universal internal timestamp scheduling calculation helper
+ */
+const getNextTriggerTime = (hours: number, minutes: number = 0): Date => {
+  const now = new Date();
+  const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+  
+  // If the targeted time window has already slipped by today, push it to tomorrow
+  if (now >= targetTime) {
+    targetTime.setDate(targetTime.getDate() + 1);
+  }
+  return targetTime;
+};
 
- 
-const now = new Date();
-const todayAt9 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0);
+/**
+ * Schedules a repeated daily notification template for a specific target window
+ */
+const scheduleSpecificNotification = async (
+  notificationId: string, 
+  hours: number, 
+  title: string, 
+  fallbackBody: string,
+  giveaway: Giveaway | null
+) => {
+  await notifee.cancelNotification(notificationId);
 
-const trigger = now < todayAt9
-  ? todayAt9
-  : new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0, 0);
-
-  const giveaway = await fetchLatestGiveaway();
+  const triggerDate = getNextTriggerTime(hours);
 
   const notification: Parameters<typeof notifee.createTriggerNotification>[0] = {
-    id: NOTIFICATION_ID,
-    title: 'Todays Giveaways Are Live!',
-    body: giveaway
-      ? ` ${giveaway.title} is free right now!`
-      : "Today's free game giveaways are live. Don't miss out!",
+    id: notificationId,
+    title: title,
+    body: giveaway ? `${giveaway.title} is free right now!` : fallbackBody,
     android: {
       channelId: CHANNEL_ID,
     },
@@ -85,9 +104,43 @@ const trigger = now < todayAt9
 
   await notifee.createTriggerNotification(notification, {
     type: TriggerType.TIMESTAMP,
-    timestamp: trigger.getTime(),
+    timestamp: triggerDate.getTime(),
     repeatFrequency: RepeatFrequency.DAILY,
   });
+};
+
+/**
+ * Main orchestration function coordinating all optimal scheduling windows
+ */
+const scheduleAllGiveawayTimers = async () => {
+  const giveaway = await fetchLatestGiveaway();
+
+  // 1. Morning Drop Scan (9:00 AM)
+  await scheduleSpecificNotification(
+    NOTIFICATION_IDS.MORNING,
+    9,
+    "Morning Reminder",
+    "Don't miss today's fresh giveaways. Tap to view what's free!",
+    giveaway
+  );
+
+  // 2. Lunch Break Drop (1:00 PM)
+  await scheduleSpecificNotification(
+    NOTIFICATION_IDS.LUNCH,
+    13,
+    "Lunchtime Reminder",
+    "Take a break and stack your library profiles with free items right now.",
+    giveaway
+  );
+
+  // 3. Evening Peak Gaming Hours (8:00 PM)
+  await scheduleSpecificNotification(
+    NOTIFICATION_IDS.EVENING,
+    20,
+    "Evening Reminder",
+    "Claim your evening gaming freebies before limited keys expire.",
+    giveaway
+  );
 };
 
 export const initNotifications = async () => {
@@ -101,7 +154,7 @@ export const checkNotificationPermission = async () => {
     settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
 
   if (granted) {
-    await scheduleDailyNotification();
+    await scheduleAllGiveawayTimers();
   } else {
     Alert.alert(
       'Notifications Disabled',

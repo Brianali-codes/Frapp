@@ -15,38 +15,50 @@ function FloatingTabBar() {
   const { themeMode } = useCustomTheme();
   const pathname = usePathname();
 
-  const tabBgColor = themeMode === 'dark' ? '#2f2f36' : '#ede6e6';
+  const isDark = themeMode === 'dark';
+  
+  // --- NATIVE LIQUID GLASS CONFIGURATION ---
+  // Using explicit alpha channel parameters to let native hardware layers composite transparency
+  const glassBgColor = isDark ? 'rgba(44, 44, 53, 0.75)' : 'rgba(241, 242, 246, 0.75)';
+  const glassBorderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const activeCapsuleColor = '#9333ea';
-  const inactiveTintColor = themeMode === 'dark' ? '#a1a1aa' : '#71717a';
-  const tabBorderColor = themeMode === 'dark' ? '#a3a3b5' : '#3c3c40';
+  const inactiveTintColor = isDark ? '#a1a1aa' : '#71717a';
 
   const screenWidth = Dimensions.get('window').width;
+  const TAB_BAR_WIDTH = 280;
 
   return (
     <View
-      style={{
-        position: 'absolute',
-        bottom: Platform.OS === 'ios' ? 30 : 20,
-        width: 280,
-        left: (screenWidth - 280) / 2,
-        height: 56,
-        borderRadius: 100,
-        backgroundColor: tabBgColor,
-        borderWidth: 1,
-        borderColor: tabBorderColor,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        elevation: 20,
-        ...Platform.select({
+      style={[
+        {
+          position: 'absolute',
+          bottom: Platform.OS === 'ios' ? 30 : 20,
+          width: TAB_BAR_WIDTH,
+          left: (screenWidth - TAB_BAR_WIDTH) / 2,
+          height: 56,
+          borderRadius: 9999,
+          backgroundColor: glassBgColor,
+          borderWidth: 1.5,
+          borderColor: glassBorderColor,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          overflow: 'hidden', // Forces native container bounds clipping
+        },
+        Platform.select({
           ios: {
-            shadowColor: activeCapsuleColor,
-            shadowOffset: { width: 0, height: 12 },
-            shadowOpacity: 0.18,
-            shadowRadius: 16,
+            // Native iOS Sub-Layer Compositing: Triggers core animation hardware blur filtering
+            backdropFilter: 'blur(20px)', 
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: isDark ? 0.40 : 0.15,
+            shadowRadius: 20,
+          },
+          android: {
+            elevation: 8,
           },
         }),
-      }}
+      ]}
     >
       {TABS.map((tab) => {
         const focused = pathname === tab.href || (tab.href === '/' && pathname === '/');
@@ -55,6 +67,7 @@ function FloatingTabBar() {
         return (
           <TouchableOpacity
             key={tab.name}
+            activeOpacity={0.8}
             onPress={() => router.push(tab.href as any)}
             style={{
               paddingHorizontal: focused ? 14 : 0,
