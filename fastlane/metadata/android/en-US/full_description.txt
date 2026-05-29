@@ -1,0 +1,1 @@
+FRAPP (Freebie Radar App) aggregates active video game giveaways and free-to-keep titles into one unified mobile interface. Check active giveaways across major platforms simultaneously, with complete light and dark mode styling. Completely open-source and ad-free.
