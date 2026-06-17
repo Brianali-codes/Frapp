@@ -1,4 +1,3 @@
-import Button from '@/components/custom/Button';
 import { Divider } from '@/components/custom/Divider';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_URLS } from '@/constants/app';
@@ -21,56 +20,109 @@ import { useRouter } from 'expo-router';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 
+// Retaining original button for the final form submission action wrapper
+import Button from '@/components/custom/Button';
+
+// =========================================================================
+// LOCAL THEMED GRID CATEGORY CELL COMPONENT
+// =========================================================================
+interface CategoryGridCellProps {
+  label: string;
+  IconComponent: React.ComponentType<any>;
+  isSelected: boolean;
+  isDark: boolean;
+  onPress: () => void;
+  cardBgColor: string;
+}
+
+function CategoryGridCell({ 
+  label, 
+  IconComponent, 
+  isSelected, 
+  isDark, 
+  onPress, 
+  cardBgColor 
+}: CategoryGridCellProps) {
+  
+  // Theme rules setup: selected uses purple accents, unselected locks to strict black/white values
+  const dynamicBorderColor = isSelected 
+    ? '#a855f7' 
+    : (isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(28, 28, 30, 1)');
+    
+  const dynamicContentColor = isSelected 
+    ? '#ffffff' 
+    : (isDark ? '#ffffff' : '#1c1c1e');
+
+  const dynamicBgColor = isSelected ? '#9333ea' : cardBgColor;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[
+        { 
+          backgroundColor: dynamicBgColor,
+          borderColor: dynamicBorderColor,
+          borderWidth: isSelected ? 1 : 1.5, // Slightly heavier unselected profile for raw styling focus
+          width: '48.5%', 
+          height: 90
+        },
+        Platform.select({
+          ios: {
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: isSelected ? 4 : (isDark ? 3 : 4) },
+            shadowOpacity: isSelected ? 0.30 : (isDark ? 0.20 : 0.06), 
+            shadowRadius: isSelected ? 8 : (isDark ? 6 : 8),     
+          },
+          android: {
+            elevation: isSelected ? 4 : (isDark ? 2 : 3), 
+          }
+        })
+      ]}
+      className="p-3 rounded-2xl active:opacity-85 flex-col items-center justify-center gap-2 text-center"
+    >
+      <IconComponent 
+        size="26" 
+        color={dynamicContentColor} 
+        variant={isSelected ? 'Bold' : 'Broken'} 
+      />
+      
+      <ThemedText 
+        style={{ color: dynamicContentColor }} 
+        className="text-[11px] font-montBlack text-center tracking-tight"
+        numberOfLines={1}
+      >
+        {label}
+      </ThemedText>
+    </Pressable>
+  );
+}
+
 export default function ReportScreen() {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('UI/UX Bug');
 
-  // Fetch dynamic theme parameters
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const { themeMode, toggleTheme } = useCustomTheme();
 
-  // Unified color layering layout configuration:
-  const cardBgColor = themeMode === 'dark' ? '#2c2c35' : '#f1f2f6';
-
-  // Tweaked border profiles to lock down the light/dark frame depths perfectly
-  const adaptiveBorderColor = themeMode === 'dark'
+  const isDark = themeMode === 'dark';
+  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
+  
+  const adaptiveBorderColor = isDark
     ? 'rgba(255, 255, 255, 0.07)'
     : 'rgba(0, 0, 0, 0.07)';
 
-  // Adaptive standard icon colors to avoid orange color tint accenting
-  const unselectedIconColor = themeMode === 'dark' ? '#ffffff' : '#000000';
-
-  // Dynamic Array mapping your custom components directly to their keys
   const bugCategories = [
-    { 
-      id: 'ui', 
-      label: 'UI/UX Bug', 
-      IconComponent: BrushBig 
-    },
-    { 
-      id: 'api', 
-      label: 'API / Data Error', 
-      IconComponent: Wifi 
-    },
-    { 
-      id: 'crash', 
-      label: 'Performance / Crash', 
-      IconComponent: Danger 
-    },
-    { 
-      id: 'feature', 
-      label: 'Feature Request', 
-      IconComponent: LampCharge 
-    },
+    { id: 'ui', label: 'UI/UX Bug', IconComponent: BrushBig },
+    { id: 'api', label: 'API / Data Error', IconComponent: Wifi },
+    { id: 'crash', label: 'Performance / Crash', IconComponent: Danger },
+    { id: 'feature', label: 'Feature Request', IconComponent: LampCharge },
   ];
 
-  // Opens GitHub with fully structured, pre-filled markdown templates
   const handleGitHubIssue = () => {
     const issueTitle = `[${selectedCategory}] Bug Report from Frapp User`;
     const issueBody = `### Bug Description\n[Please enter a brief description of what happened]\n\n### Environment Details\n- **Platform:** ${Platform.OS === 'ios' ? 'iOS' : 'Android'} (v${Platform.Version})\n- **App Version:** Frapp v1.0.8\n\n### Steps to Reproduce\n1. Open the App\n2. Navigate to...\n3. Observe...`;
 
-    // Constructing the full GitHub Query parameters
     const encodedTitle = encodeURIComponent(issueTitle);
     const encodedBody = encodeURIComponent(issueBody);
     const githubUrl = `${APP_URLS.GITHUB_ISSUES}/new?title=${encodedTitle}&body=${encodedBody}`;
@@ -80,7 +132,6 @@ export default function ReportScreen() {
         if (supported) {
           Linking.openURL(githubUrl);
         } else {
-          // Fallback if full parameters fail on specific device browsers
           Linking.openURL(APP_URLS.GITHUB_ISSUES);
         }
       })
@@ -99,8 +150,6 @@ export default function ReportScreen() {
     >
       {/* --- MATCHING BRAND HEADER ROW --- */}
       <View className="flex-row items-center justify-between w-full mb-6">
-        
-        {/* Left Side: Fixed Asset Logo and Title */}
         <View className="flex-row items-center gap-3">
           <View
             style={{ backgroundColor: '#9333ea' }}
@@ -117,22 +166,21 @@ export default function ReportScreen() {
           </ThemedText>
         </View>
 
-        {/* Right Side: Circular Utility Actions Group */}
         <View className="flex-row items-center gap-2.5">
           <Pressable 
             onPress={() => router.push('/(tabs)/settings')}
-            style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
+            style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
           >
-            <Setting size="22" color={themeMode === 'dark' ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
+            <Setting size="22" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
           </Pressable>
 
           <Pressable 
             onPress={toggleTheme}
-            style={{ backgroundColor: themeMode === 'dark' ? '#27272a' : '#f4f4f5' }}
+            style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
             className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
           >
-            {themeMode === 'dark' ? (
+            {isDark ? (
               <Sun1 size="22" color="#f4f4f5" variant="Broken" />
             ) : (
               <Moon size="22" color="#3f3f46" variant="Broken" />
@@ -149,73 +197,34 @@ export default function ReportScreen() {
       <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-3 ml-1">
         Select Bug Category
       </ThemedText>
+      
       <View className="flex-row flex-wrap justify-between gap-y-3 mb-6">
-        {bugCategories.map((category) => {
-          const isSelected = selectedCategory === category.label;
-          const { IconComponent } = category;
-
-          return (
-            <Pressable
-              key={category.id}
-              onPress={() => setSelectedCategory(category.label)}
-              style={[
-                { 
-                  backgroundColor: isSelected ? '#9333ea' : cardBgColor,
-                  borderColor: isSelected ? '#a855f7' : adaptiveBorderColor,
-                  borderWidth: 1,
-                  width: '48.5%', // Displays neatly in a 2x2 grid layout
-                  height: 90
-                },
-                Platform.select({
-                  ios: {
-                    shadowColor: '#000000',
-                    shadowOffset: { width: 0, height: isSelected ? 4 : (themeMode === 'dark' ? 3 : 4) },
-                    shadowOpacity: isSelected ? 0.30 : (themeMode === 'dark' ? 0.20 : 0.06), 
-                    shadowRadius: isSelected ? 8 : (themeMode === 'dark' ? 6 : 8),     
-                  },
-                  android: {
-                    elevation: isSelected ? 4 : (themeMode === 'dark' ? 2 : 3), 
-                  }
-                })
-              ]}
-              className="p-3 rounded-2xl active:opacity-85 flex-col items-center justify-center gap-2 text-center"
-            >
-              {/* Dynamic Icon Rendering - No more orange. Black in Light mode, White in Dark mode. */}
-              <IconComponent 
-                size="26" 
-                color={isSelected ? '#ffffff' : unselectedIconColor} 
-                variant={isSelected ? 'Bold' : 'Broken'} 
-              />
-              
-              <ThemedText 
-                style={{ color: isSelected ? '#ffffff' : undefined }} 
-                className="text-[11px] font-montBlack text-center tracking-tight"
-                numberOfLines={1}
-              >
-                {category.label}
-              </ThemedText>
-            </Pressable>
-          );
-        })}
+        {bugCategories.map((category) => (
+          <CategoryGridCell
+            key={category.id}
+            label={category.label}
+            IconComponent={category.IconComponent}
+            isSelected={selectedCategory === category.label}
+            isDark={isDark}
+            cardBgColor={cardBgColor}
+            onPress={() => setSelectedCategory(category.label)}
+          />
+        ))}
       </View>
 
       {/* Primary Action Card */}
       <View 
         style={[
-          { 
-            backgroundColor: cardBgColor,
-            borderWidth: 1,
-            borderColor: adaptiveBorderColor,
-          },
+          { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
           Platform.select({
             ios: {
               shadowColor: '#000000',
-              shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
-              shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10, 
-              shadowRadius: themeMode === 'dark' ? 10 : 16,     
+              shadowOffset: { width: 0, height: isDark ? 4 : 8 },
+              shadowOpacity: isDark ? 0.35 : 0.10, 
+              shadowRadius: isDark ? 10 : 16,     
             },
             android: {
-              elevation: themeMode === 'dark' ? 4 : 5, 
+              elevation: isDark ? 4 : 5, 
             }
           })
         ]} 
@@ -243,20 +252,16 @@ export default function ReportScreen() {
       {/* API Attribution Disclosure Block */}
       <View 
         style={[
-          { 
-            backgroundColor: cardBgColor,
-            borderWidth: 1,
-            borderColor: adaptiveBorderColor,
-          },
+          { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
           Platform.select({
             ios: {
               shadowColor: '#000000',
-              shadowOffset: { width: 0, height: themeMode === 'dark' ? 4 : 8 },
-              shadowOpacity: themeMode === 'dark' ? 0.35 : 0.10, 
-              shadowRadius: themeMode === 'dark' ? 10 : 16,     
+              shadowOffset: { width: 0, height: isDark ? 4 : 8 },
+              shadowOpacity: isDark ? 0.35 : 0.10, 
+              shadowRadius: isDark ? 10 : 16,     
             },
             android: {
-              elevation: themeMode === 'dark' ? 4 : 5, 
+              elevation: isDark ? 4 : 5, 
             }
           })
         ]} 

@@ -1,4 +1,3 @@
-import Button from '@/components/custom/Button';
 import FreeGiveawayItem from '@/components/custom/FreeGiveawayItem';
 import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
 import { ThemedText } from '@/components/ThemedText';
@@ -12,9 +11,41 @@ import { useRouter } from 'expo-router';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 
+// Retaining original button for error state retry call triggers if needed
+import Button from '@/components/custom/Button';
+
+// =========================================================================
+// LOCAL SCREEN-SPECIFIC THEMED PAGINATION BUTTON COMPONENT
+// =========================================================================
+interface PaginationButtonProps {
+  text: string;
+  onPress: () => void;
+  isDark: boolean;
+}
+
+function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
+  const dynamicBorderColor = isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(28, 28, 30, 1)';
+  const dynamicTextColor = isDark ? '#ffffff' : '#1c1c1e';
+
+  return (
+    <Pressable
+      onPress={onPress}
+      className="w-full h-12 rounded-xl border items-center justify-center active:opacity-60 bg-transparent"
+      style={{ borderColor: dynamicBorderColor }}
+    >
+      <ThemedText 
+        style={{ color: dynamicTextColor }} 
+        className="font-montBold text-sm uppercase tracking-wider"
+      >
+        {text}
+      </ThemedText>
+    </Pressable>
+  );
+}
+
 export default function FreeScreen() {
   const router = useRouter();
-  const scrollRef = useRef<ScrollView>(null); // Anchor point for automated viewport snapping
+  const scrollRef = useRef<ScrollView>(null); 
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<FreeGiveaway[]>([]);
@@ -23,19 +54,12 @@ export default function FreeScreen() {
   const itemsPerPage = 10;
 
   const backgroundColor = useThemeColor({}, 'background');
-  const textColor = useThemeColor({}, 'text');
   const { themeMode, toggleTheme } = useCustomTheme();
 
   const isDark = themeMode === 'dark';
   const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
-  
-  const adaptiveBorderColor = isDark ? '#FFFFFF' : '#000000';
+  const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
 
-  // Liquid Glass Floating Action Button Color Configuration
-  const glassBgColor = isDark ? 'rgba(44, 44, 53, 0.75)' : 'rgba(241, 242, 246, 0.75)';
-  const glassBorderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)';
-
-  // Calculate dynamic chunk limits for precise 10-item extraction windows
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentPagedGiveaways = giveaways.slice(startIndex, endIndex);
@@ -84,7 +108,8 @@ export default function FreeScreen() {
       <ScrollView
         ref={scrollRef}
         className='flex-1 px-4 pt-10 pb-2'
-        contentContainerStyle={{ paddingBottom: 100 }}
+        style={{ backgroundColor }}
+        contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* --- MATCHING BRAND HEADER ROW --- */}
@@ -105,7 +130,20 @@ export default function FreeScreen() {
             </ThemedText>
           </View>
 
+          {/* Integrated Header Toolbar Panel */}
           <View className="flex-row items-center gap-2.5">
+            <Pressable
+              onPress={() => setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal')}
+              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
+              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
+            >
+              {layoutVariant === 'normal' ? (
+                <Element3 size="22" color="#9333ea" variant="Broken" />
+              ) : (
+                <RowVertical size="22" color="#9333ea" variant="Broken" />
+              )}
+            </Pressable>
+
             <Pressable
               onPress={() => router.push('/(tabs)/settings')}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
@@ -131,34 +169,22 @@ export default function FreeScreen() {
             </Pressable>
           </View>
         </View>
-        {/* --- END OF BRAND HEADER ROW --- */}
 
         {/* Summary Section Container */}
         {!isLoading && !hasError && giveaways.length > 0 && (
           <View
             style={[
-              {
-                backgroundColor: cardBgColor,
-                borderWidth: 1,
-                borderColor: adaptiveBorderColor,
-              },
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
               Platform.select({
-                ios: {
-                  shadowColor: '#000000',
-                  shadowOffset: { width: 0, height: isDark ? 4 : 8 },
-                  shadowOpacity: isDark ? 0.35 : 0.10,
-                  shadowRadius: isDark ? 10 : 16,
-                },
-                android: {
-                  elevation: isDark ? 4 : 5,
-                }
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+                android: { elevation: 2 }
               })
             ]}
             className="rounded-2xl p-4 mb-6"
           >
             <ThemedText className="font-mont text-sm leading-6 opacity-90">
               We discovered{' '}
-              <ThemedText style={{ color: 'green' }} className="font-montBlack">{giveaways.length}</ThemedText> fully free-to-play games available as of{' '}
+              <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{giveaways.length}</ThemedText> fully free-to-play games available as of{' '}
               <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">
                 {day} {monthName} {year}
               </ThemedText>. Tap any title to jump straight into the action!
@@ -166,25 +192,14 @@ export default function FreeScreen() {
           </View>
         )}
 
-        {/* Primary Context Layer: Error Architecture vs Data Mapping */}
+        {/* Primary Data Render Pipeline */}
         {hasError ? (
           <View
             style={[
-              {
-                backgroundColor: cardBgColor,
-                borderWidth: 1,
-                borderColor: adaptiveBorderColor,
-              },
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
               Platform.select({
-                ios: {
-                  shadowColor: '#000000',
-                  shadowOffset: { width: 0, height: 6 },
-                  shadowOpacity: isDark ? 0.30 : 0.08,
-                  shadowRadius: 12,
-                },
-                android: {
-                  elevation: 4,
-                }
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
+                android: { elevation: 4 }
               })
             ]}
             className="rounded-3xl p-6 items-center justify-center my-6"
@@ -219,7 +234,7 @@ export default function FreeScreen() {
               <FreeGiveawayItem 
                 key={giveaway.id} 
                 giveaway={giveaway} 
-                variant={layoutVariant} // Passes the layout configuration variable directly down to layout nodes
+                variant={layoutVariant} 
               />
             ))}
           </View>
@@ -230,69 +245,26 @@ export default function FreeScreen() {
           <View className="flex-row items-center gap-3 mt-4 w-full">
             {currentPage > 1 && (
               <View className="flex-1 mb-24">
-                <Button
-                  type="outline"
-                  onPress={handlePrevPage}
-                  className="w-full font-montBold"
+                <PaginationButton 
                   text="Previous"
+                  onPress={handlePrevPage}
+                  isDark={isDark}
                 />
               </View>
             )}
             
             {endIndex < giveaways.length && (
               <View className="flex-1 mb-24">
-                <Button
-                  type="outline"
-                  onPress={handleNextPage}
-                  className="w-full font-montBold"
+                <PaginationButton 
                   text="Next Games"
+                  onPress={handleNextPage}
+                  isDark={isDark}
                 />
               </View>
             )}
           </View>
         )}
       </ScrollView>
-
-      {/* --- LIQUID GLASS FLOATING ACTION BUTTON (FAB) --- */}
-      {!isLoading && !hasError && (
-        <View 
-          style={[
-            {
-              position: 'absolute',
-              bottom: 70,
-              right: 20,
-              backgroundColor: glassBgColor,
-              borderWidth: 1.5,
-              borderColor: glassBorderColor,
-              borderRadius: 9999,
-              overflow: 'hidden',
-            },
-            Platform.select({
-              ios: {
-                shadowColor: '#000000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: isDark ? 0.40 : 0.15,
-                shadowRadius: 20,
-              },
-              android: {
-                elevation: 8,
-              }
-            })
-          ]}
-        >
-          <Pressable
-            onPress={() => setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal')}
-            android_ripple={{ color: 'rgba(255, 255, 255, 0.2)', borderless: true }}
-            className="w-14 h-14 items-center justify-center active:opacity-80"
-          >
-            {layoutVariant === 'normal' ? (
-              <Element3 size="24" color="#9333ea" variant="Broken" />
-            ) : (
-              <RowVertical size="24" color="#9333ea" variant="Broken" />
-            )}
-          </Pressable>
-        </View>
-      )}
     </View>
   );
 }

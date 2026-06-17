@@ -1,4 +1,3 @@
-import Button from '@/components/custom/Button';
 import GiveawayItem from '@/components/custom/GiveawayItem';
 import { Setting, Moon, Sun1, WifiSquare, Filter, RowVertical, Element3 } from 'iconsax-react-nativejs';
 import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
@@ -13,6 +12,9 @@ import { useCustomTheme } from '@/context/ThemeContext';
 import { useRouter } from 'expo-router';
 import HighestWorthCarousel from '@/components/custom/HighestWorthCarousel';
 
+// Custom Button import retained for the Error fallback retry action if needed
+import Button from '@/components/custom/Button';
+
 const PLATFORMS = [
   { id: 'all', label: 'All' },
   { id: 'pc', label: 'PC' },
@@ -21,6 +23,35 @@ const PLATFORMS = [
   { id: 'gog', label: 'GOG' },
   { id: 'ps4', label: 'PS' },
 ];
+
+// =========================================================================
+// LOCAL SCREEN-SPECIFIC THEMED PAGINATION BUTTON COMPONENT
+// =========================================================================
+interface PaginationButtonProps {
+  text: string;
+  onPress: () => void;
+  isDark: boolean;
+}
+
+function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
+  const dynamicBorderColor = isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(28, 28, 30, 1)';
+  const dynamicTextColor = isDark ? '#ffffff' : '#1c1c1e';
+
+  return (
+    <Pressable
+      onPress={onPress}
+      className="w-full h-12 rounded-xl border items-center justify-center active:opacity-60 bg-transparent"
+      style={{ borderColor: dynamicBorderColor }}
+    >
+      <ThemedText 
+        style={{ color: dynamicTextColor }} 
+        className="font-montBold text-sm uppercase tracking-wider"
+      >
+        {text}
+      </ThemedText>
+    </Pressable>
+  );
+}
 
 export default function GiveawayScreen() {
   const router = useRouter();
@@ -39,17 +70,11 @@ export default function GiveawayScreen() {
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('normal');
 
   const backgroundColor = useThemeColor({}, 'background');
-  const textColor = useThemeColor({}, 'text');
-
   const { themeMode, toggleTheme } = useCustomTheme();
 
   const isDark = themeMode === 'dark';
   const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
   const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
-
-  // Glassmorphism specs for the floating element
-  const glassBgColor = isDark ? 'rgba(44, 44, 53, 0.75)' : 'rgba(255, 255, 255, 0.75)';
-  const glassBorderColor = isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.08)';
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -122,7 +147,7 @@ export default function GiveawayScreen() {
         ref={scrollRef}
         className='flex-1 px-4 pt-10 pb-2'
         style={{ backgroundColor }}
-        contentContainerStyle={{ paddingBottom: 100 }} // Extra pad prevents layout clipping behind the FAB
+        contentContainerStyle={{ paddingBottom: 40 }} 
         showsVerticalScrollIndicator={false}
       >
         {/* --- PREMIUM BRAND HEADER ROW --- */}
@@ -146,6 +171,18 @@ export default function GiveawayScreen() {
 
           {/* Header Action Buttons Panel */}
           <View className="flex-row items-center gap-2">
+            <Pressable
+              onPress={() => setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal')}
+              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
+              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+            >
+              {layoutVariant === 'normal' ? (
+                <Element3 size="20" color="#9333ea" variant="Broken" />
+              ) : (
+                <RowVertical size="20" color="#9333ea" variant="Broken" />
+              )}
+            </Pressable>
+
             <Pressable
               onPress={() => setShowFilterBar(prev => !prev)}
               style={{ 
@@ -211,7 +248,7 @@ export default function GiveawayScreen() {
                     style={{
                       backgroundColor: isSelected ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5'),
                       borderWidth: 1,
-                      borderColor: isSelected ? '#9333ea' : (isDark ? '#3c3c40' : '#e4e4e7'),
+                      borderColor: isSelected ? '#9333ea' : (isDark ? '#3c3c3a' : '#e4e4e7'),
                       height: 36,
                     }}
                     className="px-4 rounded-full items-center justify-center shadow-sm"
@@ -232,28 +269,28 @@ export default function GiveawayScreen() {
         {/* Summary Section Container */}
         {!isLoading && !hasError && giveaways.length > 0 && (
           <>
-          <View
-            style={[
-              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
-              Platform.select({
-                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
-                android: { elevation: 2 }
-              })
-            ]}
-            className="rounded-2xl p-4 mb-5"
-          >
-            <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
-              We have found{' '}
-              <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{prices}</ThemedText> video game giveaways as of{' '}
-              <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
-              <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
-            </ThemedText>
-          </View>
-          <HighestWorthCarousel />
-        </>
+            <View
+              style={[
+                { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+                Platform.select({
+                  ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+                  android: { elevation: 2 }
+                })
+              ]}
+              className="rounded-2xl p-4 mb-5"
+            >
+              <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
+                We have found{' '}
+                <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{prices}</ThemedText> video game giveaways as of{' '}
+                <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
+                <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
+              </ThemedText>
+            </View>
+            <HighestWorthCarousel />
+          </>
         )}
 
-        {/* Primary Context Layer: Error Architecture vs Data Mapping */}
+        {/* Primary Data Content Blocks */}
         {hasError ? (
           <View
             style={[
@@ -306,69 +343,26 @@ export default function GiveawayScreen() {
           <View className="flex-row items-center gap-3 mt-4 w-full">
             {currentPage > 1 && (
               <View className="flex-1 mb-24">
-                <Button
-                  type="outline"
-                  onPress={handlePrevPage}
-                  className="w-full font-montBold"
+                <PaginationButton 
                   text="Previous"
+                  onPress={handlePrevPage}
+                  isDark={isDark}
                 />
               </View>
             )}
             
             {endIndex < giveaways.length && (
               <View className="flex-1 mb-24">
-                <Button
-                  type="outline"
-                  onPress={handleNextPage}
-                  className="w-full font-montBold"
+                <PaginationButton 
                   text="Next Games"
+                  onPress={handleNextPage}
+                  isDark={isDark}
                 />
               </View>
             )}
           </View>
         )}
       </ScrollView>
-
-      {/* --- LIQUID GLASS FLOATING ACTION BUTTON (FAB) --- */}
-      {!isLoading && !hasError && (
-        <View 
-          style={[
-            {
-              position: 'absolute',
-              bottom: 70,
-              right: 20,
-              backgroundColor: glassBgColor,
-              borderWidth: 1.5,
-              borderColor: glassBorderColor,
-              borderRadius: 9999,
-              overflow: 'hidden',
-            },
-            Platform.select({
-              ios: {
-                shadowColor: '#000000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: isDark ? 0.40 : 0.15,
-                shadowRadius: 20,
-              },
-              android: {
-                elevation: 8,
-              }
-            })
-          ]}
-        >
-          <Pressable
-            onPress={() => setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal')}
-            android_ripple={{ color: 'rgba(255, 255, 255, 0.2)', borderless: true }}
-            className="w-14 h-14 items-center justify-center active:opacity-80"
-          >
-            {layoutVariant === 'normal' ? (
-              <Element3 size="24" color="#9333ea" variant="Broken" />
-            ) : (
-              <RowVertical size="24" color="#9333ea" variant="Broken" />
-            )}
-          </Pressable>
-        </View>
-      )}
     </View>
   );
 }
