@@ -11,6 +11,7 @@ import { ScrollView, View, Pressable, Image, Platform } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { useRouter } from 'expo-router';
+import HighestWorthCarousel from '@/components/custom/HighestWorthCarousel';
 
 const PLATFORMS = [
   { id: 'all', label: 'All' },
@@ -230,6 +231,7 @@ export default function GiveawayScreen() {
 
         {/* Summary Section Container */}
         {!isLoading && !hasError && giveaways.length > 0 && (
+          <>
           <View
             style={[
               { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
@@ -247,6 +249,8 @@ export default function GiveawayScreen() {
               <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
             </ThemedText>
           </View>
+          <HighestWorthCarousel />
+        </>
         )}
 
         {/* Primary Context Layer: Error Architecture vs Data Mapping */}
