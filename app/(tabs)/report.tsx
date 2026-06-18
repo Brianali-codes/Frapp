@@ -285,7 +285,7 @@ export default function ReportScreen() {
           className="w-12 h-0.5 rounded-full opacity-10 mb-3" 
         />
         <ThemedText className="text-center font-montBold text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-          Frapp Build v1.1.1
+          Frapp Build v1.1.2
         </ThemedText>
       </View>
     </ScrollView>

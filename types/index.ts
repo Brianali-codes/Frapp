@@ -8,9 +8,13 @@ export interface Giveaway {
   open_giveaway: string;
   worth: string;
   end_date: string;
+  // FIXED: Renamed 'plaform' to 'platform'
+  platform: string; 
 }
 
 export interface FreeGiveaway extends Giveaway {
+  // FIXED: Removed the invalid function definition
+  // Added any specific properties from the API here
   short_description: string;
   game_url: string;
   genre: string;

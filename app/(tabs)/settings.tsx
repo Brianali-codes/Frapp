@@ -3,7 +3,7 @@ import { Divider } from '@/components/custom/Divider';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_REPO_URL, APP_URLS } from '@/constants/app';
 import React, { useState, useEffect, useRef } from 'react';
-import { Linking, View, ScrollView, Pressable, Platform, Image, Modal, Switch } from 'react-native';
+import { Linking, View, ScrollView, Pressable, Platform, Image, Modal } from 'react-native';
 import { 
   Setting, 
   Moon, 
@@ -15,7 +15,9 @@ import {
   ArrowRight2,
   InfoCircle,
   Refresh2,
-  CloseCircle
+  CloseCircle,
+  ToggleOnCircle,
+  ToggleOffCircle
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
@@ -27,7 +29,7 @@ import { useCustomTheme } from '@/context/ThemeContext';
 // Import notification controllers
 import { checkNotificationPermission } from '@/lib/notifications';
 
-const CURRENT_VERSION = 'v1.1.1';
+const CURRENT_VERSION = 'v1.1.2';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -278,12 +280,17 @@ export default function SettingsScreen() {
                 </ThemedText>
               </View>
             </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={handleNotificationToggle}
-              trackColor={{ false: '#71717a', true: '#a855f7' }}
-              thumbColor={Platform.OS === 'android' ? '#ffffff' : undefined}
-            />
+            <Pressable 
+              onPress={() => handleNotificationToggle(!notificationsEnabled)}
+              className="active:opacity-60"
+              hitSlop={10}
+            >
+              {notificationsEnabled ? (
+                <ToggleOnCircle size="42" color="#a855f7" variant="Bold" />
+              ) : (
+                <ToggleOffCircle size="42" color={isDark ? '#52525b' : '#a1a1aa'} variant="Outline" />
+              )}
+            </Pressable>
           </View>
           
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />

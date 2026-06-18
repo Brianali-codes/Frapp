@@ -18,8 +18,8 @@ function FloatingTabBar() {
   const isDark = themeMode === 'dark';
   
   // --- NATIVE LIQUID GLASS CONFIGURATION ---
-  // Using explicit alpha channel parameters to let native hardware layers composite transparency
-  const glassBgColor = isDark ? 'rgba(44, 44, 53, 0.75)' : 'rgba(241, 242, 246, 0.75)';
+  // Reduced alpha from 0.75 to 0.55 for higher translucency
+  const glassBgColor = isDark ? 'rgba(44, 44, 53, 0.95)' : 'rgba(241, 242, 246, 0.95)';
   const glassBorderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const activeCapsuleColor = '#9333ea';
   const inactiveTintColor = isDark ? '#a1a1aa' : '#71717a';
@@ -43,11 +43,10 @@ function FloatingTabBar() {
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-around',
-          overflow: 'hidden', // Forces native container bounds clipping
+          overflow: 'hidden', 
         },
         Platform.select({
           ios: {
-            // Native iOS Sub-Layer Compositing: Triggers core animation hardware blur filtering
             backdropFilter: 'blur(20px)', 
             shadowColor: '#000000',
             shadowOffset: { width: 0, height: 10 },

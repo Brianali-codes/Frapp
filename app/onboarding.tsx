@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { View, Dimensions, Pressable, ScrollView, Image } from 'react-native'; 
+import { View, Dimensions, Pressable, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { 
-  SecuritySafe, 
-  Eye, 
-  ArrowRight2, 
-  TickCircle 
+import {
+  SecuritySafe,
+  Eye,
+  ArrowRight2,
+  TickCircle
 } from 'iconsax-react-nativejs';
-import LottieView from 'lottie-react-native'; 
+import LottieView from 'lottie-react-native';
 
 // Import custom theme hooks
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -23,7 +23,7 @@ export default function OnboardingScreen() {
 
   // Fetch dynamic system theme parameters
   const backgroundColor = useThemeColor({}, 'background');
-  const cardBgColor = useThemeColor({}, 'background'); 
+  const cardBgColor = useThemeColor({}, 'background');
   const { themeMode } = useCustomTheme();
 
   const handleNextStep = () => {
@@ -37,7 +37,7 @@ export default function OnboardingScreen() {
 
   return (
     <View style={{ backgroundColor }} className="flex-1 justify-between px-6 pt-16 pb-10">
-      
+
       {/* STEP METADATA / PROGRESS PILLS */}
       <View className="flex-row items-center justify-center gap-2 mt-2">
         <View className={`h-1.5 rounded-full ${currentStep === 1 ? 'w-8 bg-purple-500' : 'w-2 bg-zinc-300 dark:bg-zinc-800'}`} />
@@ -51,17 +51,17 @@ export default function OnboardingScreen() {
           <View className="items-center mt-4">
             {/* Native Branding Asset Container retaining original dimensions */}
             <View className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg shadow-purple-500/20 mb-4 border border-purple-400/20">
-              <Image 
-                source={require('@/assets/images/FRAPP_ICON1.png')} 
+              <Image
+                source={require('@/assets/images/FRAPP_ICON1.png')}
                 style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
               />
             </View>
-            
+
             <ThemedText className="text-3xl font-montBlack tracking-tight text-center">
               Welcome to Frapp<ThemedText className="text-purple-500 font-montBlack"></ThemedText>
             </ThemedText>
-            
+
             <View className="bg-purple-500/10 px-3 py-1 rounded-full mt-2 border border-purple-500/20">
               <ThemedText className="text-purple-500 font-montBold text-[11px] uppercase tracking-wider">
                 Next-Gen Aggregate Engine
@@ -86,7 +86,7 @@ export default function OnboardingScreen() {
               Track giveaways and premium free-to-play listings instantly.
             </ThemedText>
             <ThemedText className="text-zinc-500 dark:text-zinc-400 text-center text-xs leading-relaxed font-mont">
-              A streamlined aggregator that fetches continuous database updates, alerts you before distributions expire, and operates entirely client-side.
+              We track and aggregate the latest game giveaways, free-to-play titles, digital keys, and exclusive loot drops so you never miss a reward.
             </ThemedText>
           </View>
         </View>
@@ -108,7 +108,7 @@ export default function OnboardingScreen() {
           </View>
 
           {/* Legal Content Box Container */}
-          <View 
+          <View
             style={{ backgroundColor: cardBgColor }}
             className="flex-1 my-6 max-h-[280px] border border-zinc-100 dark:border-zinc-800/60 rounded-2xl p-4 shadow-sm"
           >
@@ -136,7 +136,7 @@ export default function OnboardingScreen() {
           </View>
 
           {/* Custom Checkbox Row Layout */}
-          <Pressable 
+          <Pressable
             onPress={() => setAgreed(!agreed)}
             style={{ backgroundColor: cardBgColor }}
             className="flex-row items-center gap-3 border border-zinc-100 dark:border-zinc-800/60 p-4 rounded-xl mb-4 active:opacity-90 max-w-md w-full self-center shadow-sm"
@@ -163,31 +163,31 @@ export default function OnboardingScreen() {
           onPress={handleNextStep}
           disabled={currentStep === 2 && !agreed}
           style={{
-            backgroundColor: currentStep === 2 && !agreed 
-              ? (themeMode === 'dark' ? '#27272a' : '#e4e4e7') 
+            backgroundColor: currentStep === 2 && !agreed
+              ? (themeMode === 'dark' ? '#27272a' : '#e4e4e7')
               : '#9333ea',
           }}
           className="w-full h-14 rounded-3xl flex-row items-center justify-center shadow-md gap-2 active:opacity-90"
         >
-          <ThemedText 
+          <ThemedText
             style={{
-              color: currentStep === 2 && !agreed 
-                ? (themeMode === 'dark' ? '#71717a' : '#a1a1aa') 
+              color: currentStep === 2 && !agreed
+                ? (themeMode === 'dark' ? '#71717a' : '#a1a1aa')
                 : '#ffffff'
             }}
             className="font-montBlack text-sm tracking-wide"
           >
             {currentStep === 1 ? 'Continue' : 'Get Started'}
           </ThemedText>
-          <ArrowRight2 
-            size="16" 
-            color={currentStep === 2 && !agreed ? (themeMode === 'dark' ? '#71717a' : '#a1a1aa') : '#ffffff'} 
-            variant="Bold" 
+          <ArrowRight2
+            size="16"
+            color={currentStep === 2 && !agreed ? (themeMode === 'dark' ? '#71717a' : '#a1a1aa') : '#ffffff'}
+            variant="Bold"
           />
         </Pressable>
-        
+
         <ThemedText className="text-zinc-400 dark:text-zinc-600 text-base  text-center font-mont tracking-widest mt-5">
-          Frapp • v1.1.1
+          Frapp • v1.1.2
         </ThemedText>
       </View>
 

@@ -7,6 +7,7 @@ import { useCustomTheme } from '@/context/ThemeContext';
 import * as WebBrowser from 'expo-web-browser';
 import { ArrowCircleRight, ExportCurve, ExportSquare, LinkSquare } from 'iconsax-react-nativejs';
 
+
 interface FreeGiveawayItemProps {
   giveaway: FreeGiveaway;
   variant?: 'normal' | 'compact' | 'minimal';
@@ -51,6 +52,7 @@ export default function FreeGiveawayItem({ giveaway, variant = 'normal' }: FreeG
 
   const displayPlatform = giveaway.platform ? normalizePlatform(giveaway.platform) : '';
 
+  
   const handleOpenGameSite = async () => {
     if (!giveaway.game_url) return;
     try {
@@ -144,7 +146,7 @@ export default function FreeGiveawayItem({ giveaway, variant = 'normal' }: FreeG
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <ExportCurve size="13" color={iconColor} variant="Outline" />
+                  <ExportSquare size="13" color={iconColor} variant="Outline" />
                 </Pressable>
               </View>
             </View>
@@ -219,7 +221,7 @@ export default function FreeGiveawayItem({ giveaway, variant = 'normal' }: FreeG
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <ExportCurve size="15" color={iconColor} variant="Outline" />
+                  <ExportSquare size="15" color={iconColor} variant="Outline" />
                 </Pressable>
               </View>
             </View>

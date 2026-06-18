@@ -5,11 +5,13 @@ import { Giveaway } from '@/types';
 import { Image, Linking, View, Platform, Pressable, Share } from 'react-native';
 import { useCustomTheme } from '@/context/ThemeContext';
 import * as WebBrowser from 'expo-web-browser';
-import { ArrowCircleRight, ExportCurve,ExportSquare,LinkSquare } from 'iconsax-react-nativejs';
+import { ArrowCircleRight, ExportCurve, ExportSquare, Share as ShareIcon } from 'iconsax-react-nativejs';
+
 
 interface GiveawayItemProps {
   giveaway: Giveaway;
   variant?: 'normal' | 'compact' | 'minimal';
+  
 }
 
 export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayItemProps) {
@@ -135,7 +137,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <LinkSquare size="13" color={iconColor} variant="Outline" />
+                  <ExportSquare size="13" color={iconColor} variant="Outline" />
                 </Pressable>
                 <Pressable 
                   onPress={handleShare} 
@@ -143,7 +145,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <ExportCurve size="13" color={iconColor} variant="Outline" />
+                  <ShareIcon size="13" color={iconColor} variant="Outline" />
                 </Pressable>
               </View>
             </View>
@@ -219,7 +221,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <LinkSquare size="15" color={iconColor} variant="Outline" />
+                  <ExportSquare size="15" color={iconColor} variant="Outline" />
                 </Pressable>
                 <Pressable 
                   onPress={handleShare} 
@@ -227,7 +229,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <ExportCurve size="15" color={iconColor} variant="Outline" />
+                  <ShareIcon size="15" color={iconColor} variant="Outline" />
                 </Pressable>
               </View>
             </View>
@@ -325,7 +327,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                 style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                 className="p-2 rounded-xl border active:opacity-60"
               >
-               <LinkSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+               <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
               </Pressable>
 
               <Pressable 
@@ -334,7 +336,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                 style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                 className="p-2 rounded-xl border active:opacity-60"
               >
-                 <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+                 <ShareIcon size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
               </Pressable>
             </View>
           </View>

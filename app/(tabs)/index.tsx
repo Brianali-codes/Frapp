@@ -21,7 +21,15 @@ const PLATFORMS = [
   { id: 'steam', label: 'Steam' },
   { id: 'epic-games-store', label: 'Epic' },
   { id: 'gog', label: 'GOG' },
-  { id: 'ps4', label: 'PS' },
+  { id: 'ps4', label: 'PS4' },
+  { id: 'ps5', label: 'PS5' },
+  { id: 'xbox-series-xs', label: 'Xbox Series' },
+  { id: 'xbox-one', label: 'Xbox One' },
+  { id: 'switch', label: 'Switch' },
+  { id: 'android', label: 'Android' },
+  { id: 'ios', label: 'iOS' },
+  { id: 'drm-free', label: 'DRM-Free' },
+  { id: 'itchio', label: 'itch.io' },
 ];
 
 // =========================================================================
@@ -43,8 +51,8 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
       className="w-full h-12 rounded-xl border items-center justify-center active:opacity-60 bg-transparent"
       style={{ borderColor: dynamicBorderColor }}
     >
-      <ThemedText 
-        style={{ color: dynamicTextColor }} 
+      <ThemedText
+        style={{ color: dynamicTextColor }}
         className="font-montBold text-sm uppercase tracking-wider"
       >
         {text}
@@ -65,7 +73,7 @@ export default function GiveawayScreen() {
   const [prices, setPrices] = useState(0);
   const [worth, setWorth] = useState(0);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
-  
+
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('normal');
 
@@ -96,8 +104,8 @@ export default function GiveawayScreen() {
     setIsLoading(true);
     setHasError(false);
     try {
-      const url = platform === 'all' 
-        ? API_ENDPOINTS.Giveaways 
+      const url = platform === 'all'
+        ? API_ENDPOINTS.Giveaways
         : `${API_ENDPOINTS.Giveaways}?platform=${platform}`;
 
       const response = await fetch(url);
@@ -147,7 +155,7 @@ export default function GiveawayScreen() {
         ref={scrollRef}
         className='flex-1 px-4 pt-10 pb-2'
         style={{ backgroundColor }}
-        contentContainerStyle={{ paddingBottom: 40 }} 
+        contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* --- PREMIUM BRAND HEADER ROW --- */}
@@ -185,10 +193,10 @@ export default function GiveawayScreen() {
 
             <Pressable
               onPress={() => setShowFilterBar(prev => !prev)}
-              style={{ 
-                backgroundColor: showFilterBar 
-                  ? '#9333ea' 
-                  : (isDark ? '#27272a' : '#f4f4f5') 
+              style={{
+                backgroundColor: showFilterBar
+                  ? '#9333ea'
+                  : (isDark ? '#27272a' : '#f4f4f5')
               }}
               className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
@@ -228,15 +236,15 @@ export default function GiveawayScreen() {
         {/* --- CONDITIONAL SCROLLFILTER SECTION --- */}
         {showFilterBar && (
           <View className="w-full mb-5">
-            <ScrollView 
-              horizontal 
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
               className="py-1"
               style={{ height: 50 }}
-              contentContainerStyle={{ 
-                alignItems: 'center', 
-                gap: 8, 
-                paddingHorizontal: 2 
+              contentContainerStyle={{
+                alignItems: 'center',
+                gap: 8,
+                paddingHorizontal: 2
               }}
             >
               {PLATFORMS.map((platform) => {
@@ -266,8 +274,8 @@ export default function GiveawayScreen() {
           </View>
         )}
 
-        {/* Summary Section Container */}
-        {!isLoading && !hasError && giveaways.length > 0 && (
+        {/* Summary Section Container (Only shows when on 'all' category) */}
+        {!isLoading && !hasError && giveaways.length > 0 && selectedPlatform === 'all' && (
           <>
             <View
               style={[
@@ -326,34 +334,64 @@ export default function GiveawayScreen() {
           <GiveawaySkeleton loading={true}>
             <></>
           </GiveawaySkeleton>
+        ) : giveaways.length === 0 ? (
+          <View
+            style={[
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+              Platform.select({
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
+                android: { elevation: 4 }
+              })
+            ]}
+            className="rounded-3xl p-6 items-center justify-center my-6"
+          >
+            <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
+              <Element3 size="36" color="#9333ea" variant="Broken" />
+            </View>
+
+            <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
+              No Drops Available
+            </ThemedText>
+
+            <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
+              It looks like there are no active giveaways for this platform right now.
+            </ThemedText>
+
+            <Button
+              type="primary"
+              onPress={() => handlePlatformChange('all')}
+              className="w-full"
+              text="View All Giveaways"
+            />
+          </View>
         ) : (
           <View className="w-full">
             {currentPagedGiveaways.map(giveaway => (
-              <GiveawayItem 
-                key={giveaway.id} 
-                giveaway={giveaway} 
-                variant={layoutVariant} 
+              <GiveawayItem
+                key={giveaway.id}
+                giveaway={giveaway}
+                variant={layoutVariant}
               />
             ))}
           </View>
         )}
 
         {/* Dual Action Pagination Footer Toolbar */}
-        {!isLoading && !hasError && (
+        {!isLoading && !hasError && giveaways.length > 0 && (
           <View className="flex-row items-center gap-3 mt-4 w-full">
             {currentPage > 1 && (
               <View className="flex-1 mb-24">
-                <PaginationButton 
+                <PaginationButton
                   text="Previous"
                   onPress={handlePrevPage}
                   isDark={isDark}
                 />
               </View>
             )}
-            
+
             {endIndex < giveaways.length && (
               <View className="flex-1 mb-24">
-                <PaginationButton 
+                <PaginationButton
                   text="Next Games"
                   onPress={handleNextPage}
                   isDark={isDark}

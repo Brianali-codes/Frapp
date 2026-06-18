@@ -5,7 +5,7 @@ import { API_ENDPOINTS } from '@/constants/api';
 import { FreeGiveaway } from '@/types';
 import React, { useEffect, useState, useRef } from 'react';
 import { ScrollView, View, Pressable, Image, Platform } from 'react-native';
-import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical } from 'iconsax-react-nativejs'; 
+import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter } from 'iconsax-react-nativejs'; 
 import { useRouter } from 'expo-router';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -13,6 +13,12 @@ import { useCustomTheme } from '@/context/ThemeContext';
 
 // Retaining original button for error state retry call triggers if needed
 import Button from '@/components/custom/Button';
+
+const PLATFORMS = [
+  { id: 'all', label: 'All' },
+  { id: 'pc', label: 'PC' },
+  { id: 'browser', label: 'Browser' },
+];
 
 // =========================================================================
 // LOCAL SCREEN-SPECIFIC THEMED PAGINATION BUTTON COMPONENT
@@ -51,6 +57,10 @@ export default function FreeScreen() {
   const [giveaways, setGiveaways] = useState<FreeGiveaway[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('normal');
+  
+  const [showFilterBar, setShowFilterBar] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
+  
   const itemsPerPage = 10;
 
   const backgroundColor = useThemeColor({}, 'background');
@@ -64,15 +74,19 @@ export default function FreeScreen() {
   const endIndex = startIndex + itemsPerPage;
   const currentPagedGiveaways = giveaways.slice(startIndex, endIndex);
 
-  const fetchData = async () => {
+  const fetchData = async (platform: string = 'all') => {
     setIsLoading(true);
     setHasError(false);
     try {
-      const response = await fetch(API_ENDPOINTS.Games);
+      const url = platform === 'all' 
+        ? API_ENDPOINTS.Games 
+        : `${API_ENDPOINTS.Games}?platform=${platform}`;
+
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Server returned invalid status payload');
       
       const finalData: FreeGiveaway[] = await response.json();
-      setGiveaways(finalData);
+      setGiveaways(Array.isArray(finalData) ? finalData : []);
     } catch (error) {
       console.error('Error fetching data:', error);
       setHasError(true);
@@ -82,8 +96,13 @@ export default function FreeScreen() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(selectedPlatform);
+  }, [selectedPlatform]);
+
+  const handlePlatformChange = (platformId: string) => {
+    setCurrentPage(1);
+    setSelectedPlatform(platformId);
+  };
 
   const handleNextPage = () => {
     setCurrentPage(prev => prev + 1);
@@ -131,17 +150,33 @@ export default function FreeScreen() {
           </View>
 
           {/* Integrated Header Toolbar Panel */}
-          <View className="flex-row items-center gap-2.5">
+          <View className="flex-row items-center gap-2">
             <Pressable
               onPress={() => setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal')}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
               className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
             >
               {layoutVariant === 'normal' ? (
-                <Element3 size="22" color="#9333ea" variant="Broken" />
+                <Element3 size="20" color="#9333ea" variant="Broken" />
               ) : (
-                <RowVertical size="22" color="#9333ea" variant="Broken" />
+                <RowVertical size="20" color="#9333ea" variant="Broken" />
               )}
+            </Pressable>
+
+            <Pressable
+              onPress={() => setShowFilterBar(prev => !prev)}
+              style={{ 
+                backgroundColor: showFilterBar 
+                  ? '#9333ea' 
+                  : (isDark ? '#27272a' : '#f4f4f5') 
+              }}
+              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
+            >
+              <Filter
+                size="20"
+                color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')}
+                variant="Broken"
+              />
             </Pressable>
 
             <Pressable
@@ -150,7 +185,7 @@ export default function FreeScreen() {
               className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
             >
               <Setting
-                size="22"
+                size="20"
                 color={isDark ? '#f4f4f5' : '#3f3f46'}
                 variant="Broken"
               />
@@ -162,13 +197,54 @@ export default function FreeScreen() {
               className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
             >
               {isDark ? (
-                <Sun1 size="22" color="#f4f4f5" variant="Broken" />
+                <Sun1 size="20" color="#f4f4f5" variant="Broken" />
               ) : (
-                <Moon size="22" color="#3f3f46" variant="Broken" />
+                <Moon size="20" color="#3f3f46" variant="Broken" />
               )}
             </Pressable>
           </View>
         </View>
+
+        {/* --- CONDITIONAL SCROLLFILTER SECTION --- */}
+        {showFilterBar && (
+          <View className="w-full mb-5">
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              className="py-1"
+              style={{ height: 50 }}
+              contentContainerStyle={{ 
+                alignItems: 'center', 
+                gap: 8, 
+                paddingHorizontal: 2 
+              }}
+            >
+              {PLATFORMS.map((platform) => {
+                const isSelected = selectedPlatform === platform.id;
+                return (
+                  <Pressable
+                    key={platform.id}
+                    onPress={() => handlePlatformChange(platform.id)}
+                    style={{
+                      backgroundColor: isSelected ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5'),
+                      borderWidth: 1,
+                      borderColor: isSelected ? '#9333ea' : (isDark ? '#3c3c3a' : '#e4e4e7'),
+                      height: 36,
+                    }}
+                    className="px-4 rounded-full items-center justify-center shadow-sm"
+                  >
+                    <ThemedText
+                      style={{ color: isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a') }}
+                      className={`text-xs ${isSelected ? 'font-montBlack' : 'font-montBold'}`}
+                    >
+                      {platform.label}
+                    </ThemedText>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Summary Section Container */}
         {!isLoading && !hasError && giveaways.length > 0 && (
@@ -219,7 +295,7 @@ export default function FreeScreen() {
             <Button
               type="primary"
               loading={isLoading}
-              onPress={fetchData}
+              onPress={() => fetchData(selectedPlatform)}
               className="w-full"
               text="Retry Connection"
             />
@@ -228,6 +304,33 @@ export default function FreeScreen() {
           <GiveawaySkeleton loading={true}>
             <></>
           </GiveawaySkeleton>
+        ) : giveaways.length === 0 ? (
+          <View
+            style={[
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+              Platform.select({
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
+                android: { elevation: 4 }
+              })
+            ]}
+            className="rounded-3xl p-6 items-center justify-center my-6"
+          >
+            <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
+              <Element3 size="36" color="#9333ea" variant="Broken" />
+            </View>
+            <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
+              No Games Found
+            </ThemedText>
+            <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
+              It looks like there are no free games for this platform right now.
+            </ThemedText>
+            <Button
+              type="primary"
+              onPress={() => handlePlatformChange('all')}
+              className="w-full"
+              text="View All Platforms"
+            />
+          </View>
         ) : (
           <View className="w-full">
             {currentPagedGiveaways.map(giveaway => (
@@ -241,7 +344,7 @@ export default function FreeScreen() {
         )}
 
         {/* Dual Action Pagination Footer Toolbar */}
-        {!isLoading && !hasError && (
+        {!isLoading && !hasError && giveaways.length > 0 && (
           <View className="flex-row items-center gap-3 mt-4 w-full">
             {currentPage > 1 && (
               <View className="flex-1 mb-24">
