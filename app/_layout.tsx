@@ -24,7 +24,7 @@ import {
 } from '@expo-google-fonts/montserrat';
 
 // Local app tracking baseline
-const CURRENT_VERSION = 'v1.1.1';
+const CURRENT_VERSION = 'v1.1.2';
 
 // Prevent the splash screen from auto-hiding prematurely
 SplashScreen.preventAutoHideAsync();
