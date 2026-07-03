@@ -29,7 +29,7 @@ import { useCustomTheme } from '@/context/ThemeContext';
 // Import notification controllers
 import { checkNotificationPermission } from '@/lib/notifications';
 
-const CURRENT_VERSION = 'v1.1.2';
+const CURRENT_VERSION = 'v1.1.3';
 
 export default function SettingsScreen() {
   const router = useRouter();
