@@ -3,11 +3,11 @@ import React from 'react';
 import { Platform, View, Dimensions, TouchableOpacity } from 'react-native';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { ThemedText } from '@/components/ThemedText';
-import { Game, Gift, Warning2 } from 'iconsax-react-nativejs';
+import { DollarCircle, Gift, Warning2 } from 'iconsax-react-nativejs';
 
 const TABS = [
   { name: 'index', href: '/', title: 'Get', icon: Gift },
-  { name: 'free', href: '/free', title: 'Free', icon: Game },
+  { name: 'deals', href: '/deals', title: 'Deals', icon: DollarCircle },
   { name: 'report', href: '/report', title: 'Bug', icon: Warning2 },
 ];
 
@@ -106,7 +106,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="index" />
-      <Tabs.Screen name="free" />
+      <Tabs.Screen name="deals" />
       <Tabs.Screen name="report" />
       <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>

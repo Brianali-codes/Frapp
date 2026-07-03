@@ -21,4 +21,14 @@ export interface FreeGiveaway extends Giveaway {
   publisher: string;
   release_date: string;
   margin: string;
+
+  // CheapShark API Mappings for Free Game Listings
+  dealID?: string;
+  storeID?: string;
+  gameID?: string;
+  thumb?: string;        // CheapShark fallback for image thumbnails
+  salePrice?: string;    // Maps current free/sale status ($0.00)
+  normalPrice?: string;  // Maps true market valuation values
+  savings?: string;      // Percent calculations for custom pricing labels
+  steamRatingPercent?: string;
 }

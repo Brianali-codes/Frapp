@@ -374,7 +374,7 @@ export default function SettingsScreen() {
             <ArrowRight2 size="14" color="#a1a1aa" />
           </Pressable>
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
-          <Pressable onPress={() => Linking.openURL(APP_URLS.FREE_TO_GAME_URL)} className="flex-row items-center justify-between p-3 active:opacity-60">
+          <Pressable onPress={() => Linking.openURL(APP_URLS.CHEAP_SHARK_URL)} className="flex-row items-center justify-between p-3 active:opacity-60">
             <View className="flex-row items-center gap-3">
               <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
                 <Global size="18" color={monochromeIconColor} variant="Broken" />

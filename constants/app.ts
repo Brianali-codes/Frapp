@@ -4,7 +4,7 @@ import appconfig from "../app.json"
 export const APP_REPO_URL = "https://github.com/Brianali-codes/Frapp"
 
 export const APP_URLS = {
-    FREE_TO_GAME_URL: "https://www.freetogame.com/",
+    CHEAP_SHARK_URL: "https://www.cheapshark.com/",
     GAME_POWER_URL: "https://www.gamerpower.com/",
     GITHUB_ISSUES: `${APP_REPO_URL}/issues`,
     IOS_SETTINGS: "app-settings:",
