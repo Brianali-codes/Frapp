@@ -5,13 +5,11 @@ import { Giveaway } from '@/types';
 import { Image, Linking, View, Platform, Pressable, Share } from 'react-native';
 import { useCustomTheme } from '@/context/ThemeContext';
 import * as WebBrowser from 'expo-web-browser';
-import { ArrowCircleRight, ExportCurve, ExportSquare, Share as ShareIcon } from 'iconsax-react-nativejs';
-
+import { ArrowCircleRight, ExportSquare, Share as ShareIcon } from 'iconsax-react-nativejs';
 
 interface GiveawayItemProps {
   giveaway: Giveaway;
   variant?: 'normal' | 'compact' | 'minimal';
-  
 }
 
 export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayItemProps) {
@@ -96,10 +94,17 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
         >
           <View className="relative w-24 h-24 rounded-xl overflow-hidden bg-zinc-800">
             <Image source={{ uri: giveaway.thumbnail }} className="w-full h-full" resizeMode="cover" />
+            
+            {/* UNIFIED HORIZONTAL CAPSULE FOR MINIMAL */}
             <View 
               style={{ backgroundColor: badgeBgColor, borderColor: badgeBorderColor }} 
-              className="absolute top-1 left-1 px-1.5 py-0.5 rounded border"
+              className="absolute top-1 left-1 px-1.5 py-0.5 rounded border flex-row items-center gap-1"
             >
+              {hasValidPrice && (
+                <ThemedText style={{ color: '#ef4444' }} className={`text-[8px] font-montBold line-through ${strikeThroughOpacity}`}>
+                  {giveaway.worth}
+                </ThemedText>
+              )}
               <ThemedText className="text-[8px] font-montBlack tracking-wide text-emerald-500 dark:text-emerald-400">
                 FREE
               </ThemedText>
@@ -184,6 +189,8 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                 <ThemedText className="text-white font-montBold text-[8px] tracking-wide">{displayPlatform}</ThemedText>
               </View>
             )}
+            
+            {/* UNIFIED HORIZONTAL CAPSULE FOR COMPACT */}
             <View 
               style={{ backgroundColor: badgeBgColor, borderTopWidth: 1, borderColor: badgeBorderColor }} 
               className="absolute bottom-0 left-0 right-0 px-1 py-1 flex-row items-center justify-center gap-1"
@@ -278,7 +285,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
             </View>
           )}
 
-          {/* Theme-Adaptive Top-Right Pricing Capsule */}
+          {/* UNIFIED HORIZONTAL CAPSULE FOR NORMAL */}
           <View 
             style={{ backgroundColor: badgeBgColor, borderColor: badgeBorderColor }} 
             className="absolute top-3 right-3 px-2.5 py-1.5 rounded-md flex-row items-center gap-1.5 shadow-sm border"

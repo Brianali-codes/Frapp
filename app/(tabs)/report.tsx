@@ -232,7 +232,7 @@ export default function ReportScreen() {
       >
         <View className="flex-row items-center gap-2 mb-2">
           <Flag size="18" color="#a855f7" variant="Broken" />
-          <ThemedText className="font-montBlack text-base tracking-tight">
+          <ThemedText className="font-montBold text-xs uppercase tracking-wider">
             Submit directly via GitHub Issues
           </ThemedText>
         </View>

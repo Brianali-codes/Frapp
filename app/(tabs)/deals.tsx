@@ -1,6 +1,6 @@
 import DealItem from '@/components/custom/DealItem';
 import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
-import BestDealsCarousel from '@/components/custom/BestDealsCarousel'; // Your newly added carousel component
+import BestDealsCarousel from '@/components/custom/BestDealsCarousel'; 
 import { ThemedText } from '@/components/ThemedText';
 import { FreeGiveaway } from '@/types';
 import React, { useEffect, useState, useRef, useMemo } from 'react';
@@ -161,6 +161,8 @@ export default function FreeScreen() {
     'July', 'August', 'September', 'October', 'November', 'December'
   ][now.getMonth()];
 
+  const hasNextPage = endIndex < giveaways.length;
+
   return (
     <View style={{ flex: 1, backgroundColor }}>
       <ScrollView
@@ -298,23 +300,26 @@ export default function FreeScreen() {
           </View>
         )}
 
-        {/* --- DUAL ACTION PAGINATION FOOTER TOOLBAR --- */}
-        {!isLoading && !hasError && giveaways.length > 0 && (
-          <View className="flex-row items-center gap-3 mt-4 w-full">
-            {currentPage > 1 ? (
-              <View className="flex-1 mb-24">
-                <PaginationButton text="Previous" onPress={handleHoldPrevPage} isDark={isDark} />
-              </View>
-            ) : (
-              giveaways.length > itemsPerPage && <View className="flex-1 mb-24" />
-            )}
-
-            {endIndex < giveaways.length ? (
-              <View className="flex-1 mb-24">
+        {/* --- DYNAMIC PACKED PAGINATION TOOLBAR --- */}
+        {!isLoading && !hasError && giveaways.length > itemsPerPage && (
+          <View className="mt-4 mb-24 w-full">
+            {currentPage === 1 ? (
+              // Page 1 Layout: Next Button claims explicit 100% full width
+              hasNextPage && (
                 <PaginationButton text="Next Games" onPress={handleNextPage} isDark={isDark} />
-              </View>
+              )
             ) : (
-              currentPage > 1 && giveaways.length > itemsPerPage && <View className="flex-1 mb-24" />
+              // Subsequent Pages Layout: Perfect 50/50 flex side-by-side structure 
+              <View className="flex-row items-center gap-3 w-full">
+                <View className="flex-1">
+                  <PaginationButton text="Previous" onPress={handleHoldPrevPage} isDark={isDark} />
+                </View>
+                {hasNextPage && (
+                  <View className="flex-1">
+                    <PaginationButton text="Next Games" onPress={handleNextPage} isDark={isDark} />
+                  </View>
+                )}
+              </View>
             )}
           </View>
         )}

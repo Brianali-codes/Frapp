@@ -44,7 +44,7 @@ export default function OnboardingScreen() {
         <View className={`h-1.5 rounded-full ${currentStep === 2 ? 'w-8 bg-purple-500' : 'w-2 bg-zinc-300 dark:bg-zinc-800'}`} />
       </View>
 
-      {/* --- STEP 1: RE-DESIGNED LOTTIE & SUMMARY PANEL --- */}
+      {/* --- STEP 1: SUMMARY PANEL FOR BOTH GIVEAWAYS & DEALS --- */}
       {currentStep === 1 && (
         <View className="flex-1 justify-between my-auto py-4">
           {/* Enhanced Core Branding Hero Section */}
@@ -64,7 +64,7 @@ export default function OnboardingScreen() {
 
             <View className="bg-purple-500/10 px-3 py-1 rounded-full mt-2 border border-purple-500/20">
               <ThemedText className="text-purple-500 font-montBold text-[11px] uppercase tracking-wider">
-                Next-Gen Aggregate Engine
+                Get Giveaways and Game Deals in One Place
               </ThemedText>
             </View>
           </View>
@@ -80,13 +80,13 @@ export default function OnboardingScreen() {
             />
           </View>
 
-          {/* New 2-Line High-Fidelity Summary Layout */}
+          {/* New Hybrid Value Proposition Text */}
           <View className="max-w-md self-center w-full px-4 mb-6">
             <ThemedText className="text-center font-montBold text-base leading-snug tracking-tight mb-2">
-              Track giveaways and premium free-to-play listings instantly.
+              Track active giveaways and premium game deals simultaneously.
             </ThemedText>
             <ThemedText className="text-zinc-500 dark:text-zinc-400 text-center text-xs leading-relaxed font-mont">
-              We track and aggregate the latest game giveaways, free-to-play titles, digital keys, and exclusive loot drops so you never miss a reward.
+              Frapp deals in both game giveaways and massive video game price cuts with equal priority. We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.
             </ThemedText>
           </View>
         </View>
@@ -130,7 +130,7 @@ export default function OnboardingScreen() {
                 </ThemedText>
               </View>
               <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed font-mont">
-                All data indexes visible throughout the interface are fetched directly from external networks via the Gamepower and FreeToGame open public architectures. Use of these indexes complies directly with their native distribution rules. Frapp does not manipulate individual item listings, alter pricing structures, or manage distribution timelines. Consequently, we cannot guarantee the uninterrupted availability, accuracy, or ongoing support of external nodes or keys distributed through those respective platforms.
+                All data indexes visible throughout the interface are fetched directly from external networks via the Gamepower, FreeToGame, and CheapShark open public architectures. Use of these indexes complies directly with their native distribution rules. Frapp does not manipulate individual item listings, alter pricing structures, or manage distribution timelines. Consequently, we cannot guarantee the uninterrupted availability, accuracy, or ongoing support of external nodes or keys distributed through those respective platforms.
               </ThemedText>
             </ScrollView>
           </View>
@@ -149,9 +149,11 @@ export default function OnboardingScreen() {
               )}
             </View>
             <View className="flex-1">
-              <ThemedText className="font-montBold text-xs leading-tight">
-                I accept the Terms of Service & Privacy Statement
-              </ThemedText>
+              <View className="flex-1">
+                <ThemedText className="font-montBold text-xs leading-tight">
+                  I accept the Terms of Service & Privacy Statement
+                </ThemedText>
+              </View>
             </View>
           </Pressable>
         </View>
@@ -186,7 +188,7 @@ export default function OnboardingScreen() {
           />
         </Pressable>
 
-        <ThemedText className="text-zinc-400 dark:text-zinc-600 text-base  text-center font-mont tracking-widest mt-5">
+        <ThemedText className="text-zinc-400 dark:text-zinc-600 text-xs text-center font-mont tracking-widest mt-5">
           Frapp • v1.1.2
         </ThemedText>
       </View>
