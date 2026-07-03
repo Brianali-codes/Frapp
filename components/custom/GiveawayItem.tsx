@@ -1,11 +1,12 @@
+import React from 'react';
+import { Image, Linking, View, Platform, Pressable, Share, Text } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { formatDate } from '@/lib/utils';
 import { Giveaway } from '@/types';
-import { Image, Linking, View, Platform, Pressable, Share } from 'react-native';
 import { useCustomTheme } from '@/context/ThemeContext';
-import * as WebBrowser from 'expo-web-browser';
-import { ArrowCircleRight, ExportSquare, Share as ShareIcon } from 'iconsax-react-nativejs';
+import { ArrowRight, ExportSquare, Share as ShareIcon, Flash } from 'iconsax-react-nativejs';
 
 interface GiveawayItemProps {
   giveaway: Giveaway;
@@ -29,7 +30,6 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
   // Action Button Dynamic Theme Styles
   const iconBtnBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
   const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
-  const iconColor = isDark ? '#a78bfa' : '#7c3aed';
 
   // Fixed Theme Compatibility for the Pricing Capsule
   const badgeBgColor = isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.92)';
@@ -78,6 +78,16 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
 
   const hasValidPrice = giveaway.worth && giveaway.worth !== 'N/A' && giveaway.worth !== '$0.00';
 
+  const shadowStyle = Platform.select({
+    ios: { 
+      shadowColor: '#000000', 
+      shadowOffset: { width: 0, height: isDark ? 4 : 5 }, 
+      shadowOpacity: isDark ? 0.22 : 0.06, 
+      shadowRadius: isDark ? 8 : 10 
+    },
+    android: { elevation: isDark ? 2 : 4 }
+  });
+
   // =========================================================================
   // MINIMAL VARIANT
   // =========================================================================
@@ -95,7 +105,6 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
           <View className="relative w-24 h-24 rounded-xl overflow-hidden bg-zinc-800">
             <Image source={{ uri: giveaway.thumbnail }} className="w-full h-full" resizeMode="cover" />
             
-            {/* UNIFIED HORIZONTAL CAPSULE FOR MINIMAL */}
             <View 
               style={{ backgroundColor: badgeBgColor, borderColor: badgeBorderColor }} 
               className="absolute top-1 left-1 px-1.5 py-0.5 rounded border flex-row items-center gap-1"
@@ -142,7 +151,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <ExportSquare size="13" color={iconColor} variant="Outline" />
+                  <ExportSquare size="13" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
                 </Pressable>
                 <Pressable 
                   onPress={handleShare} 
@@ -150,7 +159,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <ShareIcon size="13" color={iconColor} variant="Outline" />
+                  <ShareIcon size="13" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
                 </Pressable>
               </View>
             </View>
@@ -190,7 +199,6 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
               </View>
             )}
             
-            {/* UNIFIED HORIZONTAL CAPSULE FOR COMPACT */}
             <View 
               style={{ backgroundColor: badgeBgColor, borderTopWidth: 1, borderColor: badgeBorderColor }} 
               className="absolute bottom-0 left-0 right-0 px-1 py-1 flex-row items-center justify-center gap-1"
@@ -228,7 +236,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <ExportSquare size="15" color={iconColor} variant="Outline" />
+                  <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
                 </Pressable>
                 <Pressable 
                   onPress={handleShare} 
@@ -236,7 +244,7 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
                   style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                   className="p-1.5 rounded-lg border active:opacity-60"
                 >
-                  <ShareIcon size="15" color={iconColor} variant="Outline" />
+                  <ShareIcon size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
                 </Pressable>
               </View>
             </View>
@@ -247,103 +255,99 @@ export default function GiveawayItem({ giveaway, variant = 'normal' }: GiveawayI
   }
 
   // =========================================================================
-  // NORMAL VARIANT
+  // NORMAL VARIANT (MATCHED TO CAROUSEL CARD DESIGN)
   // =========================================================================
   return (
     <Pressable onPress={handleOpenClaimSite} className="active:opacity-95">
       <ThemedView
         key={giveaway.id}
-        className="rounded-2xl mb-5"
         style={[
           { 
-            backgroundColor: cardBgColor, 
             borderWidth: 1, 
             borderColor: adaptiveBorderColor,
-            overflow: 'hidden'
+            backgroundColor: cardBgColor 
           },
-          Platform.select({
-            ios: {
-              shadowColor: '#000000',
-              shadowOffset: { width: 0, height: isDark ? 4 : 5 },
-              shadowOpacity: isDark ? 0.22 : 0.06,
-              shadowRadius: isDark ? 8 : 10,
-            },
-            android: { elevation: isDark ? 2 : 4 }
-          })
+          shadowStyle
         ]}
+        className="rounded-2xl overflow-hidden w-full mb-6"
       >
-        {/* Banner Hero Image Section */}
-        <View className="relative w-full h-40 bg-zinc-900">
+        {/* Banner Graphic Frame Layer */}
+        <View className="w-full h-40 relative bg-zinc-900">
           <Image source={{ uri: giveaway.image }} className="w-full h-full" resizeMode="cover" />
-          <View className="absolute inset-0 bg-black/15" />
-          
+          <View className="absolute inset-0 bg-black/25" />
+
+          {/* Platform Platform Badge */}
           {displayPlatform !== '' && (
-            <View className="absolute top-3 left-3 bg-black/75 px-2.5 py-1 rounded-md border border-white/10">
-              <ThemedText className="text-white font-montBold text-[10px] tracking-wide uppercase">
-                {displayPlatform}
-              </ThemedText>
+            <View className="absolute top-3 left-3 bg-neutral-900/90 px-2.5 py-1 rounded-md border border-purple-500/30">
+              <View className="flex-row items-center gap-1">
+                <Flash size="10" color="#a855f7" variant="Bold" />
+                <Text className="text-[9px] font-montBlack text-purple-400 tracking-wider uppercase">
+                  {displayPlatform}
+                </Text>
+              </View>
             </View>
           )}
 
-          {/* UNIFIED HORIZONTAL CAPSULE FOR NORMAL */}
-          <View 
-            style={{ backgroundColor: badgeBgColor, borderColor: badgeBorderColor }} 
-            className="absolute top-3 right-3 px-2.5 py-1.5 rounded-md flex-row items-center gap-1.5 shadow-sm border"
-          >
-            {hasValidPrice && (
-              <ThemedText style={{ color: '#ef4444' }} className={`text-[10px] font-montBold line-through ${strikeThroughOpacity}`}>
-                {giveaway.worth}
-              </ThemedText>
-            )}
-            <ThemedText className="text-emerald-600 dark:text-emerald-400 font-montBlack text-[10px] uppercase tracking-wider">
-              FREE
-            </ThemedText>
+          {/* Premium End Date / Status Tag */}
+          <View className="absolute top-3 right-3 bg-purple-600 px-2.5 py-0.5 rounded-md shadow-sm">
+            <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
+              {giveaway.end_date && giveaway.end_date !== 'N/A' ? 'LIMITED TIME' : '100% OFF'}
+            </Text>
           </View>
         </View>
 
-        {/* Content Block Details */}
+        {/* Informational Summary Text Block */}
         <View className="p-4">
-          <ThemedText numberOfLines={1} className="font-montBlack text-base tracking-tight mb-0.5">
-            {giveaway.title}
-          </ThemedText>
-          <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-snug font-mont mb-3" numberOfLines={2}>
-            {giveaway.description}
-          </ThemedText>
+          <View className="mb-3">
+            <ThemedText numberOfLines={1} className="font-montBlack text-base tracking-tight mb-0.5">
+              {giveaway.title}
+            </ThemedText>
+            <ThemedText numberOfLines={2} className="text-zinc-500 dark:text-zinc-400 text-xs leading-snug font-mont">
+              {giveaway.description}
+            </ThemedText>
+          </View>
 
-          {/* Lower Informational Banner Action Strip */}
+          {/* Separation Border Strip & Call to Action */}
           <View 
-            style={{ 
-              borderTopWidth: 1, 
-              borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' 
-            }} 
+            style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} 
             className="flex-row items-center justify-between pt-2.5 mt-0.5"
           >
-            {/* Action Prompt */}
             <View className="flex-row items-center gap-1">
               <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
                 Claim drop offer
               </ThemedText>
-              <ArrowCircleRight size="14" color="#9333ea" variant="Bold" />
+              <ArrowRight size="11" color="#9333ea" variant="Bold" />
             </View>
-
-            {/* Right Action Stack Group: Icon-only Buttons */}
+            
             <View className="flex-row items-center gap-2">
+              <View className="flex-row items-center gap-1.5 mr-1">
+                {hasValidPrice && (
+                  <Text className="text-[10px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
+                    {giveaway.worth}
+                  </Text>
+                )}
+                <ThemedText className="text-[12px] font-montBlack text-emerald-500">
+                  FREE
+                </ThemedText>
+              </View>
+
+              {/* Share & External Export Action Layout Buttons */}
               <Pressable 
                 onPress={handleOpenClaimSite} 
                 hitSlop={10}
                 style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
-                className="p-2 rounded-xl border active:opacity-60"
+                className="p-1.5 rounded-lg border active:opacity-60"
               >
-               <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+                <ExportSquare size="14" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
               </Pressable>
 
               <Pressable 
                 onPress={handleShare} 
                 hitSlop={10}
                 style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
-                className="p-2 rounded-xl border active:opacity-60"
+                className="p-1.5 rounded-lg border active:opacity-60"
               >
-                 <ShareIcon size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+                <ShareIcon size="14" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
               </Pressable>
             </View>
           </View>
