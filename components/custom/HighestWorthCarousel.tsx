@@ -175,7 +175,7 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
               </ThemedText>
               <ArrowRight size="11" color="#9333ea" variant="Bold" />
             </View>
-            <ThemedText className="text-[11px] font-montBlack text-emerald-500">
+            <ThemedText className="text-[10px] line-through decoration-red-500 font-montBlack text-emerald-500">
               {currentItem.worth}
             </ThemedText>
           </View>

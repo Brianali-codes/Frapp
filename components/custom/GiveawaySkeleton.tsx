@@ -2,80 +2,177 @@ import React, { ReactNode } from 'react';
 import { View, Platform } from 'react-native';
 import { Skeleton } from './Skeleton';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { useCustomTheme } from '@/context/ThemeContext'; // Ensure this is imported
+import { useCustomTheme } from '@/context/ThemeContext';
 
 interface GiveawaySkeletonProps {
   loading: boolean;
+  variant?: 'normal' | 'compact' | 'minimal';
   children: ReactNode | ReactNode[];
 }
 
-export default function GiveawaySkeleton({ loading = false, children }: GiveawaySkeletonProps) {
+export default function GiveawaySkeleton({ loading = false, variant = 'normal', children }: GiveawaySkeletonProps) {
   const { themeMode } = useCustomTheme();
+  const isDark = themeMode === 'dark';
 
-  // These variables now match your main card theme exactly
-  const cardBgColor = themeMode === 'dark' ? '#2c2c35' : '#f1f2f6';
+  const isCompact = variant === 'compact';
+  const isMinimal = variant === 'minimal';
+
+  // Exact theme matches from live components
+  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
+  const minimalBgColor = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
   const textColor = useThemeColor({}, 'text');
+  
+  const adaptiveBorderColor = isDark
+    ? 'rgba(255, 255, 255, 0.08)'
+    : 'rgba(0, 0, 0, 0.05)';
 
-  // This color ensures the skeleton "pops" correctly against the cardBgColor
-  const skeletonColor = themeMode === 'dark' ? '#3d3d4a' : '#e0e1e6';
+  // Pop color configuration
+  const skeletonColor = isDark ? '#3d3d4a' : '#e0e1e6';
+
+  const shadowStyle = Platform.select({
+    ios: { 
+      shadowColor: '#000000', 
+      shadowOffset: { width: 0, height: isDark ? 4 : 5 }, 
+      shadowOpacity: isDark ? 0.22 : 0.06, 
+      shadowRadius: isDark ? 8 : 10 
+    },
+    android: { elevation: isDark ? 2 : 4 }
+  });
 
   if (loading) {
     return (
       <>
-        {Array.from({ length: 3 }).map((_, index) => (
-          <View
-            key={index}
-            className="rounded-2xl mb-6 p-4 border"
-            style={[
-              {
-                backgroundColor: cardBgColor,
-                borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
-              },
-              Platform.select({
-                ios: {
-                  shadowColor: textColor,
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: themeMode === 'dark' ? 0.2 : 0.06,
-                  shadowRadius: 8,
-                },
-                android: { elevation: 4 }
-              })
-            ]}
-          >
-            {/* Thumbnail */}
-            <View className="w-full h-48 rounded-xl overflow-hidden mb-4">
-              <Skeleton className="w-full h-full" color={skeletonColor} />
-            </View>
-
-            {/* Content */}
-            <View className="flex-1 space-y-2 mb-4">
-              <Skeleton className="w-3/4 h-5 rounded mb-2" color={skeletonColor} />
-              <Skeleton className="w-full h-4 rounded mb-1.5" color={skeletonColor} />
-              <Skeleton className="w-5/6 h-4 rounded mb-4" color={skeletonColor} />
-
+        {Array.from({ length: 3 }).map((_, index) => {
+          // =========================================================================
+          // MINIMAL VARIANT SKELETON
+          // =========================================================================
+          if (isMinimal) {
+            return (
               <View
-                style={{ borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}
-                className="border-t border-b py-3 my-1 flex-row justify-between"
+                key={index}
+                className="rounded-2xl mb-4 p-2.5 flex-row gap-3 border"
+                style={{ 
+                  backgroundColor: minimalBgColor, 
+                  borderColor: adaptiveBorderColor 
+                }}
               >
-                <View className="space-y-1">
-                  <Skeleton className="w-12 h-2.5 rounded mb-1" color={skeletonColor} />
-                  <Skeleton className="w-16 h-4 rounded" color={skeletonColor} />
+                {/* Thumbnail Image Wrapper */}
+                <Skeleton className="w-24 h-24 rounded-xl" color={skeletonColor} />
+
+                {/* Content Area */}
+                <View className="flex-1 justify-between py-0.5">
+                  <View>
+                    <View className="flex-row items-center justify-between mb-1.5 pr-1">
+                      <Skeleton className="h-4 w-2/3 rounded-md" color={skeletonColor} />
+                      <Skeleton className="h-4 w-10 rounded-md" color={skeletonColor} />
+                    </View>
+                    <Skeleton className="h-3 w-full rounded-md mb-1" color={skeletonColor} />
+                    <Skeleton className="h-3 w-4/5 rounded-md" color={skeletonColor} />
+                  </View>
+
+                  <View className="flex-row items-center justify-between mt-1">
+                    <Skeleton className="h-3 w-16 rounded-md" color={skeletonColor} />
+                    <View className="flex-row items-center gap-2">
+                      <Skeleton className="w-7 h-7 rounded-lg" color={skeletonColor} />
+                      <Skeleton className="w-7 h-7 rounded-lg" color={skeletonColor} />
+                    </View>
+                  </View>
                 </View>
-                <View className="items-end space-y-1">
-                  <Skeleton className="w-16 h-2.5 rounded mb-1" color={skeletonColor} />
-                  <Skeleton className="w-20 h-4 rounded" color={skeletonColor} />
+              </View>
+            );
+          }
+
+          // =========================================================================
+          // COMPACT VARIANT SKELETON
+          // =========================================================================
+          if (isCompact) {
+            return (
+              <View
+                key={index}
+                className="rounded-2xl mb-4 p-3 flex-row gap-3"
+                style={[
+                  { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+                  Platform.select({
+                    ios: {
+                      shadowColor: '#000000',
+                      shadowOffset: { width: 0, height: isDark ? 2 : 4 },
+                      shadowOpacity: isDark ? 0.25 : 0.06,
+                      shadowRadius: isDark ? 8 : 10,
+                    },
+                    android: { elevation: isDark ? 2 : 3 }
+                  })
+                ]}
+              >
+                {/* Thumbnail Frame */}
+                <Skeleton className="w-28 h-28 rounded-xl" color={skeletonColor} />
+
+                {/* Info Text Stack */}
+                <View className="flex-1 justify-between py-0.5">
+                  <View>
+                    <Skeleton className="h-4.5 w-3/4 rounded-md mb-2" color={skeletonColor} />
+                    <Skeleton className="h-3 w-full rounded-md mb-1" color={skeletonColor} />
+                    <Skeleton className="h-3 w-5/6 rounded-md" color={skeletonColor} />
+                  </View>
+
+                  <View className="flex-row items-center justify-between mt-1">
+                    <Skeleton className="h-3 w-20 rounded-md" color={skeletonColor} />
+                    <View className="flex-row items-center gap-2">
+                      <Skeleton className="w-7 h-7 rounded-lg" color={skeletonColor} />
+                      <Skeleton className="w-7 h-7 rounded-lg" color={skeletonColor} />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            );
+          }
+
+          // =========================================================================
+          // NORMAL VARIANT SKELETON (FULL BANNER CAROUSEL RENDER)
+          // =========================================================================
+          return (
+            <View
+              key={index}
+              style={[
+                { 
+                  borderWidth: 1, 
+                  borderColor: adaptiveBorderColor,
+                  backgroundColor: cardBgColor 
+                },
+                shadowStyle
+              ]}
+              className="rounded-2xl overflow-hidden w-full mb-6"
+            >
+              {/* Image Graphic Row Area */}
+              <Skeleton className="w-full h-40 rounded-none" color={skeletonColor} />
+
+              {/* Informational Panel Blocks */}
+              <View className="p-4">
+                <View className="mb-4">
+                  <Skeleton className="h-4.5 w-1/2 rounded-md mb-2" color={skeletonColor} />
+                  <Skeleton className="h-3.5 w-full rounded-md mb-1" color={skeletonColor} />
+                  <Skeleton className="h-3.5 w-4/5 rounded-md" color={skeletonColor} />
+                </View>
+
+                {/* Split Action & Claim Offer Details Strip */}
+                <View 
+                  style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} 
+                  className="flex-row items-center justify-between pt-3 mt-0.5"
+                >
+                  <Skeleton className="h-3.5 w-28 rounded-md" color={skeletonColor} />
+                  
+                  <View className="flex-row items-center gap-2">
+                    <View className="flex-row items-center gap-1.5 mr-1">
+                      <Skeleton className="h-3.5 w-8 rounded-md" color={skeletonColor} />
+                      <Skeleton className="h-4 w-10 rounded-md" color={skeletonColor} />
+                    </View>
+                    <Skeleton className="w-7 h-7 rounded-lg" color={skeletonColor} />
+                    <Skeleton className="w-7 h-7 rounded-lg" color={skeletonColor} />
+                  </View>
                 </View>
               </View>
             </View>
-
-            {/* Buttons */}
-            {/* Dual Action Button Placeholders */}
-            <View className="flex-row justify-between gap-3">
-              <Skeleton className="flex-1 h-12 rounded-lg" color={skeletonColor} />
-              <Skeleton className="flex-1 h-12 rounded-lg" color={skeletonColor} />
-            </View>
-          </View>
-        ))}
+          );
+        })}
       </>
     );
   }

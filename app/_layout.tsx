@@ -38,7 +38,7 @@ function RootLayoutContent() {
   const [targetRoute, setTargetRoute] = useState<'/(tabs)' | '/onboarding'>('/(tabs)');
 
   // --- MODAL ENGINE STATES ---
-  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState(true);
   const [updateInfo, setUpdateInfo] = useState({ latestTag: '', downloadUrl: '' });
   
   // NEW FEATURE CHANGELOG MODAL STATE
@@ -278,7 +278,7 @@ function RootLayoutContent() {
             </Pressable>
 
             <ThemedText className="font-montBlack text-lg text-center mt-2 mb-3 tracking-tight">
-              Update Available! 🎉
+              Update Available!
             </ThemedText>
 
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-1">

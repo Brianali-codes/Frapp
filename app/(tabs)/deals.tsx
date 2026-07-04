@@ -1,16 +1,17 @@
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter } from 'iconsax-react-nativejs'; 
+
 import DealItem from '@/components/custom/DealItem';
 import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
 import BestDealsCarousel from '@/components/custom/BestDealsCarousel'; 
+import Button from '@/components/custom/Button';
 import { ThemedText } from '@/components/ThemedText';
-import { FreeGiveaway } from '@/types';
-import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { ScrollView, View, Pressable, Image, Platform } from 'react-native';
-import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter } from 'iconsax-react-nativejs'; 
-import { useRouter } from 'expo-router';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
-import Button from '@/components/custom/Button';
+import { FreeGiveaway } from '@/types';
 
 const PLATFORMS = [
   { id: 'all', label: 'All Stores' },
@@ -49,6 +50,7 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
 export default function FreeScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null); 
+  
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<FreeGiveaway[]>([]);
@@ -144,13 +146,25 @@ export default function FreeScreen() {
   };
 
   const handleNextPage = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setCurrentPage(prev => prev + 1);
     safeScrollToTop();
   };
 
   const handleHoldPrevPage = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setCurrentPage(prev => Math.max(prev - 1, 1));
     safeScrollToTop();
+  };
+
+  const handleLayoutVariantToggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal');
+  };
+
+  const handleFilterBarToggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowFilterBar(prev => !prev);
   };
 
   const now = new Date();
@@ -167,56 +181,56 @@ export default function FreeScreen() {
     <View style={{ flex: 1, backgroundColor }}>
       <ScrollView
         ref={scrollRef}
-        className='flex-1 px-4 pt-10 pb-2'
+        className='flex-1 px-4 pt-10'
         style={{ backgroundColor }}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* --- PREMIUM BRAND HEADER ROW --- */}
+        {/* --- BRAND HEADER ROW POLISHED TO MATCH COMPACT SIZES --- */}
         <View className="flex-row items-center justify-between w-full mb-6">
-          <View className="flex-row items-center gap-3 flex-1 mr-2">
-            <View style={{ backgroundColor: '#9333ea' }} className="w-10 h-10 rounded-xl overflow-hidden items-center justify-center shadow-md shrink-0">
+          <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
+            <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
               <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
             </View>
-            <ThemedText numberOfLines={1} className="text-xl font-montBlack tracking-tight flex-shrink">Game Deals.</ThemedText>
-          </View>
+            <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">Game Deals.</ThemedText>
+          </Pressable>
 
           <View className="flex-row items-center gap-2">
             <Pressable
-              onPress={() => setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal')}
+              onPress={handleLayoutVariantToggle}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
-              {layoutVariant === 'normal' ? <Element3 size="20" color="#9333ea" variant="Broken" /> : <RowVertical size="20" color="#9333ea" variant="Broken" />}
+              {layoutVariant === 'normal' ? <Element3 size="18" color="#9333ea" variant="Broken" /> : <RowVertical size="18" color="#9333ea" variant="Broken" />}
             </Pressable>
 
             <Pressable
-              onPress={() => setShowFilterBar(prev => !prev)}
+              onPress={handleFilterBarToggle}
               style={{ backgroundColor: showFilterBar ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
-              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
-              <Filter size="20" color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
+              <Filter size="18" color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
             </Pressable>
 
-            <Pressable onPress={() => router.push('/(tabs)/settings')} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
-              <Setting size="20" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
+            <Pressable onPress={() => router.push('/(tabs)/settings')} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
+              <Setting size="18" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
             </Pressable>
 
-            <Pressable onPress={toggleTheme} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
-              {isDark ? <Sun1 size="20" color="#f4f4f5" variant="Broken" /> : <Moon size="20" color="#3f3f46" variant="Broken" />}
+            <Pressable onPress={toggleTheme} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
+              {isDark ? <Sun1 size="18" color="#f4f4f5" variant="Broken" /> : <Moon size="18" color="#3f3f46" variant="Broken" />}
             </Pressable>
           </View>
         </View>
 
-        {/* --- CONDITIONAL SCROLLFILTER SECTION --- */}
+        {/* --- UNCLIPPED HORIZONTAL SCROLLFILTER SECTION --- */}
         {showFilterBar && (
           <View className="w-full mb-5">
             <ScrollView 
               horizontal 
               showsHorizontalScrollIndicator={false}
-              className="py-1"
+              className="-mx-4 py-1"
               style={{ height: 50 }}
-              contentContainerStyle={{ alignItems: 'center', gap: 8, paddingHorizontal: 2 }}
+              contentContainerStyle={{ alignItems: 'center', gap: 8, paddingHorizontal: 16 }}
             >
               {PLATFORMS.map((platform) => {
                 const isSelected = selectedPlatform === platform.id;
@@ -269,7 +283,16 @@ export default function FreeScreen() {
 
         {/* --- MAIN DATA CONTENT BLOCKS --- */}
         {hasError ? (
-          <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }]} className="rounded-3xl p-6 items-center justify-center my-6">
+          <View 
+            style={[
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+              Platform.select({
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
+                android: { elevation: 4 }
+              })
+            ]} 
+            className="rounded-3xl p-6 items-center justify-center my-6"
+          >
             <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
               <WifiSquare size="36" color="#9333ea" variant="Broken" />
             </View>
@@ -280,9 +303,20 @@ export default function FreeScreen() {
             <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform)} className="w-full" text="Retry Connection" />
           </View>
         ) : isLoading ? (
-          <GiveawaySkeleton loading={true}><></></GiveawaySkeleton>
+          <GiveawaySkeleton loading={true} variant={layoutVariant}>
+            <></>
+          </GiveawaySkeleton>
         ) : giveaways.length === 0 ? (
-          <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }]} className="rounded-3xl p-6 items-center justify-center my-6">
+          <View 
+            style={[
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+              Platform.select({
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
+                android: { elevation: 4 }
+              })
+            ]} 
+            className="rounded-3xl p-6 items-center justify-center my-6"
+          >
             <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
               <Element3 size="36" color="#9333ea" variant="Broken" />
             </View>
@@ -304,12 +338,10 @@ export default function FreeScreen() {
         {!isLoading && !hasError && giveaways.length > itemsPerPage && (
           <View className="mt-4 mb-24 w-full">
             {currentPage === 1 ? (
-              // Page 1 Layout: Next Button claims explicit 100% full width
               hasNextPage && (
                 <PaginationButton text="Next Games" onPress={handleNextPage} isDark={isDark} />
               )
             ) : (
-              // Subsequent Pages Layout: Perfect 50/50 flex side-by-side structure 
               <View className="flex-row items-center gap-3 w-full">
                 <View className="flex-1">
                   <PaginationButton text="Previous" onPress={handleHoldPrevPage} isDark={isDark} />

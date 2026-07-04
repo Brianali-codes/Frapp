@@ -63,8 +63,8 @@ export default function OnboardingScreen() {
             </ThemedText>
 
             <View className="bg-purple-500/10 px-3 py-1 rounded-full mt-2 border border-purple-500/20">
-              <ThemedText className="text-purple-500 font-montBold text-[11px] uppercase tracking-wider">
-                Get Giveaways and Game Deals in One Place
+              <ThemedText className="text-purple-500 font-montBold text-[11px] uppercase">
+                Giveaways and Deals in One Place
               </ThemedText>
             </View>
           </View>
@@ -83,10 +83,10 @@ export default function OnboardingScreen() {
           {/* New Hybrid Value Proposition Text */}
           <View className="max-w-md self-center w-full px-4 mb-6">
             <ThemedText className="text-center font-montBold text-base leading-snug tracking-tight mb-2">
-              Track active giveaways and premium game deals simultaneously.
+              Track Video game giveaways and premium game deals.
             </ThemedText>
             <ThemedText className="text-zinc-500 dark:text-zinc-400 text-center text-xs leading-relaxed font-mont">
-              Frapp deals in both game giveaways and massive video game price cuts with equal priority. We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.
+              Frapp deals in both game giveaways and massive video game Deals, We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.
             </ThemedText>
           </View>
         </View>
@@ -96,8 +96,8 @@ export default function OnboardingScreen() {
       {currentStep === 2 && (
         <View className="flex-1 justify-between my-auto py-6">
           <View className="items-center">
-            <View className="w-14 h-14 bg-amber-500/10 rounded-2xl items-center justify-center border border-amber-500/20 mb-3">
-              <SecuritySafe size="28" color="#f59e0b" variant="Broken" />
+            <View className="w-14 h-14 bg-white rounded-2xl items-center justify-center border border-[#9333ea] mb-3">
+              <SecuritySafe size="28" color="#9333ea" variant="Broken" />
             </View>
             <ThemedText className="text-2xl font-montBlack tracking-tight text-center">
               Legal Agreements
@@ -130,7 +130,7 @@ export default function OnboardingScreen() {
                 </ThemedText>
               </View>
               <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed font-mont">
-                All data indexes visible throughout the interface are fetched directly from external networks via the Gamepower, FreeToGame, and CheapShark open public architectures. Use of these indexes complies directly with their native distribution rules. Frapp does not manipulate individual item listings, alter pricing structures, or manage distribution timelines. Consequently, we cannot guarantee the uninterrupted availability, accuracy, or ongoing support of external nodes or keys distributed through those respective platforms.
+                All data indexes visible throughout the interface are fetched directly from external networks via the Gamepower and CheapShark open public architectures. Use of these indexes complies directly with their native distribution rules. Frapp does not manipulate individual item listings, alter pricing structures, or manage distribution timelines. Consequently, we cannot guarantee the uninterrupted availability, accuracy, or ongoing support of external nodes or keys distributed through those respective platforms.
               </ThemedText>
             </ScrollView>
           </View>
@@ -169,7 +169,7 @@ export default function OnboardingScreen() {
               ? (themeMode === 'dark' ? '#27272a' : '#e4e4e7')
               : '#9333ea',
           }}
-          className="w-full h-14 rounded-3xl flex-row items-center justify-center shadow-md gap-2 active:opacity-90"
+          className="w-full h-14 rounded-full flex-row items-center justify-center shadow-md gap-2 active:opacity-90"
         >
           <ThemedText
             style={{

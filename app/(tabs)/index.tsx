@@ -1,19 +1,18 @@
-import GiveawayItem from '@/components/custom/GiveawayItem';
+import React, { useEffect, useState, useRef } from 'react';
+import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Setting, Moon, Sun1, WifiSquare, Filter, RowVertical, Element3 } from 'iconsax-react-nativejs';
+
+import GiveawayItem from '@/components/custom/GiveawayItem';
 import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
+import HighestWorthCarousel from '@/components/custom/HighestWorthCarousel';
+import Button from '@/components/custom/Button';
 import { ThemedText } from '@/components/ThemedText';
+
 import { API_ENDPOINTS } from '@/constants/api';
-import { checkNotificationPermission } from '@/lib/notifications';
-import { Giveaway } from '@/types';
-import { useEffect, useState, useRef } from 'react';
-import { ScrollView, View, Pressable, Image, Platform } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
-import { useRouter } from 'expo-router';
-import HighestWorthCarousel from '@/components/custom/HighestWorthCarousel';
-
-// Custom Button import retained for the Error fallback retry action if needed
-import Button from '@/components/custom/Button';
+import { Giveaway } from '@/types';
 
 const PLATFORMS = [
   { id: 'all', label: 'All' },
@@ -32,9 +31,6 @@ const PLATFORMS = [
   { id: 'itchio', label: 'itch.io' },
 ];
 
-// =========================================================================
-// LOCAL SCREEN-SPECIFIC THEMED PAGINATION BUTTON COMPONENT
-// =========================================================================
 interface PaginationButtonProps {
   text: string;
   onPress: () => void;
@@ -44,6 +40,7 @@ interface PaginationButtonProps {
 function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
   const dynamicBorderColor = isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(28, 28, 30, 1)';
   const dynamicTextColor = isDark ? '#ffffff' : '#1c1c1e';
+
 
   return (
     <Pressable
@@ -64,6 +61,7 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
 export default function GiveawayScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
@@ -132,13 +130,26 @@ export default function GiveawayScreen() {
   };
 
   const handleNextPage = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setCurrentPage(prev => prev + 1);
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
 
   const handlePrevPage = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setCurrentPage(prev => Math.max(prev - 1, 1));
     scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
+  // Layout animations to smooth UI adaptations
+  const handleLayoutVariantToggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal');
+  };
+
+  const handleFilterBarToggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowFilterBar(prev => !prev);
   };
 
   const now = new Date();
@@ -153,17 +164,17 @@ export default function GiveawayScreen() {
     <View style={{ flex: 1, backgroundColor }}>
       <ScrollView
         ref={scrollRef}
-        className='flex-1 px-4 pt-10 pb-2'
+        className="flex-1 px-4 pt-10"
         style={{ backgroundColor }}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* --- PREMIUM BRAND HEADER ROW --- */}
         <View className="flex-row items-center justify-between w-full mb-6">
-          <View className="flex-row items-center gap-3 flex-1 mr-2">
+          <View className="flex-row items-center gap-2.5 flex-1 mr-2">
             <View
               style={{ backgroundColor: '#9333ea' }}
-              className="w-10 h-10 rounded-xl overflow-hidden items-center justify-center shadow-md shrink-0"
+              className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0"
             >
               <Image
                 source={require('../../assets/images/FRAPP_ICON1.png')}
@@ -177,31 +188,31 @@ export default function GiveawayScreen() {
             </ThemedText>
           </View>
 
-          {/* Header Action Buttons Panel */}
+          {/* Symmetrical Header Action Controls Group */}
           <View className="flex-row items-center gap-2">
             <Pressable
-              onPress={() => setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal')}
+              onPress={handleLayoutVariantToggle}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
               {layoutVariant === 'normal' ? (
-                <Element3 size="20" color="#9333ea" variant="Broken" />
+                <Element3 size="18" color="#9333ea" variant="Broken" />
               ) : (
-                <RowVertical size="20" color="#9333ea" variant="Broken" />
+                <RowVertical size="18" color="#9333ea" variant="Broken" />
               )}
             </Pressable>
 
             <Pressable
-              onPress={() => setShowFilterBar(prev => !prev)}
+              onPress={handleFilterBarToggle}
               style={{
                 backgroundColor: showFilterBar
                   ? '#9333ea'
                   : (isDark ? '#27272a' : '#f4f4f5')
               }}
-              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
               <Filter
-                size="20"
+                size="18"
                 color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')}
                 variant="Broken"
               />
@@ -210,10 +221,10 @@ export default function GiveawayScreen() {
             <Pressable
               onPress={() => router.push('/(tabs)/settings')}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
               <Setting
-                size="20"
+                size="18"
                 color={isDark ? '#f4f4f5' : '#3f3f46'}
                 variant="Broken"
               />
@@ -222,29 +233,29 @@ export default function GiveawayScreen() {
             <Pressable
               onPress={toggleTheme}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
               {isDark ? (
-                <Sun1 size="20" color="#f4f4f5" variant="Broken" />
+                <Sun1 size="18" color="#f4f4f5" variant="Broken" />
               ) : (
-                <Moon size="20" color="#3f3f46" variant="Broken" />
+                <Moon size="18" color="#3f3f46" variant="Broken" />
               )}
             </Pressable>
           </View>
         </View>
 
-        {/* --- CONDITIONAL SCROLLFILTER SECTION --- */}
+        {/* --- UNCLIPPED HORIZONTAL SCROLLFILTER SECTION --- */}
         {showFilterBar && (
           <View className="w-full mb-5">
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              className="py-1"
+              className="-mx-4 py-1"
               style={{ height: 50 }}
               contentContainerStyle={{
                 alignItems: 'center',
                 gap: 8,
-                paddingHorizontal: 2
+                paddingHorizontal: 16
               }}
             >
               {PLATFORMS.map((platform) => {
@@ -274,7 +285,7 @@ export default function GiveawayScreen() {
           </View>
         )}
 
-        {/* Summary Section Container (Only shows when on 'all' category) */}
+        {/* Summary Info Header Block */}
         {!isLoading && !hasError && giveaways.length > 0 && selectedPlatform === 'all' && (
           <>
             <View
@@ -298,7 +309,7 @@ export default function GiveawayScreen() {
           </>
         )}
 
-        {/* Primary Data Content Blocks */}
+        {/* --- PRIMARY CONDITIONAL CONTENT AREA --- */}
         {hasError ? (
           <View
             style={[
@@ -313,15 +324,12 @@ export default function GiveawayScreen() {
             <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
               <WifiSquare size="36" color="#9333ea" variant="Broken" />
             </View>
-
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
               Connection Interrupted
             </ThemedText>
-
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
               We can't sync up with the servers right now. Make sure your device is online and let's try that again.
             </ThemedText>
-
             <Button
               type="primary"
               loading={isLoading}
@@ -331,7 +339,7 @@ export default function GiveawayScreen() {
             />
           </View>
         ) : isLoading ? (
-          <GiveawaySkeleton loading={true}>
+          <GiveawaySkeleton loading={true} variant={layoutVariant}>
             <></>
           </GiveawaySkeleton>
         ) : giveaways.length === 0 ? (
@@ -348,15 +356,12 @@ export default function GiveawayScreen() {
             <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
               <Element3 size="36" color="#9333ea" variant="Broken" />
             </View>
-
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
               No Drops Available
             </ThemedText>
-
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
               It looks like there are no active giveaways for this platform right now.
             </ThemedText>
-
             <Button
               type="primary"
               onPress={() => handlePlatformChange('all')}
@@ -376,26 +381,37 @@ export default function GiveawayScreen() {
           </View>
         )}
 
-        {/* Dual Action Pagination Footer Toolbar */}
+        {/* --- BALANCED PAGINATION FOOTER TOOLBAR --- */}
         {!isLoading && !hasError && giveaways.length > 0 && (
-          <View className="flex-row items-center gap-3 mt-4 w-full">
-            {currentPage > 1 && (
-              <View className="flex-1 mb-24">
-                <PaginationButton
-                  text="Previous"
-                  onPress={handlePrevPage}
-                  isDark={isDark}
-                />
-              </View>
-            )}
-
-            {endIndex < giveaways.length && (
-              <View className="flex-1 mb-24">
+          <View className="mt-4 w-full mb-24">
+            {currentPage === 1 ? (
+              // Page 1: Single Full-Width Button
+              endIndex < giveaways.length && (
                 <PaginationButton
                   text="Next Games"
                   onPress={handleNextPage}
                   isDark={isDark}
                 />
+              )
+            ) : (
+              // Page 2+: Split Flex Row (50/50 Layout)
+              <View className="flex-row items-center gap-3 w-full">
+                <View className="flex-1">
+                  <PaginationButton
+                    text="Previous"
+                    onPress={handlePrevPage}
+                    isDark={isDark}
+                  />
+                </View>
+                {endIndex < giveaways.length && (
+                  <View className="flex-1">
+                    <PaginationButton
+                      text="Next Games"
+                      onPress={handleNextPage}
+                      isDark={isDark}
+                    />
+                  </View>
+                )}
               </View>
             )}
           </View>

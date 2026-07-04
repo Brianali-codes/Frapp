@@ -9,9 +9,10 @@ import { ArrowCircleRight, ExportSquare, Share as ShareIcon } from 'iconsax-reac
 interface DealItemProps {
   giveaway: FreeGiveaway;
   variant?: 'normal' | 'compact' | 'minimal';
+  ctaText?: string; // Supporting optional screen override props smoothly
 }
 
-export default function DealItem({ giveaway, variant = 'normal' }: DealItemProps) {
+export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Buy Now' }: DealItemProps) {
   const { themeMode } = useCustomTheme();
 
   const isDark = themeMode === 'dark';
@@ -260,15 +261,15 @@ export default function DealItem({ giveaway, variant = 'normal' }: DealItemProps
             style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} 
             className="flex-row items-center justify-between pt-2.5 mt-0.5"
           >
-            {/* Action Prompt */}
+            {/* Action Prompt - Standardized to resolve layout variations */}
             <View className="flex-row items-center gap-1">
               <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
-                {isFree ? 'Claim free drop offer' : `Buy on ${displayPlatform}`}
+                {ctaText}
               </ThemedText>
               <ArrowCircleRight size="14" color="#9333ea" variant="Bold" />
             </View>
 
-            {/* Right Action Stack Group (Pricing remains, savings text completely removed) */}
+            {/* Right Action Stack Group (Pricing remains) */}
             <View className="flex-row items-center gap-3">
               <View className="flex-row items-center gap-1.5">
                 {hasValidPrice && (

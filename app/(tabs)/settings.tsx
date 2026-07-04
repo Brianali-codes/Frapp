@@ -197,43 +197,43 @@ export default function SettingsScreen() {
         contentContainerStyle={{ paddingBottom: 140 }} 
         showsVerticalScrollIndicator={false}
       >
-        {/* --- MATCHING BRAND HEADER ROW --- */}
-        <View className="flex-row items-center justify-between w-full mb-6 ">
-          <View className="flex-row items-center gap-3">
-            <View
-              style={{ backgroundColor: '#9333ea' }}
-              className="w-10 h-10 rounded-xl overflow-hidden items-center justify-center shadow-md"
+        {/* --- BRAND HEADER ROW POLISHED TO MATCH COMPACT SIZES --- */}
+        <View className="flex-row items-center justify-between w-full mb-6">
+          <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
+            <View 
+              style={{ backgroundColor: '#9333ea' }} 
+              className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0"
             >
-              <Image
-                source={require('../../assets/images/FRAPP_ICON1.png')}
-                style={{ width: '100%', height: '100%' }}
-                resizeMode="cover"
+              <Image 
+                source={require('../../assets/images/FRAPP_ICON1.png')} 
+                style={{ width: '100%', height: '100%' }} 
+                resizeMode="cover" 
               />
             </View>
-            <ThemedText className="text-xl font-montBlack tracking-tight">
+            <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">
               Settings.
             </ThemedText>
-          </View>
+          </Pressable>
 
-          <View className="flex-row items-center gap-2.5">
+          <View className="flex-row items-center gap-2">
             {/* Hidden Easter Egg: Triple-tap this icon rapidly to trigger the push test */}
             <Pressable 
               onPress={handleSettingsCogTap}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-10 h-10 rounded-full items-center justify-center shadow-sm active:opacity-70"
+              className="w-9 h-9 rounded-full items-center justify-center shadow-sm active:opacity-70 shrink-0"
             >
-              <Setting size="22" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
+              <Setting size="18" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
             </Pressable>
 
             <Pressable 
               onPress={toggleTheme}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
               {isDark ? (
-                <Sun1 size="22" color="#f4f4f5" variant="Broken" />
+                <Sun1 size="18" color="#f4f4f5" variant="Broken" />
               ) : (
-                <Moon size="22" color="#3f3f46" variant="Broken" />
+                <Moon size="18" color="#3f3f46" variant="Broken" />
               )}
             </Pressable>
           </View>
@@ -335,7 +335,7 @@ export default function SettingsScreen() {
         
         <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-5 mb-6">
           <View className="flex-row items-center gap-2 mb-2">
-            <Heart size="18" color="#ef4444" variant="Broken" />
+            <Heart size="18"  color="#71717a" variant="Broken" />
             <ThemedText className="font-montBlack text-sm tracking-tight">Support Open Source</ThemedText>
           </View>
           <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
@@ -347,7 +347,7 @@ export default function SettingsScreen() {
         {/* SECTION: KO-FI SUPPORT */}
         <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-5 mb-6">
           <View className="flex-row items-center gap-2 mb-2">
-            <Coffee size="18" color="#ff5e5b" variant="Broken" />
+            <Coffee size="18" color="#71717a" variant="Broken" />
             <ThemedText className="font-montBlack text-sm tracking-tight">Buy me a Coffee</ThemedText>
           </View>
           <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
@@ -368,7 +368,7 @@ export default function SettingsScreen() {
               </View>
               <View>
                 <ThemedText className="font-montBold text-sm">Gamepower Site</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Primary giveaways engine distributor</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Primary giveaways API</ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -380,8 +380,8 @@ export default function SettingsScreen() {
                 <Global size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">FreeToGame API</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Free-to-play listings database architecture</ThemedText>
+                <ThemedText className="font-montBold text-sm">CheapShark API</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Video Game Deals API </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -434,7 +434,7 @@ export default function SettingsScreen() {
                 <Button 
                   type="dark" 
                   text="Later" 
-                  onPress={() => setModalVisible(false)} 
+                  onPress={() => modalVisible && setModalVisible(false)} 
                   className="flex-1 font-montBold"
                 />
               )}

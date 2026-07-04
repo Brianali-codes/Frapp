@@ -148,42 +148,42 @@ export default function ReportScreen() {
       contentContainerStyle={{ paddingBottom: 140 }}
       showsVerticalScrollIndicator={false}
     >
-      {/* --- MATCHING BRAND HEADER ROW --- */}
+      {/* --- BRAND HEADER ROW POLISHED TO MATCH COMPACT SIZES --- */}
       <View className="flex-row items-center justify-between w-full mb-6">
-        <View className="flex-row items-center gap-3">
-          <View
-            style={{ backgroundColor: '#9333ea' }}
-            className="w-10 h-10 rounded-xl overflow-hidden items-center justify-center shadow-md"
+        <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
+          <View 
+            style={{ backgroundColor: '#9333ea' }} 
+            className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0"
           >
-            <Image
-              source={require('../../assets/images/FRAPP_ICON1.png')}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
+            <Image 
+              source={require('../../assets/images/FRAPP_ICON1.png')} 
+              style={{ width: '100%', height: '100%' }} 
+              resizeMode="cover" 
             />
           </View>
-          <ThemedText className="text-xl font-montBlack tracking-tight">
+          <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">
             Report Bug.
           </ThemedText>
-        </View>
+        </Pressable>
 
-        <View className="flex-row items-center gap-2.5">
+        <View className="flex-row items-center gap-2">
           <Pressable 
             onPress={() => router.push('/(tabs)/settings')}
             style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-            className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
+            className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
           >
-            <Setting size="22" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
+            <Setting size="18" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
           </Pressable>
 
           <Pressable 
             onPress={toggleTheme}
             style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-            className="w-10 h-10 rounded-full items-center justify-center active:opacity-70 shadow-sm"
+            className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
           >
             {isDark ? (
-              <Sun1 size="22" color="#f4f4f5" variant="Broken" />
+              <Sun1 size="18" color="#f4f4f5" variant="Broken" />
             ) : (
-              <Moon size="22" color="#3f3f46" variant="Broken" />
+              <Moon size="18" color="#3f3f46" variant="Broken" />
             )}
           </Pressable>
         </View>
@@ -221,7 +221,7 @@ export default function ReportScreen() {
               shadowColor: '#000000',
               shadowOffset: { width: 0, height: isDark ? 4 : 8 },
               shadowOpacity: isDark ? 0.35 : 0.10, 
-              shadowRadius: isDark ? 10 : 16,     
+              shadowRadius: isDark ? 10 : 16,    
             },
             android: {
               elevation: isDark ? 4 : 5, 
@@ -231,8 +231,8 @@ export default function ReportScreen() {
         className="rounded-2xl p-5 mb-5"
       >
         <View className="flex-row items-center gap-2 mb-2">
-          <Flag size="18" color="#a855f7" variant="Broken" />
-          <ThemedText className="font-montBold text-xs uppercase tracking-wider">
+          <Flag size="18"  color="#71717a" variant="Broken" />
+          <ThemedText className="font-montBold text-xs uppercase tracking-wide">
             Submit directly via GitHub Issues
           </ThemedText>
         </View>
@@ -258,7 +258,7 @@ export default function ReportScreen() {
               shadowColor: '#000000',
               shadowOffset: { width: 0, height: isDark ? 4 : 8 },
               shadowOpacity: isDark ? 0.35 : 0.10, 
-              shadowRadius: isDark ? 10 : 16,     
+              shadowRadius: isDark ? 10 : 16,    
             },
             android: {
               elevation: isDark ? 4 : 5, 
@@ -269,7 +269,7 @@ export default function ReportScreen() {
       >
         <View className="flex-row items-center gap-2 mb-2">
           <InfoCircle size="18" color="#71717a" variant="Broken" />
-          <ThemedText className="font-montBold text-xs uppercase tracking-wider text-zinc-400 dark:text-zinc-400">
+          <ThemedText className="font-montBold text-xs uppercase tracking-wide text-zinc-400 dark:text-zinc-400">
             API & Project Attribution
           </ThemedText>
         </View>
@@ -284,7 +284,7 @@ export default function ReportScreen() {
           style={{ backgroundColor: textColor }} 
           className="w-12 h-0.5 rounded-full opacity-10 mb-3" 
         />
-        <ThemedText className="text-center font-montBold text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+        <ThemedText className="text-center font-montBold text-xs uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
           Frapp Build v1.1.3
         </ThemedText>
       </View>
