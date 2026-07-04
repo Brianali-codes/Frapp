@@ -4,7 +4,7 @@ import { Stack, useRouter, useNavigationContainerRef } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Image, Modal, Linking, Pressable } from 'react-native';
+import { View, ActivityIndicator, Image, Modal, Linking, Pressable, ScrollView } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
@@ -38,7 +38,7 @@ function RootLayoutContent() {
   const [targetRoute, setTargetRoute] = useState<'/(tabs)' | '/onboarding'>('/(tabs)');
 
   // --- MODAL ENGINE STATES ---
-  const [updateModalVisible, setUpdateModalVisible] = useState(true);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [updateInfo, setUpdateInfo] = useState({ latestTag: '', downloadUrl: '' });
   
   // NEW FEATURE CHANGELOG MODAL STATE
@@ -268,22 +268,53 @@ function RootLayoutContent() {
         <View className="flex-1 items-center justify-center bg-black/60 px-6">
           <View 
             style={{ backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderColor: adaptiveBorderColor, borderWidth: 1 }}
-            className="w-full rounded-3xl p-6 items-center shadow-2xl max-w-sm"
+            className="w-full rounded-3xl p-6 items-center shadow-2xl max-w-sm max-h-[80%]"
           >
             <Pressable 
               onPress={() => setUpdateModalVisible(false)} 
-              className="absolute top-4 right-4 active:opacity-60"
+              className="absolute top-4 right-4 active:opacity-60 z-10"
             >
               <CloseCircle size="22" color={isDark ? '#a1a1aa' : '#71717a'} variant="Broken" />
             </Pressable>
 
-            <ThemedText className="font-montBlack text-lg text-center mt-2 mb-3 tracking-tight">
-              Update Available!
+            <ThemedText className="font-montBlack text-lg text-center mt-2 mb-1 tracking-tight">
+              Update Available! 🚀
             </ThemedText>
 
-            <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-1">
-              A newer build version ({updateInfo.latestTag}) is out. Upgrade from your current version ({CURRENT_VERSION}) to get access to all the latest optimization patches!
+            <ThemedText className="font-montBold text-purple-500 text-xs text-center uppercase tracking-wider mb-4">
+              New Build: {updateInfo.latestTag}
             </ThemedText>
+
+            {/* --- SCROLLABLE CONTAINER FOR THE LONG CHANGELOG LIST --- */}
+            <View className="w-full border-t border-b border-zinc-500/10 py-3 mb-5 max-h-64">
+              <ScrollView showsVerticalScrollIndicator={true} nestedScrollEnabled={true}>
+                <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-[13px] leading-relaxed mb-4 px-0.5">
+                  A newer build version ({updateInfo.latestTag}) is out! Upgrade from your current version ({CURRENT_VERSION}) to get access to these latest changes:
+                </ThemedText>
+
+                {/* USER-FRIENDLY GROUP 1 */}
+                <ThemedText className="font-montBold text-[11px] uppercase tracking-widest text-purple-500 mb-1.5 px-0.5">
+                  Brand New Storefront Deals
+                </ThemedText>
+                <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 px-0.5">
+                  • Added a dedicated store section to track massive price cuts and active game sales.{"\n"}
+                  • Introduced quick filtering options so you can find the deepest discounts instantly.{"\n"}
+                  • Designed a highlights showcase banner that surfaces the best value offers of the week.{"\n"}
+                  • Added effortless sharing and one-tap button options to claim your deals directly.
+                </ThemedText>
+
+                {/* USER-FRIENDLY GROUP 2 */}
+                <ThemedText className="font-montBold text-[11px] uppercase tracking-widest text-purple-500 mb-1.5 px-0.5">
+                  Interface Polish & Fluidity
+                </ThemedText>
+                <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed px-0.5">
+                  • Made scrolling smoother and improved list animations across your giveaway feeds.{"\n"}
+                  • Adjusted app headers and layout menus to give you more screen space and a cleaner view.{"\n"}
+                  • Upgraded loading skeletons to blend cleanly into the design when loading fresh data.{"\n"}
+                  • Polished font weights and readability details for an enhanced look in dark mode.
+                </ThemedText>
+              </ScrollView>
+            </View>
 
             <View className="flex-row items-center gap-3 w-full">
               <Button 
