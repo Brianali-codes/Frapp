@@ -37,17 +37,15 @@ function RootLayoutContent() {
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const [targetRoute, setTargetRoute] = useState<'/(tabs)' | '/onboarding'>('/(tabs)');
 
-  // --- MODAL ENGINE STATES ---
+
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [updateInfo, setUpdateInfo] = useState({ latestTag: '', downloadUrl: '' });
-  
-  // NEW FEATURE CHANGELOG MODAL STATE
+
   const [featureModalVisible, setFeatureModalVisible] = useState(false);
 
   const isDark = themeMode === 'dark';
   const adaptiveBorderColor = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.07)';
 
-  // Helper function to sanitize version prefixes (e.g. "Frappv1.1.0" or "v1.1.0" -> "1.1.0")
   const cleanVersion = (versionStr: string) => {
     return versionStr.replace(/[^0-9.]/g, '');
   };
@@ -110,7 +108,7 @@ function RootLayoutContent() {
         console.log('Silent update verification check bypassed (likely offline state).');
       }
     }
-    
+
     if (!isCheckingStorage && fontsLoaded && assets) {
       silentLaunchUpdateCheck();
     }
@@ -162,7 +160,7 @@ function RootLayoutContent() {
     try {
       // Seal current version key so this specific build announcement modal never flashes back
       await SecureStore.setItemAsync(`frapp_seen_update_${CURRENT_VERSION}`, 'true');
-      
+
       if (shouldRouteToDeals) {
         // Defer execution slightly to let the native modal finish closing completely before changing tabs
         setTimeout(() => {
@@ -211,12 +209,12 @@ function RootLayoutContent() {
         onRequestClose={() => handleDismissFeatureModal(false)}
       >
         <View className="flex-1 items-center justify-center bg-black/60 px-6">
-          <View 
+          <View
             style={{ backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderColor: adaptiveBorderColor, borderWidth: 1 }}
             className="w-full rounded-3xl p-6 items-center shadow-2xl max-w-sm"
           >
-            <Pressable 
-              onPress={() => handleDismissFeatureModal(false)} 
+            <Pressable
+              onPress={() => handleDismissFeatureModal(false)}
               className="absolute top-4 right-4 active:opacity-60"
             >
               <CloseCircle size="22" color={isDark ? '#a1a1aa' : '#71717a'} variant="Broken" />
@@ -239,16 +237,16 @@ function RootLayoutContent() {
             </ThemedText>
 
             <View className="flex-row items-center gap-3 w-full">
-              <Button 
-                type="dark" 
-                text="Dismiss" 
-                onPress={() => handleDismissFeatureModal(false)} 
+              <Button
+                type="dark"
+                text="Dismiss"
+                onPress={() => handleDismissFeatureModal(false)}
                 className="flex-1 font-montBold"
               />
-              <Button 
-                type="primary" 
-                text="Check it Out" 
-                onPress={() => handleDismissFeatureModal(true)} 
+              <Button
+                type="primary"
+                text="Check it Out"
+                onPress={() => handleDismissFeatureModal(true)}
                 className="flex-1 font-montBold"
               />
             </View>
@@ -266,12 +264,12 @@ function RootLayoutContent() {
         onRequestClose={() => setUpdateModalVisible(false)}
       >
         <View className="flex-1 items-center justify-center bg-black/60 px-6">
-          <View 
+          <View
             style={{ backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderColor: adaptiveBorderColor, borderWidth: 1 }}
             className="w-full rounded-3xl p-6 items-center shadow-2xl max-w-sm max-h-[80%]"
           >
-            <Pressable 
-              onPress={() => setUpdateModalVisible(false)} 
+            <Pressable
+              onPress={() => setUpdateModalVisible(false)}
               className="absolute top-4 right-4 active:opacity-60 z-10"
             >
               <CloseCircle size="22" color={isDark ? '#a1a1aa' : '#71717a'} variant="Broken" />
@@ -317,19 +315,19 @@ function RootLayoutContent() {
             </View>
 
             <View className="flex-row items-center gap-3 w-full">
-              <Button 
-                type="dark" 
-                text="Later" 
-                onPress={() => setUpdateModalVisible(false)} 
+              <Button
+                type="dark"
+                text="Later"
+                onPress={() => setUpdateModalVisible(false)}
                 className="flex-1 font-montBold"
               />
-              <Button 
-                type="primary" 
-                text="Update Now" 
+              <Button
+                type="primary"
+                text="Update Now"
                 onPress={() => {
                   setUpdateModalVisible(false);
                   Linking.openURL(updateInfo.downloadUrl);
-                }} 
+                }}
                 className="flex-1 font-montBold"
               />
             </View>

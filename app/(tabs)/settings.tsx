@@ -276,7 +276,7 @@ export default function SettingsScreen() {
               <View className="flex-1">
                 <ThemedText className="font-montBold text-sm">Automated Loot Radar</ThemedText>
                 <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont" numberOfLines={2}>
-                  Receive multi-window updates (9AM, 1PM, 8PM)
+                  Receive Updates on giveaways
                 </ThemedText>
               </View>
             </View>
@@ -302,7 +302,7 @@ export default function SettingsScreen() {
               </View>
               <View>
                 <ThemedText className="font-montBold text-sm">App Introduction</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Revisit feature highlights and legal terms</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Revisit Onboarding</ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -318,7 +318,7 @@ export default function SettingsScreen() {
               </View>
               <View>
                 <ThemedText className="font-montBold text-sm">Check for Updates</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Verify server-side application builds</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Verify server-side app builds</ThemedText>
               </View>
             </View>
             <View className="flex-row items-center gap-1.5">
