@@ -41,7 +41,6 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
   const dynamicBorderColor = isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(28, 28, 30, 1)';
   const dynamicTextColor = isDark ? '#ffffff' : '#1c1c1e';
 
-
   return (
     <Pressable
       onPress={onPress}
@@ -58,10 +57,111 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
   );
 }
 
+// =========================================================================
+// HIGH FIDELITY WORTH SUMMARY SKELETON (MATCHES INTRO MESSAGE CONTAINER)
+// =========================================================================
+function WorthSummarySkeleton({ cardBgColor, adaptiveBorderColor }: { cardBgColor: string; adaptiveBorderColor: string }) {
+  return (
+    <View 
+      style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
+      className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-60"
+    >
+      <View className="flex-row items-center flex-wrap gap-y-1.5">
+        <View className="w-24 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
+        <View className="w-8 h-3 bg-emerald-500/20 dark:bg-emerald-500/30 rounded mx-1" />
+        <View className="w-40 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
+        <View className="w-16 h-3 bg-purple-500/20 dark:bg-purple-500/30 rounded mx-1" />
+        <View className="w-12 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
+        <View className="w-10 h-3 bg-emerald-500/20 dark:bg-emerald-500/30 rounded mx-1" />
+      </View>
+    </View>
+  );
+}
+
+// =========================================================================
+// HIGH FIDELITY HIGHEST WORTH CAROUSEL SKELETON
+// =========================================================================
+function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const borderLine = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+
+  return (
+    <View className="w-full mb-6 animate-pulse opacity-85">
+      <View
+        style={{ 
+          borderWidth: 1, 
+          borderColor: adaptiveBorderColor,
+          backgroundColor: cardBgColor 
+        }}
+        className="rounded-2xl overflow-hidden w-full mb-2"
+      >
+        {/* Banner Graphic Frame Placeholder (160px Height Matching Core Specs) */}
+        <View style={{ height: 160 }} className="w-full bg-zinc-300 dark:bg-zinc-800 relative justify-between p-3">
+          <View className="flex-row justify-between items-center w-full">
+            {/* Worth / Value Badge */}
+            <View className="w-28 h-5 rounded bg-zinc-400/35 dark:bg-zinc-700/40" />
+            
+            {/* Promo Tag Badge */}
+            <View className="w-16 h-5 rounded bg-purple-500/30 dark:bg-purple-500/40" />
+          </View>
+        </View>
+
+        {/* Informational Details matching Carousel structure */}
+        <View className="p-4 space-y-3">
+          <View>
+            {/* Title segment */}
+            <View className="w-2/3 h-4 rounded mb-2.5" style={{ backgroundColor: shimmerBg }} />
+            {/* Description block */}
+            <View className="space-y-1.5">
+              <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+            </View>
+          </View>
+
+          {/* Separation Border & Call-To-Action Mock placeholders */}
+          <View 
+            style={{ borderTopWidth: 1, borderColor: borderLine }} 
+            className="flex-row items-center justify-between pt-2.5 mt-0.5"
+          >
+            {/* Platform / Store link component */}
+            <View className="flex-row items-center gap-1">
+              <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-3.5 h-3.5 rounded bg-purple-500/20" />
+            </View>
+            
+            {/* Value tags */}
+            <View className="flex-row items-center gap-1.5">
+              <View className="w-8 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-12 h-4 rounded bg-emerald-500/10 dark:bg-emerald-500/20" />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Interactive Dot pagination controller mockups */}
+      <View className="flex-row items-center justify-center gap-1.5 mt-1.5">
+        {[0, 1, 2, 3, 4].map((_, dotIndex) => (
+          <View
+            key={dotIndex}
+            style={{
+              width: dotIndex === 0 ? 14 : 6,
+              height: 6,
+              backgroundColor: dotIndex === 0 
+                ? '#9333ea' 
+                : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'),
+              borderRadius: 999,
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export default function GiveawayScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
@@ -73,7 +173,7 @@ export default function GiveawayScreen() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
 
   const [showFilterBar, setShowFilterBar] = useState(false);
-  const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('normal');
+  const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('compact');
 
   const backgroundColor = useThemeColor({}, 'background');
   const { themeMode, toggleTheme } = useCustomTheme();
@@ -141,7 +241,6 @@ export default function GiveawayScreen() {
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  // Layout animations to smooth UI adaptations
   const handleLayoutVariantToggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal');
@@ -285,28 +384,46 @@ export default function GiveawayScreen() {
           </View>
         )}
 
-        {/* Summary Info Header Block */}
-        {!isLoading && !hasError && giveaways.length > 0 && selectedPlatform === 'all' && (
-          <>
-            <View
-              style={[
-                { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
-                Platform.select({
-                  ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
-                  android: { elevation: 2 }
-                })
-              ]}
-              className="rounded-2xl p-4 mb-5"
-            >
-              <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
-                We have found{' '}
-                <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{prices}</ThemedText> video game giveaways as of{' '}
-                <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
-                <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
-              </ThemedText>
+        {/* --- CAROUSEL OR SKELETON LOADER SECTION --- */}
+        {isLoading ? (
+          selectedPlatform === 'all' && (
+            <View className="w-full">
+              {/* High Fidelity Worth Summary Skeleton */}
+              <WorthSummarySkeleton 
+                cardBgColor={cardBgColor} 
+                adaptiveBorderColor={adaptiveBorderColor} 
+              />
+              {/* High Fidelity Carousel Skeleton */}
+              <CarouselSkeleton 
+                isDark={isDark} 
+                cardBgColor={cardBgColor} 
+                adaptiveBorderColor={adaptiveBorderColor} 
+              />
             </View>
-            <HighestWorthCarousel />
-          </>
+          )
+        ) : (
+          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && (
+            <>
+              <View
+                style={[
+                  { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+                  Platform.select({
+                    ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+                    android: { elevation: 2 }
+                  })
+                ]}
+                className="rounded-2xl p-4 mb-5"
+              >
+                <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
+                  We have found{' '}
+                  <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{prices}</ThemedText> video game giveaways as of{' '}
+                  <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
+                  <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
+                </ThemedText>
+              </View>
+              <HighestWorthCarousel />
+            </>
+          )
         )}
 
         {/* --- PRIMARY CONDITIONAL CONTENT AREA --- */}
@@ -339,6 +456,7 @@ export default function GiveawayScreen() {
             />
           </View>
         ) : isLoading ? (
+          /* Dynamic layout variants for skeletons */
           <GiveawaySkeleton loading={true} variant={layoutVariant}>
             <></>
           </GiveawaySkeleton>
@@ -376,6 +494,7 @@ export default function GiveawayScreen() {
                 key={giveaway.id}
                 giveaway={giveaway}
                 variant={layoutVariant}
+                
               />
             ))}
           </View>

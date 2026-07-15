@@ -252,6 +252,7 @@ export default function SettingsScreen() {
           style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} 
           className="rounded-2xl p-2 mb-6"
         >
+          {/* THEME APPEARANCE ROW */}
           <Pressable onPress={toggleTheme} className="flex-row items-center justify-between p-3 active:opacity-60">
             <View className="flex-row items-center gap-3">
               <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
@@ -263,6 +264,22 @@ export default function SettingsScreen() {
               <ThemedText className="text-xs text-zinc-400 font-montBold capitalize">{themeMode} Mode</ThemedText>
               <ArrowRight2 size="14" color="#a1a1aa" />
             </View>
+          </Pressable>
+          
+          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
+
+          {/* NEW: MY SAVED LIBRARY NAVIGATION ROW */}
+          <Pressable onPress={() => router.push('/saved')} className="flex-row items-center justify-between p-3 active:opacity-60">
+            <View className="flex-row items-center gap-3">
+              <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
+                <Heart size="18" color={monochromeIconColor} variant="Broken" />
+              </View>
+              <View>
+                <ThemedText className="font-montBold text-sm">Saved Giveaways</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Access saved local library</ThemedText>
+              </View>
+            </View>
+            <ArrowRight2 size="14" color="#a1a1aa" />
           </Pressable>
           
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />

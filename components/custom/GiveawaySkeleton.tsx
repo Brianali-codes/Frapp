@@ -42,7 +42,7 @@ export default function GiveawaySkeleton({ loading = false, variant = 'normal', 
   if (loading) {
     return (
       <>
-        {Array.from({ length: 3 }).map((_, index) => {
+        {Array.from({ length: 5 }).map((_, index) => {
           // =========================================================================
           // MINIMAL VARIANT SKELETON
           // =========================================================================

@@ -192,8 +192,10 @@ function RootLayoutContent() {
   return (
     <ThemeProvider value={themeMode === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
+        {/* Onboarding and Saved now map in parallel style as full screens */}
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="saved" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="+not-found" options={{ headerShown: true }} />
       </Stack>
 

@@ -47,6 +47,106 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
   );
 }
 
+// =========================================================================
+// HIGH FIDELITY WORTH SUMMARY SKELETON (MATCHES INTRO MESSAGE CONTAINER)
+// =========================================================================
+function WorthSummarySkeleton({ cardBgColor, adaptiveBorderColor }: { cardBgColor: string; adaptiveBorderColor: string }) {
+  return (
+    <View 
+      style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
+      className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-60"
+    >
+      <View className="flex-row items-center flex-wrap gap-y-1.5">
+        <View className="w-44 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
+        <View className="w-8 h-3 bg-emerald-500/20 dark:bg-emerald-500/30 rounded mx-1" />
+        <View className="w-28 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
+        <View className="w-16 h-3 bg-purple-500/20 dark:bg-purple-500/30 rounded mx-1" />
+        <View className="w-20 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
+      </View>
+    </View>
+  );
+}
+
+// =========================================================================
+// HIGH FIDELITY BEST DEALS CAROUSEL SKELETON
+// =========================================================================
+function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
+  const shimmerBg = isDark ? '#3d3d4a' : '#e0e1e6';
+  const borderLine = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+
+  return (
+    <View className="w-full mb-6 animate-pulse opacity-85">
+      <View
+        style={{ 
+          borderWidth: 1, 
+          borderColor: adaptiveBorderColor,
+          backgroundColor: cardBgColor 
+        }}
+        className="rounded-2xl overflow-hidden w-full mb-2"
+      >
+        {/* Banner Frame (Height matches exact 160px layout spec) */}
+        <View style={{ height: 160 }} className="w-full bg-zinc-300 dark:bg-zinc-800 relative justify-between p-3">
+          <View className="flex-row justify-between items-center w-full">
+            {/* Value Rank Badge (mimics dynamic flash badge inside image background) */}
+            <View className="w-28 h-5 rounded bg-zinc-400/35 dark:bg-zinc-700/40" />
+            
+            {/* Savings Percent Badge (mimics discount badge top right) */}
+            <View className="w-16 h-5 rounded bg-purple-500/30 dark:bg-purple-500/40" />
+          </View>
+        </View>
+
+        {/* Informational details matching BestDealsCarousel structure */}
+        <View className="p-4 space-y-3">
+          <View>
+            {/* Title segment */}
+            <View className="w-2/3 h-4 rounded mb-2.5" style={{ backgroundColor: shimmerBg }} />
+            {/* Multi-line Description block */}
+            <View className="space-y-1.5">
+              <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+            </View>
+          </View>
+
+          {/* Separation Border Strip & Call to Action components */}
+          <View 
+            style={{ borderTopWidth: 1, borderColor: borderLine }} 
+            className="flex-row items-center justify-between pt-2.5 mt-0.5"
+          >
+            {/* "View deal on StoreFront" component placeholder */}
+            <View className="flex-row items-center gap-1">
+              <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-3.5 h-3.5 rounded bg-purple-500/20" />
+            </View>
+            
+            {/* Pricing Details layout placeholder */}
+            <View className="flex-row items-center gap-1.5">
+              <View className="w-8 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-12 h-4 rounded bg-emerald-500/10 dark:bg-emerald-500/20" />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Interactive Dot pagination controller mockups */}
+      <View className="flex-row items-center justify-center gap-1.5 mt-1.5">
+        {[0, 1, 2, 3, 4].map((_, dotIndex) => (
+          <View
+            key={dotIndex}
+            style={{
+              width: dotIndex === 0 ? 14 : 6,
+              height: 6,
+              backgroundColor: dotIndex === 0 
+                ? '#9333ea' 
+                : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'),
+              borderRadius: 999,
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export default function FreeScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null); 
@@ -55,7 +155,7 @@ export default function FreeScreen() {
   const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<FreeGiveaway[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('normal');
+  const [layoutVariant, setLayoutVariant] = useState<'compact' | 'normal'>('compact');
   
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
@@ -256,29 +356,48 @@ export default function FreeScreen() {
           </View>
         )}
 
-        {/* --- SUMMARY SECTION CONTAINER --- */}
-        {!isLoading && !hasError && giveaways.length > 0 && (
-          <View
-            style={[
-              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
-              Platform.select({
-                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
-                android: { elevation: 2 }
-              })
-            ]}
-            className="rounded-2xl p-4 mb-5"
-          >
-            <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
-              We parsed through active gaming storefronts and discovered{' '}
-              <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{giveaways.length}</ThemedText> massive discounts live as of{' '}
-              <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>. Tap any title to secure your key!
-            </ThemedText>
-          </View>
-        )}
+        {/* --- CAROUSEL OR SKELETON LOADER SECTION --- */}
+        {isLoading ? (
+          selectedPlatform === 'all' && (
+            <View className="w-full">
+              {/* High Fidelity Worth Summary Skeleton */}
+              <WorthSummarySkeleton 
+                cardBgColor={cardBgColor} 
+                adaptiveBorderColor={adaptiveBorderColor} 
+              />
+              {/* High Fidelity Carousel Skeleton Component */}
+              <CarouselSkeleton 
+                isDark={isDark} 
+                cardBgColor={cardBgColor} 
+                adaptiveBorderColor={adaptiveBorderColor} 
+              />
+            </View>
+          )
+        ) : (
+          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && (
+            <>
+              {/* --- SUMMARY SECTION CONTAINER --- */}
+              <View
+                style={[
+                  { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+                  Platform.select({
+                    ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+                    android: { elevation: 2 }
+                  })
+                ]}
+                className="rounded-2xl p-4 mb-5"
+              >
+                <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
+                  We parsed through active gaming storefronts and discovered{' '}
+                  <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{giveaways.length}</ThemedText> massive discounts live as of{' '}
+                  <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>. Tap any title to secure your key!
+                </ThemedText>
+              </View>
 
-        {/* --- CAROUSEL PLACED DIRECTLY BELOW SUMMARY SECTION --- */}
-        {!isLoading && !hasError && giveaways.length > 0 && (
-          <BestDealsCarousel />
+              {/* --- CAROUSEL PLACED DIRECTLY BELOW SUMMARY SECTION --- */}
+              <BestDealsCarousel />
+            </>
+          )
         )}
 
         {/* --- MAIN DATA CONTENT BLOCKS --- */}
@@ -303,6 +422,7 @@ export default function FreeScreen() {
             <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform)} className="w-full" text="Retry Connection" />
           </View>
         ) : isLoading ? (
+          /* Structured layout list loading skeleton matching row variants */
           <GiveawaySkeleton loading={true} variant={layoutVariant}>
             <></>
           </GiveawaySkeleton>
