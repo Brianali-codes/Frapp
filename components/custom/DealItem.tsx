@@ -274,7 +274,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
               <View className="absolute inset-0 bg-black/10" />
 
               {hasValidPrice && (
-                <View className="absolute top-1.5 right-1.5 bg-purple-600 px-1.5 py-0.5 rounded shadow-sm">
+                <View className="absolute bottom-1.5 left-1.5 bg-purple-600 px-1.5 py-0.5 rounded shadow-sm">
                   <Text className="text-[8px] font-montBlack text-white uppercase tracking-wider">
                     SAVE ${totalCashSaved}
                   </Text>

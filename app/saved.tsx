@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ScrollView, View, Pressable, Platform, LayoutAnimation } from 'react-native';
+import { ScrollView, View, Pressable, Platform, LayoutAnimation, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store'; // Swapped for SecureStore
+import * as SecureStore from 'expo-secure-store';
 import { 
   Setting, 
   Moon, 
@@ -9,7 +9,8 @@ import {
   Heart, 
   Trash, 
   Element3, 
-  RowVertical 
+  RowVertical,
+  Home // Added Home3 icon
 } from 'iconsax-react-nativejs';
 
 import DealItem from '@/components/custom/DealItem'; 
@@ -28,19 +29,22 @@ export default function SavedItemsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [savedGiveaways, setSavedGiveaways] = useState<FreeGiveaway[]>([]);
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('compact');
+  
+  // State to control the themed confirmation modal
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const backgroundColor = useThemeColor({}, 'background');
   const { themeMode, toggleTheme } = useCustomTheme();
 
   const isDark = themeMode === 'dark';
   const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
+  const modalOverlayColor = isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)';
   const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
 
   // Load Saved giveaways from local storage on mount/focus
   const loadSavedItems = async () => {
     setIsLoading(true);
     try {
-      // Swapped from AsyncStorage to SecureStore
       const stored = await SecureStore.getItemAsync('saved_giveaways');
       if (stored) {
         const parsed: FreeGiveaway[] = JSON.parse(stored);
@@ -72,9 +76,9 @@ export default function SavedItemsScreen() {
   };
 
   const clearAllSaved = async () => {
+    setShowClearConfirm(false); // Hide the confirmation prompt
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     try {
-      // Swapped from AsyncStorage to SecureStore
       await SecureStore.deleteItemAsync('saved_giveaways');
       setSavedGiveaways([]);
     } catch (error) {
@@ -110,7 +114,7 @@ export default function SavedItemsScreen() {
           <View className="flex-row items-center gap-2">
             {savedGiveaways.length > 0 && (
               <Pressable
-                onPress={clearAllSaved}
+                onPress={() => setShowClearConfirm(true)} // Triggers custom themed confirmation modal
                 style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
                 className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
               >
@@ -128,6 +132,19 @@ export default function SavedItemsScreen() {
               ) : (
                 <RowVertical size="18" color="#9333ea" variant="Broken" />
               )}
+            </Pressable>
+
+            {/* --- HOME BUTTON --- */}
+            <Pressable
+              onPress={() => router.replace('/(tabs)')}
+              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+            >
+              <Home
+                size="18"
+                color={isDark ? '#f4f4f5' : '#3f3f46'}
+                variant="Broken"
+              />
             </Pressable>
 
             <Pressable
@@ -223,6 +240,74 @@ export default function SavedItemsScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* =========================================================================
+          THEMED DELETE CONFIRMATION MODAL
+          ========================================================================= */}
+      <Modal
+        visible={showClearConfirm}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setShowClearConfirm(false)}
+      >
+        <View 
+          style={{ backgroundColor: modalOverlayColor }} 
+          className="flex-1 justify-center items-center px-6"
+        >
+          <View
+            style={[
+              { backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderWidth: 1, borderColor: adaptiveBorderColor },
+              Platform.select({
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.25, shadowRadius: 15 },
+                android: { elevation: 10 }
+              })
+            ]}
+            className="w-full rounded-3xl p-6 max-w-sm overflow-hidden"
+          >
+            {/* Warning Icon Badge */}
+            <View className="items-center justify-center mb-4">
+              <View className="w-14 h-14 rounded-2xl bg-red-500/10 items-center justify-center">
+                <Trash size="28" color="#ef4444" variant="Broken" />
+              </View>
+            </View>
+
+            {/* Title & Desc */}
+            <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
+              Clear Saved Library?
+            </ThemedText>
+            
+            <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-[13px] text-center leading-relaxed mb-6 px-2">
+              This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually.
+            </ThemedText>
+
+            {/* Actions Grid */}
+            <View className="flex-row gap-3">
+              {/* Cancel Button */}
+              <Pressable
+                onPress={() => setShowClearConfirm(false)}
+                style={{ backgroundColor: isDark ? '#2c2c35' : '#f1f2f6' }}
+                className="flex-1 h-11 rounded-full items-center justify-center active:opacity-75"
+              >
+                <ThemedText className="font-montBold text-xs uppercase tracking-wider">
+                  Cancel
+                </ThemedText>
+              </Pressable>
+
+              {/* Confirm / Delete Button */}
+              <Pressable
+                onPress={clearAllSaved}
+                style={{ backgroundColor: '#ef4444' }}
+                className="flex-1 h-11 rounded-full items-center justify-center active:opacity-90 shadow-md shadow-red-500/20"
+              >
+                <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
+                  Wipe All
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
