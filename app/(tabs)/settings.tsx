@@ -21,6 +21,7 @@ import {
   User,
   Mobile,
   Share,
+  Lock1,
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
@@ -32,7 +33,7 @@ import { useCustomTheme } from '@/context/ThemeContext';
 // Import notification controllers
 import { checkNotificationPermission } from '@/lib/notifications';
 
-const CURRENT_VERSION = 'v1.1.3';
+const CURRENT_VERSION = 'v1.1.4';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -249,7 +250,7 @@ export default function SettingsScreen() {
 
         {/* SECTION: PREFERENCES */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
-          Preferences
+          Preferences.
         </ThemedText>
 
         <View
@@ -351,7 +352,7 @@ export default function SettingsScreen() {
 
         {/* SECTION: ABOUT */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
-          About
+          About.
         </ThemedText>
 
         <View 
@@ -403,11 +404,27 @@ export default function SettingsScreen() {
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
           </Pressable>
+
+          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
+
+          {/* Privacy Policy */}
+          <Pressable onPress={() => Linking.openURL('https://frappgiveaways.vercel.app/privacy-policy')} className="flex-row items-center justify-between p-3 active:opacity-60">
+            <View className="flex-row items-center gap-3">
+              <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
+                <Lock1 size="18" color={monochromeIconColor} variant="Broken" />
+              </View>
+              <View>
+                <ThemedText className="font-montBold text-sm">Privacy Policy</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">View Frapp's Policies</ThemedText>
+              </View>
+            </View>
+            <ArrowRight2 size="14" color="#a1a1aa" />
+          </Pressable>
         </View>
 
         {/* SECTION: COMMUNITY & SUPPORT */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
-          Community & Support
+          Community & Support.
         </ThemedText>
 
         <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-5 mb-6">
@@ -431,11 +448,13 @@ export default function SettingsScreen() {
             Help keep the servers running and the coffee flowing! A small donation helps us maintain the project and add new features.
           </ThemedText>
           <Button onPress={() => Linking.openURL('https://ko-fi.com/brianalicodes')} text="Donate on Ko-fi" type="primary" className="font-montBold" />
+          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 my-4" />
+          <Button onPress={() => Linking.openURL('https://www.patreon.com/c/brianali_codes')} text="Donate on Patreon" type="primary" className="font-montBold" />
         </View>
 
         {/* SECTION: DATA PROVIDERS */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
-          Data Providers
+          Data Providers.
         </ThemedText>
         <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-2">
           <Pressable onPress={() => Linking.openURL(APP_URLS.GAME_POWER_URL)} className="flex-row items-center justify-between p-3 active:opacity-60">

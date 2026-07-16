@@ -4,7 +4,7 @@ import { Stack, useRouter, useNavigationContainerRef } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Image, Modal, Linking, Pressable, ScrollView } from 'react-native';
+import { View, ActivityIndicator, Image, Modal, Linking, Pressable } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
@@ -13,7 +13,7 @@ import { checkNotificationPermission, initNotifications } from '@/lib/notificati
 import { useAssets } from 'expo-asset'; // Pre-load asset reference
 import { ThemedText } from '@/components/ThemedText';
 import Button from '@/components/custom/Button';
-import { CloseCircle, TicketDiscount } from 'iconsax-react-nativejs';
+import { CloseCircle } from 'iconsax-react-nativejs';
 
 import {
   useFonts,
@@ -24,7 +24,7 @@ import {
 } from '@expo-google-fonts/montserrat';
 
 // Local app tracking baseline
-const CURRENT_VERSION = 'v1.1.3';
+const CURRENT_VERSION = 'v1.1.4';
 
 // Prevent the splash screen from auto-hiding prematurely
 SplashScreen.preventAutoHideAsync();
@@ -37,10 +37,9 @@ function RootLayoutContent() {
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const [targetRoute, setTargetRoute] = useState<'/(tabs)' | '/onboarding'>('/(tabs)');
 
-
+  // Simple state management for version checking - initialized to false to prevent premature flashing
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
-  const [updateInfo, setUpdateInfo] = useState({ latestTag: '', downloadUrl: '' });
-
+  const [updateInfo, setUpdateInfo] = useState({ latestTag: '', downloadUrl: 'https://frappgiveaways.vercel.app' });
   const [featureModalVisible, setFeatureModalVisible] = useState(false);
 
   const isDark = themeMode === 'dark';
@@ -99,7 +98,7 @@ function RootLayoutContent() {
           if (remoteClean && remoteClean !== localClean) {
             setUpdateInfo({
               latestTag: rawLatestVersion,
-              downloadUrl: data.html_url || 'https://github.com/Brianali-codes/FRAPP'
+              downloadUrl: 'https://frappgiveaways.vercel.app'
             });
             setUpdateModalVisible(true);
           }
@@ -137,7 +136,6 @@ function RootLayoutContent() {
         // Returning user -> Verify if they have seen this specific build version update notification
         async function verifyFeatureChangelogStatus() {
           try {
-            // NOTE: Change this to `const hasSeenCurrentUpdate = null;` if you need to pop it up for testing again!
             const hasSeenCurrentUpdate = await SecureStore.getItemAsync(`frapp_seen_update_${CURRENT_VERSION}`);
             if (hasSeenCurrentUpdate === null) {
               // Add minor delay execution tick so native container rendering stabilizes
@@ -164,7 +162,6 @@ function RootLayoutContent() {
       if (shouldRouteToDeals) {
         // Defer execution slightly to let the native modal finish closing completely before changing tabs
         setTimeout(() => {
-          // FIXED: Redirects directly to the root of your tabs group where the Deals feed live
           router.navigate('/(tabs)');
         }, 100);
       }
@@ -202,61 +199,6 @@ function RootLayoutContent() {
       <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
 
       {/* =========================================================================
-          1. LOCAL RELEASES FEATURES & CHANGELOG ANNOUNCEMENT MODAL
-          ========================================================================= */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={featureModalVisible}
-        onRequestClose={() => handleDismissFeatureModal(false)}
-      >
-        <View className="flex-1 items-center justify-center bg-black/60 px-6">
-          <View
-            style={{ backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderColor: adaptiveBorderColor, borderWidth: 1 }}
-            className="w-full rounded-3xl p-6 items-center shadow-2xl max-w-sm"
-          >
-            <Pressable
-              onPress={() => handleDismissFeatureModal(false)}
-              className="absolute top-4 right-4 active:opacity-60"
-            >
-              <CloseCircle size="22" color={isDark ? '#a1a1aa' : '#71717a'} variant="Broken" />
-            </Pressable>
-
-            <View className="w-12 h-12 rounded-2xl bg-purple-500/10 items-center justify-center mt-2 mb-3 border border-purple-500/20">
-              <TicketDiscount size="24" color="#a855f7" variant="Broken" />
-            </View>
-
-            <ThemedText className="font-montBlack text-lg text-center mb-1 tracking-tight">
-              New Feature Update! 🚀
-            </ThemedText>
-
-            <ThemedText className="font-montBold text-purple-500 text-xs text-center uppercase tracking-wider mb-4">
-              Version {CURRENT_VERSION}
-            </ThemedText>
-
-            <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-1">
-              We've integrated an all-new storefront price monitoring feature right into the client interface! Drop in to browse hot discounts and ongoing sales feeds.
-            </ThemedText>
-
-            <View className="flex-row items-center gap-3 w-full">
-              <Button
-                type="dark"
-                text="Dismiss"
-                onPress={() => handleDismissFeatureModal(false)}
-                className="flex-1 font-montBold"
-              />
-              <Button
-                type="primary"
-                text="Check it Out"
-                onPress={() => handleDismissFeatureModal(true)}
-                className="flex-1 font-montBold"
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* =========================================================================
           2. GLOBAL OVERLAY LAUNCH DISCOVERED REMOTE GITHUB UPDATE MODAL
           ========================================================================= */}
       <Modal
@@ -268,7 +210,7 @@ function RootLayoutContent() {
         <View className="flex-1 items-center justify-center bg-black/60 px-6">
           <View
             style={{ backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderColor: adaptiveBorderColor, borderWidth: 1 }}
-            className="w-full rounded-3xl p-6 items-center shadow-2xl max-w-sm max-h-[80%]"
+            className="w-full rounded-3xl p-6 items-center shadow-2xl max-w-sm"
           >
             <Pressable
               onPress={() => setUpdateModalVisible(false)}
@@ -278,43 +220,16 @@ function RootLayoutContent() {
             </Pressable>
 
             <ThemedText className="font-montBlack text-lg text-center mt-2 mb-1 tracking-tight">
-              Update Available! 🚀
+              Update Available
             </ThemedText>
 
             <ThemedText className="font-montBold text-purple-500 text-xs text-center uppercase tracking-wider mb-4">
-              New Build: {updateInfo.latestTag}
+              {updateInfo.latestTag} is here!
             </ThemedText>
 
-            {/* --- SCROLLABLE CONTAINER FOR THE LONG CHANGELOG LIST --- */}
-            <View className="w-full border-t border-b border-zinc-500/10 py-3 mb-5 max-h-64">
-              <ScrollView showsVerticalScrollIndicator={true} nestedScrollEnabled={true}>
-                <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-[13px] leading-relaxed mb-4 px-0.5">
-                  A newer build version ({updateInfo.latestTag}) is out! Upgrade from your current version ({CURRENT_VERSION}) to get access to these latest changes:
-                </ThemedText>
-
-                {/* USER-FRIENDLY GROUP 1 */}
-                <ThemedText className="font-montBold text-[11px] uppercase tracking-widest text-purple-500 mb-1.5 px-0.5">
-                  Brand New Storefront Deals
-                </ThemedText>
-                <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 px-0.5">
-                  • Added a dedicated store section to track massive price cuts and active game sales.{"\n"}
-                  • Introduced quick filtering options so you can find the deepest discounts instantly.{"\n"}
-                  • Designed a highlights showcase banner that surfaces the best value offers of the week.{"\n"}
-                  • Added effortless sharing and one-tap button options to claim your deals directly.
-                </ThemedText>
-
-                {/* USER-FRIENDLY GROUP 2 */}
-                <ThemedText className="font-montBold text-[11px] uppercase tracking-widest text-purple-500 mb-1.5 px-0.5">
-                  Interface Polish & Fluidity
-                </ThemedText>
-                <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed px-0.5">
-                  • Made scrolling smoother and improved list animations across your giveaway feeds.{"\n"}
-                  • Adjusted app headers and layout menus to give you more screen space and a cleaner view.{"\n"}
-                  • Upgraded loading skeletons to blend cleanly into the design when loading fresh data.{"\n"}
-                  • Polished font weights and readability details for an enhanced look in dark mode.
-                </ThemedText>
-              </ScrollView>
-            </View>
+            <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-[14px] text-center leading-relaxed mb-6 px-2">
+              A newer version of the app ({updateInfo.latestTag}) is out. Upgrade from your current build ({CURRENT_VERSION}) to get access to the latest changes.
+            </ThemedText>
 
             <View className="flex-row items-center gap-3 w-full">
               <Button
