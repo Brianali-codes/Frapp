@@ -500,7 +500,7 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                   >
                     <Gift size="16" color="#ffffff" variant="Broken" />
                     <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                      Claim Now
+                      Claim
                     </ThemedText>
                   </Pressable>
                 </View>

@@ -459,7 +459,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                 >
                   <Gift size="16" color="#ffffff" variant="Broken" />
                   <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                    Claim Deal
+                    Claim 
                   </ThemedText>
                 </Pressable>
               </View>
