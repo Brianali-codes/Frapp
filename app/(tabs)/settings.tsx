@@ -4,20 +4,23 @@ import { ThemedText } from '@/components/ThemedText';
 import { APP_REPO_URL, APP_URLS } from '@/constants/app';
 import React, { useState, useEffect, useRef } from 'react';
 import { Linking, View, ScrollView, Pressable, Platform, Image, Modal } from 'react-native';
-import { 
-  Setting, 
-  Moon, 
-  Sun1, 
-  Notification, 
-  Global, 
-  Heart, 
-  Coffee, 
+import {
+  Setting,
+  Moon,
+  Sun1,
+  Notification,
+  Global,
+  Heart,
+  Coffee,
   ArrowRight2,
   InfoCircle,
   Refresh2,
   CloseCircle,
   ToggleOnCircle,
-  ToggleOffCircle
+  ToggleOffCircle,
+  User,
+  Mobile,
+  Share,
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
@@ -35,7 +38,8 @@ export default function SettingsScreen() {
   const router = useRouter();
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  
+  const [socialsModalVisible, setSocialsModalVisible] = useState(false);
+
   // --- TRACKING FOR EASTER EGG TRIPLE TAP ---
   const tapCountRef = useRef(0);
   const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -64,7 +68,7 @@ export default function SettingsScreen() {
   useEffect(() => {
     async function getInitialPermissionState() {
       const settings = await notifee.getNotificationSettings();
-      const isGranted = 
+      const isGranted =
         settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
         settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
       setNotificationsEnabled(isGranted);
@@ -150,7 +154,7 @@ export default function SettingsScreen() {
     try {
       const response = await fetch('https://api.github.com/repos/Brianali-codes/FRAPP/releases/latest');
       if (!response.ok) throw new Error();
-      
+
       const data = await response.json();
       const rawLatestVersion = data.tag_name;
 
@@ -191,23 +195,23 @@ export default function SettingsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
-      <ScrollView 
-        style={{ backgroundColor }} 
+      <ScrollView
+        style={{ backgroundColor }}
         className="flex-1 px-4 pt-10"
-        contentContainerStyle={{ paddingBottom: 140 }} 
+        contentContainerStyle={{ paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
       >
         {/* --- BRAND HEADER ROW POLISHED TO MATCH COMPACT SIZES --- */}
         <View className="flex-row items-center justify-between w-full mb-6">
           <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
-            <View 
-              style={{ backgroundColor: '#9333ea' }} 
+            <View
+              style={{ backgroundColor: '#9333ea' }}
               className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0"
             >
-              <Image 
-                source={require('../../assets/images/FRAPP_ICON1.png')} 
-                style={{ width: '100%', height: '100%' }} 
-                resizeMode="cover" 
+              <Image
+                source={require('../../assets/images/FRAPP_ICON1.png')}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
               />
             </View>
             <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">
@@ -217,7 +221,7 @@ export default function SettingsScreen() {
 
           <View className="flex-row items-center gap-2">
             {/* Hidden Easter Egg: Triple-tap this icon rapidly to trigger the push test */}
-            <Pressable 
+            <Pressable
               onPress={handleSettingsCogTap}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
               className="w-9 h-9 rounded-full items-center justify-center shadow-sm active:opacity-70 shrink-0"
@@ -225,7 +229,7 @@ export default function SettingsScreen() {
               <Setting size="18" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
             </Pressable>
 
-            <Pressable 
+            <Pressable
               onPress={toggleTheme}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
@@ -247,9 +251,9 @@ export default function SettingsScreen() {
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
           Preferences
         </ThemedText>
-        
-        <View 
-          style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} 
+
+        <View
+          style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]}
           className="rounded-2xl p-2 mb-6"
         >
           {/* THEME APPEARANCE ROW */}
@@ -265,7 +269,7 @@ export default function SettingsScreen() {
               <ArrowRight2 size="14" color="#a1a1aa" />
             </View>
           </Pressable>
-          
+
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
 
           {/* NEW: MY SAVED LIBRARY NAVIGATION ROW */}
@@ -276,14 +280,14 @@ export default function SettingsScreen() {
               </View>
               <View>
                 <ThemedText className="font-montBold text-sm">Saved Giveaways</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Access saved local library</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Access saved games</ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
           </Pressable>
-          
+
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
-          
+
           {/* DYNAMIC TIMING ALERTS INTERACTION ROW */}
           <View className="flex-row items-center justify-between p-3">
             <View className="flex-row items-center gap-3 flex-1 pr-4">
@@ -291,13 +295,13 @@ export default function SettingsScreen() {
                 <Notification size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View className="flex-1">
-                <ThemedText className="font-montBold text-sm">Automated Loot Radar</ThemedText>
+                <ThemedText className="font-montBold text-sm">Notification Settings</ThemedText>
                 <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont" numberOfLines={2}>
-                  Receive Updates on giveaways
+                  Turn Notifications On or Off
                 </ThemedText>
               </View>
             </View>
-            <Pressable 
+            <Pressable
               onPress={() => handleNotificationToggle(!notificationsEnabled)}
               className="active:opacity-60"
               hitSlop={10}
@@ -309,9 +313,9 @@ export default function SettingsScreen() {
               )}
             </Pressable>
           </View>
-          
+
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
-          
+
           <Pressable onPress={() => router.push('/onboarding')} className="flex-row items-center justify-between p-3 active:opacity-60">
             <View className="flex-row items-center gap-3">
               <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
@@ -345,14 +349,70 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
+        {/* SECTION: ABOUT */}
+        <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
+          About
+        </ThemedText>
+
+        <View 
+          style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} 
+          className="rounded-2xl p-2 mb-6"
+        >
+          {/* ABOUT DEVELOPER */}
+          <Pressable onPress={() => Linking.openURL('https://brian-ali.netlify.app')} className="flex-row items-center justify-between p-3 active:opacity-60">
+            <View className="flex-row items-center gap-3">
+              <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
+                <User size="18" color={monochromeIconColor} variant="Broken" />
+              </View>
+              <View>
+                <ThemedText className="font-montBold text-sm">About Developer</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Visit personal portfolio</ThemedText>
+              </View>
+            </View>
+            <ArrowRight2 size="14" color="#a1a1aa" />
+          </Pressable>
+
+          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
+
+          {/* MORE APPS */}
+          <Pressable onPress={() => Linking.openURL('https://github.com/brianali-codes')} className="flex-row items-center justify-between p-3 active:opacity-60">
+            <View className="flex-row items-center gap-3">
+              <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
+                <Mobile size="18" color={monochromeIconColor} variant="Broken" />
+              </View>
+              <View>
+                <ThemedText className="font-montBold text-sm">More Apps</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Explore GitHub projects</ThemedText>
+              </View>
+            </View>
+            <ArrowRight2 size="14" color="#a1a1aa" />
+          </Pressable>
+
+          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
+
+          {/* SOCIALS */}
+          <Pressable onPress={() => setSocialsModalVisible(true)} className="flex-row items-center justify-between p-3 active:opacity-60">
+            <View className="flex-row items-center gap-3">
+              <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
+                <Share size="18" color={monochromeIconColor} variant="Broken" />
+              </View>
+              <View>
+                <ThemedText className="font-montBold text-sm">Socials</ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Connect across networks</ThemedText>
+              </View>
+            </View>
+            <ArrowRight2 size="14" color="#a1a1aa" />
+          </Pressable>
+        </View>
+
         {/* SECTION: COMMUNITY & SUPPORT */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
           Community & Support
         </ThemedText>
-        
+
         <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-5 mb-6">
           <View className="flex-row items-center gap-2 mb-2">
-            <Heart size="18"  color="#71717a" variant="Broken" />
+            <Heart size="18" color="#71717a" variant="Broken" />
             <ThemedText className="font-montBlack text-sm tracking-tight">Support Open Source</ThemedText>
           </View>
           <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
@@ -413,9 +473,7 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
 
-      {/* =========================================================================
-          CUSTOM HOOKED STATUS MODAL COMPONENT (Replaces Native Popups)
-          ========================================================================= */}
+      {/* --- SERVER CROSS-REFERENCE STATUS MODAL --- */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -423,46 +481,100 @@ export default function SettingsScreen() {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 items-center justify-center bg-black/60 px-6">
-          <View 
+          <View
             style={{ backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderColor: adaptiveBorderColor, borderWidth: 1 }}
             className="w-full rounded-3xl p-6 items-center shadow-2xl max-w-sm"
           >
-            {/* Upper Right Quick Close Vector */}
-            <Pressable 
-              onPress={() => setModalVisible(false)} 
+            <Pressable
+              onPress={() => setModalVisible(false)}
               className="absolute top-4 right-4 active:opacity-60"
             >
               <CloseCircle size="22" color={isDark ? '#a1a1aa' : '#71717a'} variant="Broken" />
             </Pressable>
 
-            {/* Dynamic Status Title */}
             <ThemedText className="font-montBlack text-lg text-center mt-2 mb-3 tracking-tight">
               {modalConfig.title}
             </ThemedText>
 
-            {/* Status Informational Message */}
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-1">
               {modalConfig.message}
             </ThemedText>
 
-            {/* Dynamic Action Grid Trigger Section */}
             <View className="flex-row items-center gap-3 w-full">
               {modalConfig.type === 'update' && (
-                <Button 
-                  type="dark" 
-                  text="Later" 
-                  onPress={() => modalVisible && setModalVisible(false)} 
+                <Button
+                  type="dark"
+                  text="Later"
+                  onPress={() => modalVisible && setModalVisible(false)}
                   className="flex-1 font-montBold"
                 />
               )}
-              <Button 
-                type={modalConfig.type === 'error' ? 'dark' : 'primary'} 
-                text={modalConfig.actionText || 'OK'} 
+              <Button
+                type={modalConfig.type === 'error' ? 'dark' : 'primary'}
+                text={modalConfig.actionText || 'OK'}
                 onPress={() => {
                   if (modalConfig.onAction) modalConfig.onAction();
                   setModalVisible(false);
-                }} 
+                }}
                 className="flex-1 font-montBold"
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* =========================================================================
+          NEW: SOCIALS CONNECT SELECTION MODAL
+          ========================================================================= */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={socialsModalVisible}
+        onRequestClose={() => setSocialsModalVisible(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60 px-6">
+          <View
+            style={{ backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderColor: adaptiveBorderColor, borderWidth: 1 }}
+            className="w-full rounded-3xl p-6 shadow-2xl max-w-sm"
+          >
+            <Pressable
+              onPress={() => setSocialsModalVisible(false)}
+              className="absolute top-4 right-4 active:opacity-60 z-10"
+            >
+              <CloseCircle size="22" color={isDark ? '#a1a1aa' : '#71717a'} variant="Broken" />
+            </Pressable>
+
+            <ThemedText className="font-montBlack text-lg text-center mt-2 mb-5 tracking-tight">
+              Connect with Me
+            </ThemedText>
+
+            <View className="gap-2 w-full mb-2">
+              <Button
+                type="primary"
+                text="Twitter / X"
+                onPress={() => {
+                  Linking.openURL('https://x.com/brianali427');
+                  setSocialsModalVisible(false);
+                }}
+                className="w-full font-montBold"
+              />
+              <Button
+                type="dark"
+                text="Instagram"
+                onPress={() => {
+                  Linking.openURL('https://instagram.com/luh_bryxe');
+                  setSocialsModalVisible(false);
+                }}
+                className="w-full font-montBold"
+              />
+              <Button
+                type="dark"
+                text="Youtube"
+                onPress={() => {
+                  Linking.openURL('https://www.youtube.com/@frappgiveaways');
+                  setSocialsModalVisible(false);
+                }}
+                className="w-full font-montBold"
               />
             </View>
           </View>

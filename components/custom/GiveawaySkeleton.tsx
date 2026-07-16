@@ -7,27 +7,40 @@ import { useCustomTheme } from '@/context/ThemeContext';
 interface GiveawaySkeletonProps {
   loading: boolean;
   variant?: 'normal' | 'compact' | 'minimal';
+  cardBgColor?: string;
+  adaptiveBorderColor?: string;
+  isDark?: boolean;
   children: ReactNode | ReactNode[];
 }
 
-export default function GiveawaySkeleton({ loading = false, variant = 'normal', children }: GiveawaySkeletonProps) {
+export default function GiveawaySkeleton({ 
+  loading = false, 
+  variant = 'normal', 
+  cardBgColor: customCardBgColor,
+  adaptiveBorderColor: customAdaptiveBorderColor,
+  isDark: customIsDark,
+  children 
+}: GiveawaySkeletonProps) {
   const { themeMode } = useCustomTheme();
-  const isDark = themeMode === 'dark';
+  
+  // Prioritize passed design tokens from screen parent, fallback to context state
+  const isDark = customIsDark !== undefined ? customIsDark : themeMode === 'dark';
 
   const isCompact = variant === 'compact';
   const isMinimal = variant === 'minimal';
 
-  // Exact theme matches from live components
-  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
+  // Fallbacks matched precisely to core specifications
+  const cardBgColor = customCardBgColor || (isDark ? '#2c2c35' : '#f1f2f6');
   const minimalBgColor = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
-  const textColor = useThemeColor({}, 'text');
   
-  const adaptiveBorderColor = isDark
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.05)';
+  const adaptiveBorderColor = customAdaptiveBorderColor || (isDark
+    ? '#3a3a45'
+    : '#e4e4e7');
 
-  // Pop color configuration
-  const skeletonColor = isDark ? '#3d3d4a' : '#e0e1e6';
+  // Exact shimmer match to Carousel component specification:
+  // Dark: rgba(255, 255, 255, 0.05) | Light: rgba(0, 0, 0, 0.04)
+  const skeletonColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
 
   const shadowStyle = Platform.select({
     ios: { 
@@ -155,7 +168,7 @@ export default function GiveawaySkeleton({ loading = false, variant = 'normal', 
 
                 {/* Split Action & Claim Offer Details Strip */}
                 <View 
-                  style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} 
+                  style={{ borderTopWidth: 1, borderColor: borderLine }} 
                   className="flex-row items-center justify-between pt-3 mt-0.5"
                 >
                   <Skeleton className="h-3.5 w-28 rounded-md" color={skeletonColor} />

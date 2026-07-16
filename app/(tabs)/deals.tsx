@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter } from 'iconsax-react-nativejs'; 
 
 import DealItem from '@/components/custom/DealItem';
-import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
 import BestDealsCarousel from '@/components/custom/BestDealsCarousel'; 
 import Button from '@/components/custom/Button';
 import { ThemedText } from '@/components/ThemedText';
@@ -34,7 +33,7 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="w-full h-12 rounded-xl border items-center justify-center active:opacity-60 bg-transparent"
+      className="w-full h-12 rounded-full border items-center justify-center active:opacity-60 bg-transparent"
       style={{ borderColor: dynamicBorderColor }}
     >
       <ThemedText 
@@ -48,31 +47,33 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
 }
 
 // =========================================================================
-// HIGH FIDELITY WORTH SUMMARY SKELETON (MATCHES INTRO MESSAGE CONTAINER)
+// HIGH FIDELITY WORTH SUMMARY SKELETON (UNIFORM WITH MAIN SCREEN)
 // =========================================================================
-function WorthSummarySkeleton({ cardBgColor, adaptiveBorderColor }: { cardBgColor: string; adaptiveBorderColor: string }) {
+function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+
   return (
     <View 
       style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
-      className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-60"
+      className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-85"
     >
       <View className="flex-row items-center flex-wrap gap-y-1.5">
-        <View className="w-44 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
-        <View className="w-8 h-3 bg-emerald-500/20 dark:bg-emerald-500/30 rounded mx-1" />
-        <View className="w-28 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
-        <View className="w-16 h-3 bg-purple-500/20 dark:bg-purple-500/30 rounded mx-1" />
-        <View className="w-20 h-3 bg-zinc-400/20 dark:bg-zinc-700/30 rounded" />
+        <View className="w-44 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-8 h-3 rounded mx-1" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
+        <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-16 h-3 rounded mx-1" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
+        <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
       </View>
     </View>
   );
 }
 
 // =========================================================================
-// HIGH FIDELITY BEST DEALS CAROUSEL SKELETON
+// HIGH FIDELITY BEST DEALS CAROUSEL SKELETON (UNIFORM WITH MAIN SCREEN)
 // =========================================================================
 function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
-  const shimmerBg = isDark ? '#3d3d4a' : '#e0e1e6';
-  const borderLine = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
 
   return (
     <View className="w-full mb-6 animate-pulse opacity-85">
@@ -84,44 +85,37 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
         }}
         className="rounded-2xl overflow-hidden w-full mb-2"
       >
-        {/* Banner Frame (Height matches exact 160px layout spec) */}
-        <View style={{ height: 160 }} className="w-full bg-zinc-300 dark:bg-zinc-800 relative justify-between p-3">
+        {/* Banner Graphic Frame Placeholder */}
+        <View style={{ height: 160, backgroundColor: shimmerBg }} className="w-full relative justify-between p-3">
           <View className="flex-row justify-between items-center w-full">
-            {/* Value Rank Badge (mimics dynamic flash badge inside image background) */}
-            <View className="w-28 h-5 rounded bg-zinc-400/35 dark:bg-zinc-700/40" />
-            
-            {/* Savings Percent Badge (mimics discount badge top right) */}
-            <View className="w-16 h-5 rounded bg-purple-500/30 dark:bg-purple-500/40" />
+            <View className="w-28 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
+            <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.25)' : 'rgba(147,51,234,0.15)' }} />
           </View>
         </View>
 
-        {/* Informational details matching BestDealsCarousel structure */}
+        {/* Informational Details matching Carousel structure */}
         <View className="p-4 space-y-3">
           <View>
-            {/* Title segment */}
             <View className="w-2/3 h-4 rounded mb-2.5" style={{ backgroundColor: shimmerBg }} />
-            {/* Multi-line Description block */}
             <View className="space-y-1.5">
               <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
               <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
             </View>
           </View>
 
-          {/* Separation Border Strip & Call to Action components */}
+          {/* Separation Border & Call-To-Action Mock placeholders */}
           <View 
             style={{ borderTopWidth: 1, borderColor: borderLine }} 
             className="flex-row items-center justify-between pt-2.5 mt-0.5"
           >
-            {/* "View deal on StoreFront" component placeholder */}
             <View className="flex-row items-center gap-1">
               <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-3.5 h-3.5 rounded bg-purple-500/20" />
+              <View className="w-3.5 h-3.5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
             </View>
             
-            {/* Pricing Details layout placeholder */}
             <View className="flex-row items-center gap-1.5">
               <View className="w-8 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-12 h-4 rounded bg-emerald-500/10 dark:bg-emerald-500/20" />
+              <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
             </View>
           </View>
         </View>
@@ -143,6 +137,72 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
           />
         ))}
       </View>
+    </View>
+  );
+}
+
+// =========================================================================
+// HIGH FIDELITY CARD LIST SKELETON (UNIFORM WITH MAIN SCREEN)
+// =========================================================================
+function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string; variant: 'normal' | 'compact' }) {
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const mockItems = [1, 2, 3, 4];
+
+  return (
+    <View className="w-full space-y-4">
+      {mockItems.map((item) => (
+        <View
+          key={item}
+          style={{
+            borderWidth: 1,
+            borderColor: adaptiveBorderColor,
+            backgroundColor: cardBgColor,
+          }}
+          className="rounded-2xl overflow-hidden w-full mb-4 animate-pulse opacity-85"
+        >
+          {variant === 'normal' ? (
+            /* --- NORMAL/LARGE DISPLAY VARIANT --- */
+            <View>
+              <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full" />
+              
+              <View className="p-4 space-y-3">
+                <View className="w-3/4 h-4 rounded" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-1/2 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+                
+                <View 
+                  style={{ borderTopWidth: 1, borderColor: borderLine }} 
+                  className="flex-row items-center justify-between pt-3 mt-1"
+                >
+                  <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+                  <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
+                </View>
+              </View>
+            </View>
+          ) : (
+            /* --- COMPACT LIST STYLE VARIANT --- */
+            <View className="p-3 flex-row items-center">
+              <View 
+                style={{ width: 84, height: 84, backgroundColor: shimmerBg }} 
+                className="rounded-xl shrink-0 mr-3" 
+              />
+              
+              <View className="flex-1 justify-between h-20 py-0.5">
+                <View className="space-y-2">
+                  <View className="w-5/6 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
+                  <View className="w-1/2 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
+                </View>
+
+                <View className="flex-row items-center justify-between">
+                  <View className="w-16 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
+                  <View className="w-12 h-4.5 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
+      ))}
     </View>
   );
 }
@@ -286,7 +346,7 @@ export default function FreeScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* --- BRAND HEADER ROW POLISHED TO MATCH COMPACT SIZES --- */}
+        {/* --- BRAND HEADER ROW --- */}
         <View className="flex-row items-center justify-between w-full mb-6">
           <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
             <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
@@ -360,12 +420,11 @@ export default function FreeScreen() {
         {isLoading ? (
           selectedPlatform === 'all' && (
             <View className="w-full">
-              {/* High Fidelity Worth Summary Skeleton */}
               <WorthSummarySkeleton 
+                isDark={isDark}
                 cardBgColor={cardBgColor} 
                 adaptiveBorderColor={adaptiveBorderColor} 
               />
-              {/* High Fidelity Carousel Skeleton Component */}
               <CarouselSkeleton 
                 isDark={isDark} 
                 cardBgColor={cardBgColor} 
@@ -394,7 +453,6 @@ export default function FreeScreen() {
                 </ThemedText>
               </View>
 
-              {/* --- CAROUSEL PLACED DIRECTLY BELOW SUMMARY SECTION --- */}
               <BestDealsCarousel />
             </>
           )
@@ -422,10 +480,12 @@ export default function FreeScreen() {
             <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform)} className="w-full" text="Retry Connection" />
           </View>
         ) : isLoading ? (
-          /* Structured layout list loading skeleton matching row variants */
-          <GiveawaySkeleton loading={true} variant={layoutVariant}>
-            <></>
-          </GiveawaySkeleton>
+          <CardListSkeleton 
+            variant={layoutVariant} 
+            cardBgColor={cardBgColor}
+            adaptiveBorderColor={adaptiveBorderColor}
+            isDark={isDark}
+          />
         ) : giveaways.length === 0 ? (
           <View 
             style={[
