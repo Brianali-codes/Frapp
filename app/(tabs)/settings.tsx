@@ -70,7 +70,7 @@ export default function SettingsScreen() {
   const currentLanguageCode = i18n?.language || 'en';
   const activeLanguageName = currentLanguageCode.startsWith('es') ? 'Español' : 'English';
 
-  const handleSelectLanguage = async (langCode: 'en' | 'es') => {
+  const handleSelectLanguage = async (langCode: 'en' | 'fr' | 'es'  | 'zh' | 'sw' | 'pt' | 'jp' | 'de') => {
     try {
       await i18n.changeLanguage(langCode);
     } catch (e) {
@@ -729,6 +729,72 @@ export default function SettingsScreen() {
               >
                 <ThemedText className="font-montBold text-sm">Español</ThemedText>
                 {currentLanguageCode.startsWith('es') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
+
+               <Pressable
+                onPress={() => handleSelectLanguage('jp')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">日本語</ThemedText>
+                {currentLanguageCode.startsWith('jp') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
+
+               <Pressable
+                onPress={() => handleSelectLanguage('sw')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">Kiswahili</ThemedText>
+                {currentLanguageCode.startsWith('sw') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
+
+               <Pressable
+                onPress={() => handleSelectLanguage('pt')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">Português</ThemedText>
+                {currentLanguageCode.startsWith('pt') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
+
+               <Pressable
+                onPress={() => handleSelectLanguage('zh')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">中文</ThemedText>
+                {currentLanguageCode.startsWith('zh') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleSelectLanguage('fr')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">Français</ThemedText>
+                {currentLanguageCode.startsWith('fr') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleSelectLanguage('de')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">Deutsch</ThemedText>
+                {currentLanguageCode.startsWith('de') && (
                   <TickCircle size="20" color="#a855f7" variant="Bold" />
                 )}
               </Pressable>
