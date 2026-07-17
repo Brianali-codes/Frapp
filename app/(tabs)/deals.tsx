@@ -1,541 +1,642 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter } from 'iconsax-react-nativejs'; 
-
-import DealItem from '@/components/custom/DealItem';
-import BestDealsCarousel from '@/components/custom/BestDealsCarousel'; 
-import Button from '@/components/custom/Button';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Image, 
+  Linking, 
+  View, 
+  Platform, 
+  Pressable, 
+  Share, 
+  Text, 
+  Modal, 
+  ScrollView, 
+  Dimensions,
+  PanResponder,
+  Animated
+} from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as SecureStore from 'expo-secure-store'; // Added for local data persistence
 import { ThemedText } from '@/components/ThemedText';
-
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { useCustomTheme } from '@/context/ThemeContext';
+import { ThemedView } from '@/components/ThemedView';
 import { FreeGiveaway } from '@/types';
+import { useCustomTheme } from '@/context/ThemeContext';
+import { 
+  ArrowCircleRight, 
+  ExportSquare, 
+  Share as ShareIcon, 
+  CalendarTick, 
+  Game, 
+  Gift,
+  InfoCircle,
+  TimerStart,
+  Heart         
+} from 'iconsax-react-nativejs';
 
-const PLATFORMS = [
-  { id: 'all', label: 'All Stores' },
-  { id: '1', label: 'Steam' },
-  { id: '11', label: 'Epic Games' },
-  { id: '7', label: 'GOG' },
-  { id: '3', label: 'Amazon' },
-];
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-interface PaginationButtonProps {
-  text: string;
-  onPress: () => void;
-  isDark: boolean;
+interface GiveawayItemProps {
+  giveaway: FreeGiveaway;
+  variant?: 'normal' | 'compact' | 'minimal';
+  ctaText?: string; 
+  isSaved?: boolean;             
+  onToggleSave?: () => void;     
 }
 
-function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
-  const dynamicBorderColor = isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(28, 28, 30, 1)';
-  const dynamicTextColor = isDark ? '#ffffff' : '#1c1c1e';
+// Helper to calculate relative days remaining
+const getDaysRemainingText = (endDateString: string | undefined): { label: string; isDays: boolean } | null => {
+  if (!endDateString || endDateString === 'N/A') return null;
 
-  return (
-    <Pressable
-      onPress={onPress}
-      className="w-full h-12 rounded-full border items-center justify-center active:opacity-60 bg-transparent"
-      style={{ borderColor: dynamicBorderColor }}
-    >
-      <ThemedText 
-        style={{ color: dynamicTextColor }} 
-        className="font-montBold text-sm uppercase tracking-wider"
-      >
-        {text}
-      </ThemedText>
-    </Pressable>
-  );
-}
+  const parsedDate = Date.parse(endDateString);
+  if (isNaN(parsedDate)) {
+    return { label: `Ends: ${endDateString}`, isDays: false };
+  }
 
-// =========================================================================
-// HIGH FIDELITY WORTH SUMMARY SKELETON (UNIFORM WITH MAIN SCREEN)
-// =========================================================================
-function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-
-  return (
-    <View 
-      style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
-      className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-85"
-    >
-      <View className="flex-row items-center flex-wrap gap-y-1.5">
-        <View className="w-44 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-8 h-3 rounded mx-1" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
-        <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-16 h-3 rounded mx-1" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
-        <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-      </View>
-    </View>
-  );
-}
-
-// =========================================================================
-// HIGH FIDELITY BEST DEALS CAROUSEL SKELETON (UNIFORM WITH MAIN SCREEN)
-// =========================================================================
-function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-  const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-
-  return (
-    <View className="w-full mb-6 animate-pulse opacity-85">
-      <View
-        style={{ 
-          borderWidth: 1, 
-          borderColor: adaptiveBorderColor,
-          backgroundColor: cardBgColor 
-        }}
-        className="rounded-2xl overflow-hidden w-full mb-2"
-      >
-        {/* Banner Graphic Frame Placeholder */}
-        <View style={{ height: 160, backgroundColor: shimmerBg }} className="w-full relative justify-between p-3">
-          <View className="flex-row justify-between items-center w-full">
-            <View className="w-28 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
-            <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.25)' : 'rgba(147,51,234,0.15)' }} />
-          </View>
-        </View>
-
-        {/* Informational Details matching Carousel structure */}
-        <View className="p-4 space-y-3">
-          <View>
-            <View className="w-2/3 h-4 rounded mb-2.5" style={{ backgroundColor: shimmerBg }} />
-            <View className="space-y-1.5">
-              <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-            </View>
-          </View>
-
-          {/* Separation Border & Call-To-Action Mock placeholders */}
-          <View 
-            style={{ borderTopWidth: 1, borderColor: borderLine }} 
-            className="flex-row items-center justify-between pt-2.5 mt-0.5"
-          >
-            <View className="flex-row items-center gap-1">
-              <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-3.5 h-3.5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
-            </View>
-            
-            <View className="flex-row items-center gap-1.5">
-              <View className="w-8 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* Interactive Dot pagination controller mockups */}
-      <View className="flex-row items-center justify-center gap-1.5 mt-1.5">
-        {[0, 1, 2, 3, 4].map((_, dotIndex) => (
-          <View
-            key={dotIndex}
-            style={{
-              width: dotIndex === 0 ? 14 : 6,
-              height: 6,
-              backgroundColor: dotIndex === 0 
-                ? '#9333ea' 
-                : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'),
-              borderRadius: 999,
-            }}
-          />
-        ))}
-      </View>
-    </View>
-  );
-}
-
-// =========================================================================
-// HIGH FIDELITY CARD LIST SKELETON (UNIFORM WITH MAIN SCREEN)
-// =========================================================================
-function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string; variant: 'normal' | 'compact' }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-  const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-  const mockItems = [1, 2, 3, 4];
-
-  return (
-    <View className="w-full space-y-4">
-      {mockItems.map((item) => (
-        <View
-          key={item}
-          style={{
-            borderWidth: 1,
-            borderColor: adaptiveBorderColor,
-            backgroundColor: cardBgColor,
-          }}
-          className="rounded-2xl overflow-hidden w-full mb-4 animate-pulse opacity-85"
-        >
-          {variant === 'normal' ? (
-            /* --- NORMAL/LARGE DISPLAY VARIANT --- */
-            <View>
-              <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full" />
-              
-              <View className="p-4 space-y-3">
-                <View className="w-3/4 h-4 rounded" style={{ backgroundColor: shimmerBg }} />
-                <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                <View className="w-1/2 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                
-                <View 
-                  style={{ borderTopWidth: 1, borderColor: borderLine }} 
-                  className="flex-row items-center justify-between pt-3 mt-1"
-                >
-                  <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
-                </View>
-              </View>
-            </View>
-          ) : (
-            /* --- COMPACT LIST STYLE VARIANT --- */
-            <View className="p-3 flex-row items-center">
-              <View 
-                style={{ width: 84, height: 84, backgroundColor: shimmerBg }} 
-                className="rounded-xl shrink-0 mr-3" 
-              />
-              
-              <View className="flex-1 justify-between h-20 py-0.5">
-                <View className="space-y-2">
-                  <View className="w-5/6 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-1/2 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
-                </View>
-
-                <View className="flex-row items-center justify-between">
-                  <View className="w-16 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-12 h-4.5 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
-                </View>
-              </View>
-            </View>
-          )}
-        </View>
-      ))}
-    </View>
-  );
-}
-
-export default function FreeScreen() {
-  const router = useRouter();
-  const scrollRef = useRef<ScrollView>(null); 
+  const targetDate = new Date(parsedDate);
+  const today = new Date();
   
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-  const [giveaways, setGiveaways] = useState<FreeGiveaway[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [layoutVariant, setLayoutVariant] = useState<'compact' | 'normal'>('compact');
-  
-  const [showFilterBar, setShowFilterBar] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
-  
-  const itemsPerPage = 10;
+  today.setHours(0, 0, 0, 0);
+  targetDate.setHours(0, 0, 0, 0);
 
-  const backgroundColor = useThemeColor({}, 'background');
-  const { themeMode, toggleTheme } = useCustomTheme();
+  const diffTime = targetDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  const isDark = themeMode === 'dark';
-  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
-  const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
+  if (diffDays < 0) {
+    return { label: 'Expired', isDays: true };
+  } else if (diffDays === 0) {
+    return { label: 'Ends Today', isDays: true };
+  } else if (diffDays === 1) {
+    return { label: '1 Day Left', isDays: true };
+  } else {
+    return { label: `${diffDays} Days Left`, isDays: true };
+  }
+};
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentPagedGiveaways = useMemo(() => {
-    return giveaways.slice(startIndex, endIndex);
-  }, [giveaways, startIndex, endIndex]);
+export default function GiveawayItem({ 
+  giveaway, 
+  variant = 'normal', 
+  ctaText = 'Claim',
+  isSaved = false,
+  onToggleSave = () => {} 
+}: GiveawayItemProps) {
+  const { themeMode } = useCustomTheme();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [localIsSaved, setLocalIsSaved] = useState(isSaved);
+  const translateY = useRef(new Animated.Value(0)).current;
 
-  const fetchData = async (storeId: string = 'all') => {
-    setIsLoading(true);
-    setHasError(false);
+  // --- PERSISTENCE LOGIC (SECURESTORE SYNC) ---
+
+  // 1. On Mount: Query storage to see if this giveaway is already saved
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      try {
+        const stored = await SecureStore.getItemAsync('saved_giveaways');
+        if (stored) {
+          const parsed: FreeGiveaway[] = JSON.parse(stored);
+          const exists = parsed.some((item) => item.id === giveaway.id);
+          setLocalIsSaved(exists);
+        } else {
+          setLocalIsSaved(isSaved);
+        }
+      } catch (error) {
+        console.error('Failed to read saved list:', error);
+        setLocalIsSaved(isSaved);
+      }
+    };
+    checkSavedStatus();
+  }, [giveaway.id, isSaved]);
+
+  // 2. Local Toggle and Write handler
+  const handleToggle = async () => {
+    const nextSavedState = !localIsSaved;
+    setLocalIsSaved(nextSavedState);
+    
+    // Call the parent callback to notify upper components (if any UI updates are expected there)
+    onToggleSave();
+
     try {
-      let url = `https://www.cheapshark.com/api/1.0/deals?upperPrice=100&pageSize=50`; 
-      if (storeId !== 'all') {
-        url += `&storeID=${storeId}`;
+      const stored = await SecureStore.getItemAsync('saved_giveaways');
+      let parsed: FreeGiveaway[] = stored ? JSON.parse(stored) : [];
+
+      if (!nextSavedState) {
+        // Unsave: Filter out current giveaway
+        parsed = parsed.filter((item) => item.id !== giveaway.id);
+      } else {
+        // Save: Add to storage
+        parsed.push(giveaway);
       }
 
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Server payload error');
-      
-      const rawDeals = await response.json();
-      
-      const normalizedData: FreeGiveaway[] = (Array.isArray(rawDeals) ? rawDeals : []).map((deal: any, index: number) => {
-        const percentSavings = deal.savings ? Math.round(parseFloat(deal.savings)) : 0;
-        const currentSalePrice = parseFloat(deal.salePrice || '0');
-        const guaranteedUniqueId = deal.dealID ? deal.dealID : `deal-${index}-${deal.gameID}`;
-
-        return {
-          id: guaranteedUniqueId as any, 
-          title: deal.title || 'Unknown Title',
-          thumbnail: deal.thumb || '',
-          image: deal.thumb || '',
-          description: percentSavings > 0 
-            ? `Save ${percentSavings}% off! Now $${deal.salePrice} down from $${deal.normalPrice}.`
-            : `Available now for $${deal.salePrice}.`,
-          short_description: `Score this offer on Store #${deal.storeID}. Deal Rating: ${deal.dealRating || 'N/A'}/10`,
-          open_giveaway_url: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
-          open_giveaway: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
-          game_url: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
-          worth: currentSalePrice === 0 ? 'FREE' : `$${deal.salePrice}`,
-          end_date: 'Limited Time Offer',
-          platform: deal.storeID || storeId, 
-          genre: 'Video Game Deal',
-          publisher: 'Retail Distribution',
-          release_date: deal.releaseDate && deal.releaseDate > 0 ? new Date(deal.releaseDate * 1000).toISOString() : '',
-          margin: '0',
-          dealID: deal.dealID,
-          storeID: deal.storeID,
-          salePrice: deal.salePrice,
-          normalPrice: deal.normalPrice,
-          savings: percentSavings.toString()
-        };
-      });
-
-      setGiveaways(normalizedData);
+      await SecureStore.setItemAsync('saved_giveaways', JSON.stringify(parsed));
     } catch (error) {
-      console.error('CheapShark network error:', error);
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
+      console.error('Error modifying saved list in SecureStore:', error);
     }
   };
 
-  useEffect(() => {
-    fetchData(selectedPlatform);
-  }, [selectedPlatform]);
+  // --- END OF PERSISTENCE LOGIC ---
 
-  const safeScrollToTop = () => {
-    setTimeout(() => {
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
-    }, 40);
+  const isDark = themeMode === 'dark';
+  const isCompact = variant === 'compact';
+  const isMinimal = variant === 'minimal';
+
+  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
+  const minimalBgColor = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
+
+  const adaptiveBorderColor = isDark
+    ? 'rgba(255, 255, 255, 0.08)'
+    : 'rgba(0, 0, 0, 0.05)';
+
+  const iconBtnBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
+  const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+  const iconColor = isDark ? '#a78bfa' : '#7c3aed';
+
+  const worthValue = giveaway.worth || 'N/A';
+  const hasWorth = worthValue !== 'N/A' && worthValue !== '0' && worthValue !== '$0.00';
+
+  const daysRemainingInfo = getDaysRemainingText(giveaway.end_date);
+
+  const handleOpenClaimSite = async () => {
+    const targetUrl = giveaway.open_giveaway_url || giveaway.open_giveaway || giveaway.game_url;
+    if (!targetUrl) return;
+    try {
+      await WebBrowser.openBrowserAsync(targetUrl, {
+        toolbarColor: isDark ? '#2c2c35' : '#f1f2f6',
+        controlsColor: '#9333ea', 
+        secondaryToolbarColor: isDark ? '#1c1c1e' : '#ffffff',
+        enableBarCollapsing: true,
+        showTitle: true,
+      });
+    } catch (error) {
+      console.error('Failed to launch in-app web view layer:', error);
+      if (targetUrl) Linking.openURL(targetUrl);
+    }
   };
 
-  const handlePlatformChange = (platformId: string) => {
-    setCurrentPage(1);
-    setSelectedPlatform(platformId);
+  const handleShare = async () => {
+    const targetUrl = giveaway.open_giveaway_url || giveaway.open_giveaway || giveaway.game_url;
+    if (!targetUrl) return;
+    try {
+      await Share.share({
+        message: `🔥 Freebie Alert: Get "${giveaway.title}" for FREE ${hasWorth ? `(Worth ${worthValue})` : ''} on ${giveaway.platform || 'PC'}!\nClaim here: ${targetUrl}`,
+        title: giveaway.title,
+      });
+    } catch (error) {
+      console.error('Error sharing giveaway:', error);
+    }
   };
 
-  const handleNextPage = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setCurrentPage(prev => prev + 1);
-    safeScrollToTop();
-  };
-
-  const handleHoldPrevPage = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-    safeScrollToTop();
-  };
-
-  const handleLayoutVariantToggle = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal');
-  };
-
-  const handleFilterBarToggle = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setShowFilterBar(prev => !prev);
-  };
-
-  const now = new Date();
-  const day = now.getDate();
-  const year = now.getFullYear();
-  const monthName = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ][now.getMonth()];
-
-  const hasNextPage = endIndex < giveaways.length;
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return gestureState.dy > 5;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          translateY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 100) {
+          Animated.timing(translateY, {
+            toValue: SCREEN_HEIGHT * 0.7,
+            duration: 220,
+            useNativeDriver: true,
+          }).start(() => {
+            setModalVisible(false);
+            translateY.setValue(0);
+          });
+        } else {
+          Animated.spring(translateY, {
+            toValue: 0,
+            friction: 6,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   return (
-    <View style={{ flex: 1, backgroundColor }}>
-      <ScrollView
-        ref={scrollRef}
-        className='flex-1 px-4 pt-10'
-        style={{ backgroundColor }}
-        contentContainerStyle={{ paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* --- BRAND HEADER ROW --- */}
-        <View className="flex-row items-center justify-between w-full mb-6">
-          <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
-            <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
-              <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+    <>
+      {/* =========================================================================
+          MINIMAL VARIANT
+          ========================================================================= */}
+      {isMinimal && (
+        <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
+          <ThemedView
+            key={giveaway.id}
+            className="rounded-2xl mb-4 p-2.5 flex-row gap-3 border"
+            style={{ backgroundColor: minimalBgColor, borderColor: adaptiveBorderColor }}
+          >
+            <View className="relative w-24 h-24 rounded-xl overflow-hidden bg-zinc-800">
+              <Image source={{ uri: giveaway.thumbnail || giveaway.image }} className="w-full h-full" resizeMode="cover" />
+              <View className="absolute inset-0 bg-black/10" />
+
+              {hasWorth && (
+                <View className="absolute bottom-1 left-1 bg-purple-600 px-1 py-0.5 rounded shadow-sm">
+                  <Text className="text-[7px] font-montBlack text-white uppercase tracking-tight">
+                    {worthValue} VALUE
+                  </Text>
+                </View>
+              )}
             </View>
-            <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">Game Deals.</ThemedText>
-          </Pressable>
 
-          <View className="flex-row items-center gap-2">
-            <Pressable
-              onPress={handleLayoutVariantToggle}
-              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
-            >
-              {layoutVariant === 'normal' ? <Element3 size="18" color="#9333ea" variant="Broken" /> : <RowVertical size="18" color="#9333ea" variant="Broken" />}
-            </Pressable>
-
-            <Pressable
-              onPress={handleFilterBarToggle}
-              style={{ backgroundColor: showFilterBar ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
-              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
-            >
-              <Filter size="18" color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
-            </Pressable>
-
-            <Pressable onPress={() => router.push('/(tabs)/settings')} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
-              <Setting size="18" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
-            </Pressable>
-
-            <Pressable onPress={toggleTheme} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
-              {isDark ? <Sun1 size="18" color="#f4f4f5" variant="Broken" /> : <Moon size="18" color="#3f3f46" variant="Broken" />}
-            </Pressable>
-          </View>
-        </View>
-
-        {/* --- UNCLIPPED HORIZONTAL SCROLLFILTER SECTION --- */}
-        {showFilterBar && (
-          <View className="w-full mb-5">
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              className="-mx-4 py-1"
-              style={{ height: 50 }}
-              contentContainerStyle={{ alignItems: 'center', gap: 8, paddingHorizontal: 16 }}
-            >
-              {PLATFORMS.map((platform) => {
-                const isSelected = selectedPlatform === platform.id;
-                return (
-                  <Pressable
-                    key={platform.id}
-                    onPress={() => handlePlatformChange(platform.id)}
-                    style={{
-                      backgroundColor: isSelected ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5'),
-                      borderWidth: 1,
-                      borderColor: isSelected ? '#9333ea' : (isDark ? '#3c3c3a' : '#e4e4e7'),
-                      height: 36,
-                    }}
-                    className="px-4 rounded-full items-center justify-center shadow-sm"
-                  >
-                    <ThemedText style={{ color: isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a') }} className={`text-xs ${isSelected ? 'font-montBlack' : 'font-montBold'}`}>
-                      {platform.label}
-                    </ThemedText>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </View>
-        )}
-
-        {/* --- CAROUSEL OR SKELETON LOADER SECTION --- */}
-        {isLoading ? (
-          selectedPlatform === 'all' && (
-            <View className="w-full">
-              <WorthSummarySkeleton 
-                isDark={isDark}
-                cardBgColor={cardBgColor} 
-                adaptiveBorderColor={adaptiveBorderColor} 
-              />
-              <CarouselSkeleton 
-                isDark={isDark} 
-                cardBgColor={cardBgColor} 
-                adaptiveBorderColor={adaptiveBorderColor} 
-              />
-            </View>
-          )
-        ) : (
-          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && (
-            <>
-              {/* --- SUMMARY SECTION CONTAINER --- */}
-              <View
-                style={[
-                  { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
-                  Platform.select({
-                    ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
-                    android: { elevation: 2 }
-                  })
-                ]}
-                className="rounded-2xl p-4 mb-5"
-              >
-                <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
-                  We parsed through active gaming storefronts and discovered{' '}
-                  <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{giveaways.length}</ThemedText> massive discounts live as of{' '}
-                  <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>. Tap any title to secure your key!
+            <View className="flex-1 justify-between py-0.5">
+              <View>
+                <View className="flex-row items-center justify-between mb-0.5 pr-1">
+                  <ThemedText numberOfLines={1} className="font-montBlack text-sm flex-1 tracking-tight">
+                    {giveaway.title}
+                  </ThemedText>
+                </View>
+                <ThemedText className="text-zinc-500 dark:text-zinc-400 text-[11px] leading-normal font-mont" numberOfLines={2}>
+                  {giveaway.description}
                 </ThemedText>
               </View>
 
-              <BestDealsCarousel />
-            </>
-          )
-        )}
-
-        {/* --- MAIN DATA CONTENT BLOCKS --- */}
-        {hasError ? (
-          <View 
-            style={[
-              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
-              Platform.select({
-                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
-                android: { elevation: 4 }
-              })
-            ]} 
-            className="rounded-3xl p-6 items-center justify-center my-6"
-          >
-            <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
-              <WifiSquare size="36" color="#9333ea" variant="Broken" />
-            </View>
-            <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">Connection Interrupted</ThemedText>
-            <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              We can't sync up with the servers right now. Make sure your device is online and let's try that again.
-            </ThemedText>
-            <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform)} className="w-full" text="Retry Connection" />
-          </View>
-        ) : isLoading ? (
-          <CardListSkeleton 
-            variant={layoutVariant} 
-            cardBgColor={cardBgColor}
-            adaptiveBorderColor={adaptiveBorderColor}
-            isDark={isDark}
-          />
-        ) : giveaways.length === 0 ? (
-          <View 
-            style={[
-              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
-              Platform.select({
-                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
-                android: { elevation: 4 }
-              })
-            ]} 
-            className="rounded-3xl p-6 items-center justify-center my-6"
-          >
-            <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
-              <Element3 size="36" color="#9333ea" variant="Broken" />
-            </View>
-            <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">No Matches Found</ThemedText>
-            <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              No live deals found under this storefront category.
-            </ThemedText>
-            <Button type="primary" onPress={() => handlePlatformChange('all')} className="w-full" text="Reset Filters" />
-          </View>
-        ) : (
-          <View className="w-full">
-            {currentPagedGiveaways.map((giveaway) => (
-              <DealItem key={String(giveaway.id)} giveaway={giveaway} variant={layoutVariant} />
-            ))}
-          </View>
-        )}
-
-        {/* --- DYNAMIC PACKED PAGINATION TOOLBAR --- */}
-        {!isLoading && !hasError && giveaways.length > itemsPerPage && (
-          <View className="mt-4 mb-24 w-full">
-            {currentPage === 1 ? (
-              hasNextPage && (
-                <PaginationButton text="Next Games" onPress={handleNextPage} isDark={isDark} />
-              )
-            ) : (
-              <View className="flex-row items-center gap-3 w-full">
-                <View className="flex-1">
-                  <PaginationButton text="Previous" onPress={handleHoldPrevPage} isDark={isDark} />
+              <View className="flex-row items-center justify-between mt-1">
+                <View className="flex-row items-center gap-1.5">
+                  <ThemedText className="font-montBlack text-[12px] text-emerald-500">
+                    FREE
+                  </ThemedText>
+                  {hasWorth && (
+                    <Text className="text-[10px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
+                      {worthValue}
+                    </Text>
+                  )}
                 </View>
-                {hasNextPage && (
-                  <View className="flex-1">
-                    <PaginationButton text="Next Games" onPress={handleNextPage} isDark={isDark} />
+                
+                <View className="flex-row items-center gap-1.5">
+                  <Pressable onPress={handleToggle} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
+                    {localIsSaved ? (
+                      <Heart size="13" color="#22c55e" variant="Bold" />
+                    ) : (
+                      <Heart size="13" color={iconColor} variant="Outline" />
+                    )}
+                  </Pressable>
+                  <Pressable onPress={handleOpenClaimSite} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
+                    <ExportSquare size="13" color={iconColor} variant="Outline" />
+                  </Pressable>
+                  <Pressable onPress={handleShare} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
+                    <ShareIcon size="13" color={iconColor} variant="Outline" />
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </ThemedView>
+        </Pressable>
+      )}
+
+      {/* =========================================================================
+          COMPACT VARIANT
+          ========================================================================= */}
+      {isCompact && (
+        <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
+          <ThemedView
+            key={giveaway.id}
+            className="rounded-2xl mb-4 p-3 flex-row gap-3"
+            style={[
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+              Platform.select({
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 2 : 4 }, shadowOpacity: isDark ? 0.25 : 0.06, shadowRadius: isDark ? 8 : 10 },
+                android: { elevation: isDark ? 2 : 3 }
+              })
+            ]}
+          >
+            <View className="relative w-28 h-28 rounded-xl overflow-hidden bg-zinc-800">
+              <Image source={{ uri: giveaway.thumbnail || giveaway.image }} className="w-full h-full" resizeMode="cover" />
+              <View className="absolute inset-0 bg-black/10" />
+
+              {hasWorth && (
+                <View className="absolute bottom-1.5 left-1.5 bg-purple-600 px-1.5 py-0.5 rounded shadow-sm">
+                  <Text className="text-[8px] font-montBlack text-white uppercase tracking-wider">
+                    {worthValue} VALUE
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View className="flex-1 justify-between py-0.5">
+              <View>
+                <ThemedText numberOfLines={1} className="font-montBlack text-base tracking-tight mb-1">
+                  {giveaway.title}
+                </ThemedText>
+                <ThemedText className="text-zinc-500 dark:text-zinc-400 text-[11px] leading-snug font-mont" numberOfLines={2}>
+                  {giveaway.description}
+                </ThemedText>
+              </View>
+
+              <View className="flex-row items-center justify-between mt-1">
+                <View className="flex-row items-center gap-1.5">
+                  <ThemedText className="font-montBlack text-[12px] text-emerald-500">
+                    FREE
+                  </ThemedText>
+                  {hasWorth && (
+                    <Text className="text-[10px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
+                      {worthValue}
+                    </Text>
+                  )}
+                </View>
+                
+                <View className="flex-row items-center gap-1.5">
+                  <Pressable onPress={handleToggle} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
+                    {localIsSaved ? (
+                      <Heart size="15" color="#22c55e" variant="Bold" />
+                    ) : (
+                      <Heart size="15" color={iconColor} variant="Outline" />
+                    )}
+                  </Pressable>
+                  <Pressable onPress={handleOpenClaimSite} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
+                    <ExportSquare size="15" color={iconColor} variant="Outline" />
+                  </Pressable>
+                  <Pressable onPress={handleShare} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
+                    <ShareIcon size="15" color={iconColor} variant="Outline" />
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </ThemedView>
+        </Pressable>
+      )}
+
+      {/* =========================================================================
+          NORMAL VARIANT
+          ========================================================================= */}
+      {!isMinimal && !isCompact && (
+        <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
+          <ThemedView
+            key={giveaway.id}
+            className="rounded-2xl mb-5"
+            style={[
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor, overflow: 'hidden' },
+              Platform.select({
+                ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 5 }, shadowOpacity: isDark ? 0.22 : 0.06, shadowRadius: isDark ? 8 : 10 },
+                android: { elevation: isDark ? 2 : 4 }
+              })
+            ]}
+          >
+            <View className="relative w-full h-40 bg-zinc-900">
+              <Image source={{ uri: giveaway.image || giveaway.thumbnail }} className="w-full h-full" resizeMode="cover" />
+              <View className="absolute inset-0 bg-black/10" />
+
+              {hasWorth && (
+                <View className="absolute top-3 left-3 bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
+                  <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
+                    {worthValue} VALUE
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View className="p-4">
+              <ThemedText numberOfLines={1} className="font-montBlack text-base tracking-tight mb-0.5">
+                {giveaway.title}
+              </ThemedText>
+              <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-snug font-mont mb-3" numberOfLines={2}>
+                {giveaway.description}
+              </ThemedText>
+
+              <View 
+                style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} 
+                className="flex-row items-center justify-between pt-2.5 mt-0.5"
+              >
+                <View className="flex-row items-center gap-1">
+                  <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
+                    {ctaText}
+                  </ThemedText>
+                  <ArrowCircleRight size="14" color="#9333ea" variant="Bold" />
+                </View>
+
+                <View className="flex-row items-center gap-3">
+                  <View className="flex-row items-center gap-1.5">
+                    <ThemedText className="text-[12px] font-montBlack text-emerald-500">
+                      FREE
+                    </ThemedText>
+                    {hasWorth && (
+                      <Text className="text-[10px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
+                        {worthValue}
+                      </Text>
+                    )}
+                  </View>
+
+                  <View className="flex-row items-center gap-1.5">
+                    <Pressable onPress={handleToggle} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
+                      {localIsSaved ? (
+                        <Heart size="15" color="#22c55e" variant="Bold" />
+                      ) : (
+                        <Heart size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+                      )}
+                    </Pressable>
+
+                    <Pressable onPress={handleOpenClaimSite} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
+                      <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+                    </Pressable>
+
+                    <Pressable onPress={handleShare} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
+                       <ShareIcon size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </ThemedView>
+        </Pressable>
+      )}
+
+      {/* =========================================================================
+          70% HEIGHT INTERACTIVE DETAIL MODAL WITH SWIPE GESTURE
+          ========================================================================= */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-end">
+          {/* Transparent Backdrop to detect tap-outside dismissal */}
+          <Pressable 
+            style={{ ...Platform.select({ web: { cursor: 'default' } }), position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            onPress={() => setModalVisible(false)}
+          />
+
+          {/* Sheet container constrained to 70% height */}
+          <Animated.View 
+            style={{ 
+              height: SCREEN_HEIGHT * 0.7, 
+              backgroundColor: isDark ? '#1e1e24' : '#ffffff',
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              overflow: 'hidden',
+              transform: [{ translateY }]
+            }}
+            className="w-full flex-col shadow-2xl"
+          >
+            {/* Gesture banner area (Image + Swipe Indicator overlay) */}
+            <View 
+              {...panResponder.panHandlers} 
+              className="w-full h-[35%] relative bg-zinc-950"
+            >
+              {giveaway.image || giveaway.thumbnail ? (
+                <Image
+                  source={{ uri: giveaway.image || giveaway.thumbnail }}
+                  className="w-full h-full"
+                  resizeMode="cover"
+                />
+              ) : (
+                <View className="w-full h-full items-center justify-center bg-zinc-900">
+                  <Game size="40" color="#9333ea" variant="Broken" />
+                </View>
+              )}
+              <View className="absolute inset-0 bg-black/35" />
+
+              {/* Floating modern visual drag handle bar */}
+              <View className="absolute top-3 inset-x-0 items-center">
+                <View 
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }} 
+                  className="w-12 h-1 rounded-full" 
+                />
+              </View>
+
+              {/* Floating Platform Badge */}
+              <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-0.5 rounded border border-purple-500/30">
+                <Text className="text-[9px] font-montBlack text-purple-400 tracking-wider uppercase">
+                  {giveaway.platform || 'Multi-platform'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Scrollable Information Body */}
+            <View className="flex-1">
+              <ScrollView 
+                className="flex-1 px-5 pt-4"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              >
+                {/* Type & Value Line */}
+                <View className="flex-row items-center justify-between mb-2">
+                  <ThemedText className="font-mont text-xs tracking-wider uppercase opacity-60">
+                    {giveaway.type || 'Free Game Loot'}
+                  </ThemedText>
+                  
+                  <View className="flex-row items-center gap-2">
+                    {hasWorth && (
+                      <Text className="text-[11px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
+                        {worthValue}
+                      </Text>
+                    )}
+                    <View className="bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-lg">
+                      <ThemedText className="text-emerald-500 font-montBlack text-xs">
+                        FREE
+                      </ThemedText>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Title */}
+                <ThemedText className="font-montBlack text-xl tracking-tight mb-3 leading-tight">
+                  {giveaway.title}
+                </ThemedText>
+
+                {/* Status Info Chips */}
+                <View className="flex-row flex-wrap gap-2 mb-4">
+                  {giveaway.status && (
+                    <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                      <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <ThemedText className="text-[10px] font-montBold opacity-85 uppercase tracking-wide">
+                        {giveaway.status}
+                      </ThemedText>
+                    </View>
+                  )}
+                  
+                  {/* DYNAMIC DAYS REMAINING CHIP */}
+                  {daysRemainingInfo && (
+                    <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                      {daysRemainingInfo.isDays ? (
+                        <TimerStart size="12" color="#e11d48" variant="Outline" />
+                      ) : (
+                        <CalendarTick size="12" color={iconColor} variant="Outline" />
+                      )}
+                      <ThemedText className={`text-[10px] font-montBold ${daysRemainingInfo.isDays ? 'text-rose-500 dark:text-rose-400' : 'opacity-85'}`}>
+                        {daysRemainingInfo.label}
+                      </ThemedText>
+                    </View>
+                  )}
+
+                  {giveaway.keys_left && giveaway.keys_left !== 'N/A' && (
+                    <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                      <InfoCircle size="12" color={iconColor} variant="Outline" />
+                      <ThemedText className="text-[10px] font-montBold opacity-85">
+                        Keys Left: {giveaway.keys_left}
+                      </ThemedText>
+                    </View>
+                  )}
+                </View>
+
+                {/* Description Body */}
+                <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
+                  {giveaway.description || 'Grab this awesome promotional giveaway before keys run out or the deal active window closes!'}
+                </ThemedText>
+
+                {/* Instructions / Savings Breakdown Block */}
+                {giveaway.instructions && (
+                  <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
+                    <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
+                      Instructions to Claim:
+                    </ThemedText>
+                    <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
+                      {giveaway.instructions}
+                    </ThemedText>
                   </View>
                 )}
+              </ScrollView>
+
+              {/* Action Buttons Sticky Footer */}
+              <View 
+                style={{ 
+                  borderTopWidth: 1, 
+                  borderColor: adaptiveBorderColor,
+                  paddingBottom: Platform.OS === 'ios' ? 30 : 15,
+                  backgroundColor: isDark ? '#1e1e24' : '#ffffff'
+                }}
+                className="flex-row items-center gap-3 px-5 pt-3.5"
+              >
+                {/* Left side actions: Sync Local Save state inside Modal footer */}
+                <View className="flex-row items-center gap-3">
+                  <Pressable
+                    onPress={handleToggle}
+                    style={{ backgroundColor: cardBgColor }}
+                    className="w-11 h-11 rounded-2xl flex-row items-center justify-center active:opacity-75"
+                  >
+                    {localIsSaved ? (
+                      <Heart size="18" color="#22c55e" variant="Bold" />
+                    ) : (
+                      <Heart size="18" color={isDark ? "#a78bfa" : "#7c3aed"} variant="Outline" />
+                    )}
+                  </Pressable>
+
+                  <Pressable
+                    onPress={handleShare}
+                    hitSlop={10} 
+                    style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                    className="p-2.5 rounded-xl border active:opacity-60"
+                  >
+                    <ShareIcon size="16" color={isDark ? "#a78bfa" : "#7c3aed"} variant="Broken" />
+                  </Pressable>
+                </View>
+
+                {/* Right side CTA Button */}
+                <Pressable
+                  onPress={handleOpenClaimSite}
+                  style={{ backgroundColor: '#9333ea' }}
+                  className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-2 active:opacity-85 shadow-lg shadow-purple-500/20"
+                >
+                  <Gift size="16" color="#ffffff" variant="Broken" />
+                  <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
+                    {ctaText}
+                  </ThemedText>
+                </Pressable>
               </View>
-            )}
-          </View>
-        )}
-      </ScrollView>
-    </View>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
+    </>
   );
 }

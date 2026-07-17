@@ -14,7 +14,8 @@ import {
   Animated
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as SecureStore from 'expo-secure-store'; // Added for local data persistence
+import * as SecureStore from 'expo-secure-store';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { FreeGiveaway } from '@/types';
@@ -38,11 +39,15 @@ interface DealItemProps {
   ctaText?: string;
 }
 
-export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Claim' }: DealItemProps) {
+export default function DealItem({ giveaway, variant = 'normal', ctaText }: DealItemProps) {
   const { themeMode } = useCustomTheme();
+  const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
+
+  // Resolve localized CTA text fallback chain
+  const resolvedCtaText = ctaText || t('deals.claim', 'Claim');
 
   const isDark = themeMode === 'dark';
   const isCompact = variant === 'compact';
@@ -103,7 +108,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
   // --- END OF PERSISTENCE LOGIC ---
 
   const normalizeStorePlatform = (storeId: string) => {
-    if (!storeId) return 'Retailer';
+    if (!storeId) return t('deals.retailer', 'Retailer');
     switch (storeId.toString()) {
       case '1': return 'Steam';
       case '2': return 'GamersGate';
@@ -112,7 +117,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
       case '11': return 'Epic Games';
       case '25': return 'Epic Games';
       case '34': return 'Amazon';
-      default: return `Store #${storeId}`;
+      default: return `${t('deals.store', 'Store')} #${storeId}`;
     }
   };
 
@@ -146,8 +151,18 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
     const targetUrl = giveaway.open_giveaway_url || giveaway.game_url;
     if (!targetUrl) return;
     try {
+      const localizedPriceText = isFree ? t('deals.free_uppercase', 'FREE') : `$${salePriceNum}`;
+      const shareMessage = t('deals.share_message', {
+        defaultValue: `🔥 Game Deal Alert: {{title}} is on sale for {{price}} (Saved \${{saved}}) at {{platform}}!\nGet it here: {{url}}`,
+        title: giveaway.title,
+        price: localizedPriceText,
+        saved: totalCashSaved,
+        platform: displayPlatform,
+        url: targetUrl
+      });
+
       await Share.share({
-        message: `🔥 Game Deal Alert: ${giveaway.title} is on sale for ${isFree ? 'FREE' : `$${salePriceNum}`} (Saved $${totalCashSaved}) at ${displayPlatform}!\nGet it here: ${targetUrl}`,
+        message: shareMessage,
         title: giveaway.title,
       });
     } catch (error) {
@@ -235,7 +250,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
                     </Text>
                   )}
                   <ThemedText className="font-montBlack text-[12px] text-emerald-500">
-                    {isFree ? 'FREE' : `$${salePriceNum.toFixed(2)}`}
+                    {isFree ? t('deals.free_uppercase', 'FREE') : `$${salePriceNum.toFixed(2)}`}
                   </ThemedText>
                 </View>
 
@@ -276,7 +291,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
               {hasValidPrice && (
                 <View className="absolute bottom-1.5 left-1.5 bg-purple-600 px-1.5 py-0.5 rounded shadow-sm">
                   <Text className="text-[8px] font-montBlack text-white uppercase tracking-wider">
-                    SAVE ${totalCashSaved}
+                    {t('deals.save_amount', { defaultValue: 'SAVE ${{amount}}', amount: totalCashSaved })}
                   </Text>
                 </View>
               )}
@@ -300,7 +315,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
                     </Text>
                   )}
                   <ThemedText className="font-montBlack text-[12px] text-emerald-500">
-                    {isFree ? 'FREE' : `$${salePriceNum.toFixed(2)}`}
+                    {isFree ? t('deals.free_uppercase', 'FREE') : `$${salePriceNum.toFixed(2)}`}
                   </ThemedText>
                 </View>
 
@@ -345,7 +360,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
               {hasValidPrice && (
                 <View className="absolute top-3 right-3 bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
                   <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
-                    SAVE ${totalCashSaved}
+                    {t('deals.save_amount', { defaultValue: 'SAVE ${{amount}}', amount: totalCashSaved })}
                   </Text>
                 </View>
               )}
@@ -365,7 +380,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
               >
                 <View className="flex-row items-center gap-1">
                   <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
-                    {ctaText}
+                    {resolvedCtaText}
                   </ThemedText>
                   <ArrowCircleRight size="14" color="#9333ea" variant="Bold" />
                 </View>
@@ -378,7 +393,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
                       </Text>
                     )}
                     <ThemedText className="text-[12px] font-montBlack text-emerald-500">
-                      {isFree ? 'FREE' : `$${salePriceNum.toFixed(2)}`}
+                      {isFree ? t('deals.free_uppercase', 'FREE') : `$${salePriceNum.toFixed(2)}`}
                     </ThemedText>
                   </View>
 
@@ -474,7 +489,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
                 {/* Genre & Pricing Line */}
                 <View className="flex-row items-center justify-between mb-2">
                   <ThemedText className="font-mont text-xs tracking-wider uppercase opacity-60">
-                    {giveaway.genre || 'Hot Game Deal'}
+                    {giveaway.genre || t('deals.hot_deal', 'Hot Game Deal')}
                   </ThemedText>
 
                   <View className="flex-row items-center gap-2">
@@ -485,7 +500,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
                     )}
                     <View className="bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-lg">
                       <ThemedText className="text-emerald-500 font-montBlack text-xs">
-                        {isFree ? 'FREE' : `$${salePriceNum.toFixed(2)}`}
+                        {isFree ? t('deals.free_uppercase', 'FREE') : `$${salePriceNum.toFixed(2)}`}
                       </ThemedText>
                     </View>
                   </View>
@@ -502,7 +517,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                       <Star size="12" color="#eab308" variant="Bold" />
                       <ThemedText className="text-[10px] font-montBold opacity-85">
-                        {giveaway.steamRatingPercent}% Rating
+                        {t('deals.rating', { defaultValue: '{{percent}}% Rating', percent: giveaway.steamRatingPercent })}
                       </ThemedText>
                     </View>
                   )}
@@ -510,7 +525,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                       <CalendarTick size="12" color={iconColor} variant="Outline" />
                       <ThemedText className="text-[10px] font-montBold opacity-85">
-                        Released: {giveaway.release_date}
+                        {t('deals.released', { defaultValue: 'Released: {{date}}', date: giveaway.release_date })}
                       </ThemedText>
                     </View>
                   )}
@@ -526,17 +541,22 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
 
                 {/* Description Body */}
                 <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
-                  {giveaway.description || giveaway.short_description || 'No additional description provided. Grab this deal before it expires or store pricing shifts back!'}
+                  {giveaway.description || giveaway.short_description || t('deals.no_description', 'No additional description provided. Grab this deal before it expires or store pricing shifts back!')}
                 </ThemedText>
 
                 {/* Savings Breakdown Callout Block */}
                 {hasValidPrice && giveaway.savings && (
                   <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
                     <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
-                      Deal Breakdown:
+                      {t('deals.breakdown_title', 'Deal Breakdown:')}
                     </ThemedText>
                     <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
-                      You save <Text className="font-montBlack text-emerald-500">${totalCashSaved}</Text> off the original retail valuation of <Text className="line-through opacity-70">${normalPriceNum.toFixed(2)}</Text> ({parseFloat(giveaway.savings).toFixed(0)}% discount).
+                      {t('deals.breakdown_body', {
+                        defaultValue: `You save {{saved}} off the original retail valuation of {{original}} ({{percent}}% discount).`,
+                        saved: `$${totalCashSaved}`,
+                        original: `$${normalPriceNum.toFixed(2)}`,
+                        percent: parseFloat(giveaway.savings).toFixed(0)
+                      })}
                     </ThemedText>
                   </View>
                 )}
@@ -586,7 +606,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText = 'Clai
                 >
                   <Gift size="16" color="#ffffff" variant="Broken" />
                   <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                    {ctaText}
+                    {resolvedCtaText}
                   </ThemedText>
                 </Pressable>
               </View>

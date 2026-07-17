@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Dimensions, Pressable, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next'; // Integrated Translation Hook
 import { ThemedText } from '@/components/ThemedText';
 import {
   SecuritySafe,
@@ -18,6 +19,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { t } = useTranslation(); // Translation configuration hook injection
   const [currentStep, setCurrentStep] = useState(1);
   const [agreed, setAgreed] = useState(false);
 
@@ -59,12 +61,12 @@ export default function OnboardingScreen() {
             </View>
 
             <ThemedText className="text-3xl font-montBlack tracking-tight text-center">
-              Welcome to Frapp<ThemedText className="text-purple-500 font-montBlack"></ThemedText>
+              {t('appIntroduction.welcomeTitle', { defaultValue: 'Welcome to Frapp' })}
             </ThemedText>
 
             <View className="bg-purple-500/10 px-3 py-1 rounded-full mt-2 border border-purple-500/20">
               <ThemedText className="text-purple-500 font-montBold text-[11px] uppercase">
-                Giveaways and Deals in One Place
+                {t('preferences.appIntroduction', { defaultValue: 'Giveaways and Deals in One Place' })}
               </ThemedText>
             </View>
           </View>
@@ -83,10 +85,10 @@ export default function OnboardingScreen() {
           {/* New Hybrid Value Proposition Text */}
           <View className="max-w-md self-center w-full px-4 mb-6">
             <ThemedText className="text-center font-montBold text-base leading-snug tracking-tight mb-2">
-              Track Video game giveaways and premium game deals.
+              {t('giveaways.title', { defaultValue: 'Track Video game giveaways and premium game deals.' })}
             </ThemedText>
             <ThemedText className="text-zinc-500 dark:text-zinc-400 text-center text-xs leading-relaxed font-mont">
-              Frapp deals in both game giveaways and massive video game Deals, We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.
+              {t('about.privacySub', { defaultValue: 'Frapp deals in both game giveaways and massive video game Deals, We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.' })}
             </ThemedText>
           </View>
         </View>
@@ -100,10 +102,10 @@ export default function OnboardingScreen() {
               <SecuritySafe size="28" color="#9333ea" variant="Broken" />
             </View>
             <ThemedText className="text-2xl font-montBlack tracking-tight text-center">
-              Legal Agreements
+              {t('about.privacy', { defaultValue: 'Legal Agreements' })}
             </ThemedText>
             <ThemedText className="text-zinc-500 dark:text-zinc-400 text-sm text-center px-4 mt-1 leading-relaxed font-mont">
-              Please review the privacy conditions before accessing our global data sync pipelines.
+              {t('report.subtitle', { defaultValue: 'Please review the privacy conditions before accessing our global data sync pipelines.' })}
             </ThemedText>
           </View>
 
@@ -116,21 +118,21 @@ export default function OnboardingScreen() {
               <View className="flex-row items-center gap-2 mb-2">
                 <Eye size="14" color="#a855f7" variant="Broken" />
                 <ThemedText className="text-xs font-montBlack uppercase text-purple-500 tracking-wider">
-                  Privacy Core Framework
+                  {t('preferences.themeAppearance', { defaultValue: 'Privacy Core Framework' })}
                 </ThemedText>
               </View>
               <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
-                Frapp operates entirely as an open-source data aggregator tool. We do not maintain localized storage platforms, harvest physical account structures, or trace user telemetry histories. Because all processes run directly on your hardware, no data is ever transmitted, processed, or logged by an internal master hub or centralized administrative network. Your localized configuration profiles, historical cache files, and interactive preferences remain securely on your device.
+                {t('community.supportOpenSourceSub', { defaultValue: 'Frapp operates entirely as an open-source data aggregator tool. We do not maintain localized storage platforms, harvest physical account structures, or trace user telemetry histories. Because all processes run directly on your hardware, no data is ever transmitted, processed, or logged by an internal master hub or centralized administrative network. Your localized configuration profiles, historical cache files, and interactive preferences remain securely on your device.' })}
               </ThemedText>
 
               <View className="flex-row items-center gap-2 mb-2">
                 <SecuritySafe size="14" color="#a855f7" variant="Broken" />
                 <ThemedText className="text-xs font-montBlack uppercase text-purple-500 tracking-wider">
-                  Third-Party API Disclosures
+                  {t('report.attributionCard.title', { defaultValue: 'Third-Party API Disclosures' })}
                 </ThemedText>
               </View>
               <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed font-mont">
-                All data indexes visible throughout the interface are fetched directly from external networks via the Gamepower and CheapShark open public architectures. Use of these indexes complies directly with their native distribution rules. Frapp does not manipulate individual item listings, alter pricing structures, or manage distribution timelines. Consequently, we cannot guarantee the uninterrupted availability, accuracy, or ongoing support of external nodes or keys distributed through those respective platforms.
+                {t('report.attributionCard.description', { defaultValue: 'All data indexes visible throughout the interface are fetched directly from external networks via the Gamepower and CheapShark open public architectures. Use of these indexes complies directly with their native distribution rules. Frapp does not manipulate individual item listings, alter pricing structures, or manage distribution timelines. Consequently, we cannot guarantee the uninterrupted availability, accuracy, or ongoing support of external nodes or keys distributed through those respective platforms.' })}
               </ThemedText>
             </ScrollView>
           </View>
@@ -151,7 +153,7 @@ export default function OnboardingScreen() {
             <View className="flex-1">
               <View className="flex-1">
                 <ThemedText className="font-montBold text-xs leading-tight">
-                  I accept the Terms of Service & Privacy Statement
+                  {t('report.github.bodyDescription', { defaultValue: 'I accept the Terms of Service & Privacy Statement' })}
                 </ThemedText>
               </View>
             </View>
@@ -179,7 +181,10 @@ export default function OnboardingScreen() {
             }}
             className="font-montBlack text-sm tracking-wide"
           >
-            {currentStep === 1 ? 'Continue' : 'Get Started'}
+            {currentStep === 1 
+              ? t('giveaways.pagination.next', { defaultValue: 'Continue' }) 
+              : t('updateModal.updateNow', { defaultValue: 'Get Started' })
+            }
           </ThemedText>
           <ArrowRight2
             size="16"
@@ -189,7 +194,7 @@ export default function OnboardingScreen() {
         </Pressable>
 
         <ThemedText className="text-zinc-400 dark:text-zinc-600 text-xs text-center font-mont tracking-widest mt-5">
-          Frapp • v1.1.4
+          {t('report.footerVersion', { version: 'v1.1.4', defaultValue: 'Frapp • v1.1.4' })}
         </ThemedText>
       </View>
 

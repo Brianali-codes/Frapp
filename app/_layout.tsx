@@ -1,8 +1,8 @@
+import '@/components/i18n'; 
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { CustomThemeProvider, useCustomTheme } from '@/context/ThemeContext';
 import { Stack, useRouter, useNavigationContainerRef } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Image, Modal, Linking, Pressable } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
@@ -10,10 +10,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
 import "../global.css";
 import { checkNotificationPermission, initNotifications } from '@/lib/notifications';
-import { useAssets } from 'expo-asset'; // Pre-load asset reference
+import { useAssets } from 'expo-asset';
 import { ThemedText } from '@/components/ThemedText';
 import Button from '@/components/custom/Button';
 import { CloseCircle } from 'iconsax-react-nativejs';
+import { useTranslation } from 'react-i18next';
 
 import {
   useFonts,
@@ -23,13 +24,12 @@ import {
   Montserrat_900Black,
 } from '@expo-google-fonts/montserrat';
 
-// Local app tracking baseline
 const CURRENT_VERSION = 'v1.1.4';
 
-// Prevent the splash screen from auto-hiding prematurely
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutContent() {
+  const { t } = useTranslation(); 
   const { themeMode } = useCustomTheme();
   const router = useRouter();
   const rootNavigationRef = useNavigationContainerRef();
@@ -37,10 +37,8 @@ function RootLayoutContent() {
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const [targetRoute, setTargetRoute] = useState<'/(tabs)' | '/onboarding'>('/(tabs)');
 
-  // Simple state management for version checking - initialized to false to prevent premature flashing
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [updateInfo, setUpdateInfo] = useState({ latestTag: '', downloadUrl: 'https://frappgiveaways.vercel.app' });
-  const [featureModalVisible, setFeatureModalVisible] = useState(false);
 
   const isDark = themeMode === 'dark';
   const adaptiveBorderColor = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.07)';
@@ -49,10 +47,8 @@ function RootLayoutContent() {
     return versionStr.replace(/[^0-9.]/g, '');
   };
 
-  // 1. Force the image asset memory stack to resolve synchronously
   const [assets, assetsError] = useAssets([require('@/assets/images/FRAPP_ICON1.png')]);
 
-  // 2. Register Montserrat Font weights inside the bundler map
   const [fontsLoaded, fontError] = useFonts({
     'Mont-Regular': Montserrat_400Regular,
     'Mont-Bold': Montserrat_700Bold,
@@ -60,14 +56,12 @@ function RootLayoutContent() {
     'Mont-Black': Montserrat_900Black,
   });
 
-  // 3. Check storage settings to determine destination route baseline
   useEffect(() => {
     async function checkFirstLaunch() {
       try {
         const hasLaunchedBefore = await SecureStore.getItemAsync('frapp_has_launched');
 
         if (hasLaunchedBefore === null) {
-          // Fresh install: push to onboarding workflow
           await SecureStore.setItemAsync('frapp_has_launched', 'true');
           await SecureStore.setItemAsync(`frapp_seen_update_${CURRENT_VERSION}`, 'true');
           setTargetRoute('/onboarding');
@@ -81,7 +75,6 @@ function RootLayoutContent() {
     checkFirstLaunch();
   }, []);
 
-  // --- BACKGROUND UPDATE CHECK LOGIC ---
   useEffect(() => {
     async function silentLaunchUpdateCheck() {
       try {
@@ -113,7 +106,6 @@ function RootLayoutContent() {
     }
   }, [isCheckingStorage, fontsLoaded, assets]);
 
-  // 4. Monitor navigation state readiness to prevent early tab injection bugs
   useEffect(() => {
     const unsubscribe = rootNavigationRef?.addListener('state', () => {
       setIsNavigationReady(true);
@@ -121,7 +113,6 @@ function RootLayoutContent() {
     return unsubscribe;
   }, [rootNavigationRef]);
 
-  // 5. Safe Core Initialization Hook: Runs cleanly AFTER everything is completely loaded
   useEffect(() => {
     const isAppReady = !isCheckingStorage && (fontsLoaded || fontError) && (assets || assetsError);
 
@@ -132,45 +123,10 @@ function RootLayoutContent() {
 
       if (targetRoute === '/onboarding') {
         router.replace('/onboarding');
-      } else {
-        // Returning user -> Verify if they have seen this specific build version update notification
-        async function verifyFeatureChangelogStatus() {
-          try {
-            const hasSeenCurrentUpdate = await SecureStore.getItemAsync(`frapp_seen_update_${CURRENT_VERSION}`);
-            if (hasSeenCurrentUpdate === null) {
-              // Add minor delay execution tick so native container rendering stabilizes
-              setTimeout(() => {
-                setFeatureModalVisible(true);
-              }, 100);
-            }
-          } catch (e) {
-            console.error('Failed reading changelog version flag metrics:', e);
-          }
-        }
-        verifyFeatureChangelogStatus();
       }
     }
   }, [isCheckingStorage, fontsLoaded, fontError, assets, assetsError, isNavigationReady, targetRoute]);
 
-  // Dismiss feature layout overlay helper and deep links route configuration
-  const handleDismissFeatureModal = async (shouldRouteToDeals: boolean) => {
-    setFeatureModalVisible(false);
-    try {
-      // Seal current version key so this specific build announcement modal never flashes back
-      await SecureStore.setItemAsync(`frapp_seen_update_${CURRENT_VERSION}`, 'true');
-
-      if (shouldRouteToDeals) {
-        // Defer execution slightly to let the native modal finish closing completely before changing tabs
-        setTimeout(() => {
-          router.navigate('/(tabs)');
-        }, 100);
-      }
-    } catch (e) {
-      console.error('Failed to update feature announcement message state context:', e);
-    }
-  };
-
-  // --- MINIMAL DESIGN ENGINE LOADING SPLASH ---
   if (isCheckingStorage || !fontsLoaded || !assets) {
     return (
       <View className="flex-1 items-center justify-center bg-zinc-950">
@@ -189,7 +145,6 @@ function RootLayoutContent() {
   return (
     <ThemeProvider value={themeMode === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        {/* Onboarding and Saved now map in parallel style as full screens */}
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="saved" options={{ gestureEnabled: false, animation: 'fade' }} />
@@ -198,9 +153,6 @@ function RootLayoutContent() {
 
       <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
 
-      {/* =========================================================================
-          2. GLOBAL OVERLAY LAUNCH DISCOVERED REMOTE GITHUB UPDATE MODAL
-          ========================================================================= */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -220,27 +172,27 @@ function RootLayoutContent() {
             </Pressable>
 
             <ThemedText className="font-montBlack text-lg text-center mt-2 mb-1 tracking-tight">
-              Update Available
+              {t('updateModal.title')}
             </ThemedText>
 
             <ThemedText className="font-montBold text-purple-500 text-xs text-center uppercase tracking-wider mb-4">
-              {updateInfo.latestTag} is here!
+              {t('updateModal.subtitle', { version: updateInfo.latestTag })}
             </ThemedText>
 
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-[14px] text-center leading-relaxed mb-6 px-2">
-              A newer version of the app ({updateInfo.latestTag}) is out. Upgrade from your current build ({CURRENT_VERSION}) to get access to the latest changes.
+              {t('updateModal.description', { latest: updateInfo.latestTag, current: CURRENT_VERSION })}
             </ThemedText>
 
             <View className="flex-row items-center gap-3 w-full">
               <Button
                 type="dark"
-                text="Later"
+                text={t('updateModal.later')}
                 onPress={() => setUpdateModalVisible(false)}
                 className="flex-1 font-montBold"
               />
               <Button
                 type="primary"
-                text="Update Now"
+                text={t('updateModal.updateNow')}
                 onPress={() => {
                   setUpdateModalVisible(false);
                   Linking.openURL(updateInfo.downloadUrl);
@@ -257,10 +209,8 @@ function RootLayoutContent() {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView className='flex-1'>
-      <CustomThemeProvider>
-        <RootLayoutContent />
-      </CustomThemeProvider>
-    </GestureHandlerRootView>
+    <CustomThemeProvider>
+      <RootLayoutContent />
+    </CustomThemeProvider>
   );
 }

@@ -8,26 +8,30 @@ import HighestWorthCarousel from '@/components/custom/HighestWorthCarousel';
 import Button from '@/components/custom/Button';
 import { ThemedText } from '@/components/ThemedText';
 
+// Import translation hooks and explicit context instance
+import { useTranslation } from 'react-i18next';
+import  i18nInstanceSource from '@/components/i18n'; 
+
 import { API_ENDPOINTS } from '@/constants/api';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { Giveaway } from '@/types';
 
 const PLATFORMS = [
-  { id: 'all', label: 'All' },
-  { id: 'pc', label: 'PC' },
-  { id: 'steam', label: 'Steam' },
-  { id: 'epic-games-store', label: 'Epic' },
-  { id: 'gog', label: 'GOG' },
-  { id: 'ps4', label: 'PS4' },
-  { id: 'ps5', label: 'PS5' },
-  { id: 'xbox-series-xs', label: 'Xbox Series' },
-  { id: 'xbox-one', label: 'Xbox One' },
-  { id: 'switch', label: 'Switch' },
-  { id: 'android', label: 'Android' },
-  { id: 'ios', label: 'iOS' },
-  { id: 'drm-free', label: 'DRM-Free' },
-  { id: 'itchio', label: 'itch.io' },
+  { id: 'all', labelKey: 'giveaways.platforms.all', labelDefault: 'All' },
+  { id: 'pc', labelKey: 'giveaways.platforms.pc', labelDefault: 'PC' },
+  { id: 'steam', labelKey: 'giveaways.platforms.steam', labelDefault: 'Steam' },
+  { id: 'epic-games-store', labelKey: 'giveaways.platforms.epic', labelDefault: 'Epic' },
+  { id: 'gog', labelKey: 'giveaways.platforms.gog', labelDefault: 'GOG' },
+  { id: 'ps4', labelKey: 'giveaways.platforms.ps4', labelDefault: 'PS4' },
+  { id: 'ps5', labelKey: 'giveaways.platforms.ps5', labelDefault: 'PS5' },
+  { id: 'xbox-series-xs', labelKey: 'giveaways.platforms.xboxSeries', labelDefault: 'Xbox Series' },
+  { id: 'xbox-one', labelKey: 'giveaways.platforms.xboxOne', labelDefault: 'Xbox One' },
+  { id: 'switch', labelKey: 'giveaways.platforms.switch', labelDefault: 'Switch' },
+  { id: 'android', labelKey: 'giveaways.platforms.android', labelDefault: 'Android' },
+  { id: 'ios', labelKey: 'giveaways.platforms.ios', labelDefault: 'iOS' },
+  { id: 'drm-free', labelKey: 'giveaways.platforms.drmFree', labelDefault: 'DRM-Free' },
+  { id: 'itchio', labelKey: 'giveaways.platforms.itchio', labelDefault: 'itch.io' },
 ];
 
 interface PaginationButtonProps {
@@ -236,6 +240,9 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
 export default function GiveawayScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
+  
+  // Initialize the translation hook tied directly to your explicit source
+  const { t } = useTranslation(undefined, { i18n: i18nInstanceSource });
 
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -329,10 +336,18 @@ export default function GiveawayScreen() {
   const now = new Date();
   const day = now.getDate();
   const year = now.getFullYear();
-  const monthName = [
+  
+  // Array mapping for localized months
+  const monthKeys = [
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december'
+  ];
+  const monthDefaults = [
     'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ][now.getMonth()];
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const currentMonthIndex = now.getMonth();
+  const localizedMonth = t(`months.${monthKeys[currentMonthIndex]}`, monthDefaults[currentMonthIndex]);
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
@@ -358,7 +373,7 @@ export default function GiveawayScreen() {
             </View>
 
             <ThemedText numberOfLines={1} className="text-xl font-montBlack tracking-tight flex-shrink">
-              Free to Redeem.
+              {t('giveaways.title', 'Free to Redeem.')}
             </ThemedText>
           </View>
 
@@ -434,6 +449,7 @@ export default function GiveawayScreen() {
             >
               {PLATFORMS.map((platform) => {
                 const isSelected = selectedPlatform === platform.id;
+                const localizedLabel = t(platform.labelKey, platform.labelDefault);
                 return (
                   <Pressable
                     key={platform.id}
@@ -450,7 +466,7 @@ export default function GiveawayScreen() {
                       style={{ color: isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a') }}
                       className={`text-xs ${isSelected ? 'font-montBlack' : 'font-montBold'}`}
                     >
-                      {platform.label}
+                      {localizedLabel}
                     </ThemedText>
                   </Pressable>
                 );
@@ -491,10 +507,13 @@ export default function GiveawayScreen() {
                 className="rounded-2xl p-4 mb-5"
               >
                 <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
-                  We have found{' '}
-                  <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{prices}</ThemedText> video game giveaways as of{' '}
-                  <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {monthName} {year}</ThemedText>, with a total value of{' '}
-                  <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>. Claim them before time runs out!
+                  {t('giveaways.summary.prefix', 'We have found ')}
+                  <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{prices}</ThemedText>
+                  {t('giveaways.summary.midActive', ' video game giveaways as of ')}
+                  <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {localizedMonth} {year}</ThemedText>
+                  {t('giveaways.summary.midWorth', ', with a total value of ')}
+                  <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>
+                  {t('giveaways.summary.suffix', '. Claim them before time runs out!')}
                 </ThemedText>
               </View>
               <HighestWorthCarousel />
@@ -518,17 +537,17 @@ export default function GiveawayScreen() {
               <WifiSquare size="36" color="#9333ea" variant="Broken" />
             </View>
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
-              Connection Interrupted
+              {t('giveaways.error.title', 'Connection Interrupted')}
             </ThemedText>
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              We can't sync up with the servers right now. Make sure your device is online and let's try that again.
+              {t('giveaways.error.description', "We can't sync up with the servers right now. Make sure your device is online and let's try that again.")}
             </ThemedText>
             <Button
               type="primary"
               loading={isLoading}
               onPress={() => fetchData(selectedPlatform)}
               className="w-full"
-              text="Retry Connection"
+              text={t('giveaways.error.retryButton', 'Retry Connection')}
             />
           </View>
         ) : isLoading ? (
@@ -554,16 +573,16 @@ export default function GiveawayScreen() {
               <Element3 size="36" color="#9333ea" variant="Broken" />
             </View>
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
-              No Drops Available
+              {t('giveaways.empty.title', 'No Drops Available')}
             </ThemedText>
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              It looks like there are no active giveaways for this platform right now.
+              {t('giveaways.empty.description', 'It looks like there are no active giveaways for this platform right now.')}
             </ThemedText>
             <Button
               type="primary"
               onPress={() => handlePlatformChange('all')}
               className="w-full"
-              text="View All Giveaways"
+              text={t('giveaways.empty.viewAllButton', 'View All Giveaways')}
             />
           </View>
         ) : (
@@ -585,7 +604,7 @@ export default function GiveawayScreen() {
               // Page 1: Single Full-Width Button
               endIndex < giveaways.length && (
                 <PaginationButton
-                  text="Next Games"
+                  text={t('giveaways.pagination.next', 'Next Games')}
                   onPress={handleNextPage}
                   isDark={isDark}
                 />
@@ -595,7 +614,7 @@ export default function GiveawayScreen() {
               <View className="flex-row items-center gap-3 w-full">
                 <View className="flex-1">
                   <PaginationButton
-                    text="Previous"
+                    text={t('giveaways.pagination.previous', 'Previous')}
                     onPress={handlePrevPage}
                     isDark={isDark}
                   />
@@ -603,7 +622,7 @@ export default function GiveawayScreen() {
                 {endIndex < giveaways.length && (
                   <View className="flex-1">
                     <PaginationButton
-                      text="Next Games"
+                      text={t('giveaways.pagination.next', 'Next Games')}
                       onPress={handleNextPage}
                       isDark={isDark}
                     />

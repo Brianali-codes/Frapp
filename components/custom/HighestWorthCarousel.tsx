@@ -15,6 +15,7 @@ import {
   Image
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { useTranslation } from 'react-i18next'; // Integrated Translation Hook
 import { ThemedText } from '@/components/ThemedText';
 import { API_ENDPOINTS } from '@/constants/api';
 import { Giveaway } from '@/types';
@@ -24,7 +25,6 @@ import {
   ArrowRight, 
   Share as ShareIcon, 
   Gift, 
-  ExportSquare, 
   CalendarTick, 
   InfoCircle, 
   Game,
@@ -39,36 +39,8 @@ interface HighestWorthCarouselProps {
   onClaimPress?: (item: Giveaway) => void;
 }
 
-// Helper to calculate relative days remaining
-const getDaysRemainingText = (endDateString: string | undefined): { label: string; isDays: boolean } | null => {
-  if (!endDateString || endDateString === 'N/A') return null;
-
-  const parsedDate = Date.parse(endDateString);
-  if (isNaN(parsedDate)) {
-    return { label: `Ends: ${endDateString}`, isDays: false };
-  }
-
-  const targetDate = new Date(parsedDate);
-  const today = new Date();
-  
-  today.setHours(0, 0, 0, 0);
-  targetDate.setHours(0, 0, 0, 0);
-
-  const diffTime = targetDate.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) {
-    return { label: 'Expired', isDays: true };
-  } else if (diffDays === 0) {
-    return { label: 'Ends Today', isDays: true };
-  } else if (diffDays === 1) {
-    return { label: '1 Day Left', isDays: true };
-  } else {
-    return { label: `${diffDays} Days Left`, isDays: true };
-  }
-};
-
 export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarouselProps) {
+  const { t } = useTranslation(); // Translation configuration hook injection
   const [items, setItems] = useState<Giveaway[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -87,6 +59,35 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
   const adaptiveBorderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
   const placeholderBg = isDark ? '#27272a' : '#e4e4e7';
   const iconColor = isDark ? '#a78bfa' : '#7c3aed';
+
+  // Helper to calculate relative days remaining localized properly
+  const getDaysRemainingText = (endDateString: string | undefined): { label: string; isDays: boolean } | null => {
+    if (!endDateString || endDateString === 'N/A') return null;
+
+    const parsedDate = Date.parse(endDateString);
+    if (isNaN(parsedDate)) {
+      return { label: `${t('deals.released', { date: '' })} ${endDateString}`, isDays: false };
+    }
+
+    const targetDate = new Date(parsedDate);
+    const today = new Date();
+    
+    today.setHours(0, 0, 0, 0);
+    targetDate.setHours(0, 0, 0, 0);
+
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { label: t('giveaways.tracking.expired'), isDays: true };
+    } else if (diffDays === 0) {
+      return { label: t('giveaways.tracking.ends_today'), isDays: true };
+    } else if (diffDays === 1) {
+      return { label: t('giveaways.tracking.day_left'), isDays: true };
+    } else {
+      return { label: t('giveaways.tracking.days_left', { count: diffDays }), isDays: true };
+    }
+  };
 
   useEffect(() => {
     const fetchTopWorth = async () => {
@@ -171,8 +172,18 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
     try {
       const worthValue = item.worth || 'N/A';
       const hasWorth = worthValue !== 'N/A' && worthValue !== '0' && worthValue !== '$0.00';
+      
+      // Leverages synchronized localization string matches for sharing operations
+      const shareMessage = t('deals.share_message', {
+        title: item.title,
+        price: t('deals.free_uppercase'),
+        saved: hasWorth ? worthValue : t('deals.free_uppercase'),
+        platform: item.platform || 'PC',
+        url: targetUrl
+      });
+
       await Share.share({
-        message: `🔥 Freebie Alert: Get "${item.title}" for FREE ${hasWorth ? `(Worth ${worthValue})` : ''} on ${item.platform || 'PC'}!\nClaim here: ${targetUrl}`,
+        message: shareMessage,
         title: item.title,
       });
     } catch (error) {
@@ -271,7 +282,7 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
             {/* Top Right Worth Metric Tag */}
             <View className="absolute top-3 right-3 bg-emerald-500 px-2.5 py-0.5 rounded-md shadow-sm">
               <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
-                {hasWorth ? 'VALUED' : 'FREE'}
+                {hasWorth ? t('deals.hot_deal') : t('deals.free_uppercase')}
               </Text>
             </View>
           </ImageBackground>
@@ -290,7 +301,7 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
           <View style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} className="flex-row items-center justify-between pt-2.5 mt-0.5">
             <View className="flex-row items-center gap-1">
               <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
-                View Deal Info
+                {t('deals.breakdown_title')}
               </ThemedText>
               <ArrowRight size="11" color="#9333ea" variant="Bold" />
             </View>
@@ -409,7 +420,7 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                       )}
                       <View className="bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-lg">
                         <ThemedText className="text-emerald-500 font-montBlack text-xs">
-                          FREE
+                          {t('deals.free_uppercase')}
                         </ThemedText>
                       </View>
                     </View>
@@ -456,14 +467,14 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
 
                   {/* Description text */}
                   <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
-                    {selectedItem.description || 'No description available for this high-value giveaway item.'}
+                    {selectedItem.description || t('deals.no_description')}
                   </ThemedText>
 
                   {/* Redirection steps / Custom Instructions */}
                   {selectedItem.instructions && (
                     <View style={{ backgroundColor: isDark ? '#2c2c35' : '#f1f2f6' }} className="rounded-xl p-3 mb-2">
                       <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
-                        Instructions to Claim:
+                        {t('report.github.step1')}
                       </ThemedText>
                       <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
                         {selectedItem.instructions}
@@ -489,7 +500,7 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                   >
                     <ShareIcon size="16" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
                     <ThemedText className="font-montBold text-xs uppercase tracking-wider">
-                      Share
+                      {t('modals.socialsTitle')}
                     </ThemedText>
                   </Pressable>
 
@@ -500,7 +511,7 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                   >
                     <Gift size="16" color="#ffffff" variant="Broken" />
                     <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                      Claim
+                      {t('deals.claim')}
                     </ThemedText>
                   </Pressable>
                 </View>

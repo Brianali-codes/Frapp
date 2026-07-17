@@ -11,13 +11,15 @@ import {
   Modal,
   ScrollView,
   Dimensions,
-  PanResponder
+  PanResponder,
+  Share
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/ThemedText';
 import { FreeGiveaway } from '@/types'; 
 import { useCustomTheme } from '@/context/ThemeContext';
-import { Flash, ArrowRight, Link1, Share as ShareIcon, Star, CalendarTick, Game, Gift } from 'iconsax-react-nativejs';
+import { Flash, ArrowRight, Share as ShareIcon, Star, CalendarTick, Game, Gift } from 'iconsax-react-nativejs';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CORE_BANNER_HEIGHT = 160; 
@@ -28,6 +30,7 @@ interface BestDealsCarouselProps {
 }
 
 export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProps) {
+  const { t } = useTranslation();
   const [items, setItems] = useState<FreeGiveaway[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -53,7 +56,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
       case '11': return 'Epic Games Store';
       case '25': return 'Epic Games Store';
       case '34': return 'Amazon';
-      default: return 'Storefront';
+      default: return t('deals.store');
     }
   };
 
@@ -77,9 +80,11 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
               title: deal.title || 'Unknown Title',
               thumbnail: deal.thumb || '',
               image: deal.thumb || '',
-              description: `Score a flawless ${deal.dealRating}/10 deal index rating! Instantly pocket $${totalSaved} in savings on ${getStoreLabel(deal.storeID)}.`,
+              description: deal.salePrice === '0.00' 
+                ? t('deals.no_description')
+                : `Score a flawless ${deal.dealRating}/10 deal index rating! Instantly pocket $${totalSaved} in savings on ${getStoreLabel(deal.storeID)}.`,
               open_giveaway_url: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
-              worth: markdownPrice === 0 ? 'FREE' : `$${deal.salePrice}`,
+              worth: markdownPrice === 0 ? t('deals.free_uppercase') : `$${deal.salePrice}`,
               platform: deal.storeID,
               normalPrice: deal.normalPrice,
               salePrice: deal.salePrice,
@@ -91,12 +96,12 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
       } catch (error) {
         console.error("Couldn't compile top deals carousel context payload:", error);
       } finally {
-        setLoading(false);
+        loading && setLoading(false);
       }
     };
     
     fetchBestValueDeals();
-  }, []);
+  }, [t]);
 
   // Autoplay cycle (paused while modal is displayed)
   useEffect(() => {
@@ -142,8 +147,16 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
   const handleShare = async (item: FreeGiveaway) => {
     if (!item.open_giveaway_url) return;
     try {
+      const shareMessage = t('deals.share_message', {
+        title: item.title,
+        price: item.worth,
+        saved: item.savings ? `${item.savings}%` : `$${(parseFloat(item.normalPrice || '0') - parseFloat(item.salePrice || '0')).toFixed(2)}`,
+        platform: getStoreLabel(item.platform),
+        url: item.open_giveaway_url
+      });
+
       await Share.share({
-        message: `🔥 Deal Alert: ${item.title} is on sale for ${item.worth} (${item.savings}% Off) at ${getStoreLabel(item.platform)}!\nRedeem here: ${item.open_giveaway_url}`,
+        message: shareMessage,
         title: item.title,
       });
     } catch (error) {
@@ -245,7 +258,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
             {/* Savings Percent Tag */}
             <View className="absolute top-3 right-3 bg-purple-600 px-2.5 py-0.5 rounded-md shadow-sm">
               <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
-                SAVE {currentDeal.savings}%
+                {t('deals.save_amount', { amount: currentDeal.savings }).replace('$', '')}
               </Text>
             </View>
           </ImageBackground>
@@ -266,7 +279,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
           <View style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} className="flex-row items-center justify-between pt-2.5 mt-0.5">
             <View className="flex-row items-center gap-1">
               <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
-                View deal 
+                {t('deals.title').replace('.', '')}
               </ThemedText>
               <ArrowRight size="11" color="#9333ea" variant="Bold" />
             </View>
@@ -375,7 +388,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                 {/* Value Rank & Pricing Line */}
                 <View className="flex-row items-center justify-between mb-2">
                   <ThemedText className="font-mont text-xs tracking-wider uppercase opacity-60">
-                    Hot Deal Value Rating
+                    {t('deals.hot_deal')}
                   </ThemedText>
                   
                   <View className="flex-row items-center gap-2">
@@ -402,7 +415,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                   <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                     <Star size="12" color={iconColor} variant="Bold" />
                     <ThemedText className="text-[10px] font-montBold opacity-85">
-                      Top Choice Rating
+                      {t('deals.rating', { percent: '100' }).replace('100%', 'Top Choice')}
                     </ThemedText>
                   </View>
                   <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
@@ -415,17 +428,21 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
 
                 {/* Description Body */}
                 <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
-                  {currentDeal.description} Get ready to secure your activation key! Grab this curated high-value discount directly from the storefront before the pricing index gets updated.
+                  {currentDeal.description}
                 </ThemedText>
 
                 {/* Savings Breakdown Callout Block */}
                 {currentDeal.normalPrice && currentDeal.savings && (
                   <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
                     <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
-                      Deal Breakdown:
+                      {t('deals.breakdown_title')}
                     </ThemedText>
                     <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
-                      You save <Text className="font-montBlack text-emerald-500">${totalCashSaved}</Text> off the original retail valuation of <Text className="line-through opacity-70">${normalPriceNum.toFixed(2)}</Text> ({currentDeal.savings}% discount overall).
+                      {t('deals.breakdown_body', {
+                        saved: `$${totalCashSaved}`,
+                        original: `$${normalPriceNum.toFixed(2)}`,
+                        percent: currentDeal.savings
+                      })}
                     </ThemedText>
                   </View>
                 )}
@@ -448,7 +465,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                 >
                   <ShareIcon size="16" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
                   <ThemedText className="font-montBold text-xs uppercase tracking-wider">
-                    Share
+                    {t('modals.socialsTitle').split(' ')[0]}
                   </ThemedText>
                 </Pressable>
 
@@ -459,7 +476,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                 >
                   <Gift size="16" color="#ffffff" variant="Broken" />
                   <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                    Claim 
+                    {t('deals.claim')}
                   </ThemedText>
                 </Pressable>
               </View>

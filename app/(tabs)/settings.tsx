@@ -22,30 +22,32 @@ import {
   Mobile,
   Share,
   Lock1,
+  TickCircle,
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
 
-// Import custom theme hooks
+import { useTranslation } from 'react-i18next';
+import i18nInstanceSource from '@/components/i18n';
+
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
-
-// Import notification controllers
 import { checkNotificationPermission } from '@/lib/notifications';
 
 const CURRENT_VERSION = 'v1.1.4';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { t, i18n } = useTranslation(undefined, { i18n: i18nInstanceSource });
+
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [socialsModalVisible, setSocialsModalVisible] = useState(false);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
-  // --- TRACKING FOR EASTER EGG TRIPLE TAP ---
   const tapCountRef = useRef(0);
   const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // --- STATE FOR DYNAMIC CUSTOM MODAL ---
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState<{
     title: string;
@@ -65,7 +67,19 @@ export default function SettingsScreen() {
   const monochromeIconColor = isDark ? '#ffffff' : '#000000';
   const iconWrapperBg = 'bg-zinc-500/10 dark:bg-zinc-400/10';
 
-  // Synchronize internal state toggle switches with system notification authorization states
+  const currentLanguageCode = i18n?.language || 'en';
+  const activeLanguageName = currentLanguageCode.startsWith('es') ? 'Español' : 'English';
+
+  const handleSelectLanguage = async (langCode: 'en' | 'es') => {
+    try {
+      await i18n.changeLanguage(langCode);
+    } catch (e) {
+      await i18nInstanceSource.changeLanguage(langCode);
+    } finally {
+      setLanguageModalVisible(false);
+    }
+  };
+
   useEffect(() => {
     async function getInitialPermissionState() {
       const settings = await notifee.getNotificationSettings();
@@ -76,7 +90,6 @@ export default function SettingsScreen() {
     }
     getInitialPermissionState();
 
-    // Cleanup tap timeout on unmount
     return () => {
       if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
     };
@@ -100,11 +113,9 @@ export default function SettingsScreen() {
     }
   };
 
-  // --- LOCAL NOTIFICATION TEST TRIGGER ---
   const triggerTestNotification = async () => {
     try {
       await notifee.requestPermission();
-
       const channelId = await notifee.createChannel({
         id: 'frapp-test-channel',
         name: 'FRAPP Radar Updates',
@@ -122,28 +133,24 @@ export default function SettingsScreen() {
       });
     } catch (error) {
       setModalConfig({
-        title: 'Test Trigger Failed',
-        message: 'Could not execute instantaneous payload render. Confirm local application target permissions.',
+        title: t('modals.testFailedTitle', 'Test Trigger Failed'),
+        message: t('modals.testFailedMessage', 'Could not execute instantaneous payload render. Confirm local application target permissions.'),
         type: 'error',
-        actionText: 'Dismiss',
+        actionText: t('modals.dismiss', 'Dismiss'),
         onAction: () => setModalVisible(false)
       });
       setModalVisible(true);
     }
   };
 
-  // --- EASTER EGG INTERACTION HANDLER ---
   const handleSettingsCogTap = () => {
     tapCountRef.current += 1;
-
     if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
 
     if (tapCountRef.current === 3) {
-      // Secret combo unlocked! Run the test notification
       triggerTestNotification();
       tapCountRef.current = 0;
     } else {
-      // Reset the tap counter if the user delays between clicks (1000ms threshold)
       tapTimeoutRef.current = setTimeout(() => {
         tapCountRef.current = 0;
       }, 1000);
@@ -164,28 +171,28 @@ export default function SettingsScreen() {
 
       if (remoteClean && remoteClean !== localClean) {
         setModalConfig({
-          title: 'Update Available! ',
-          message: `A newer build version (${rawLatestVersion}) is out. Upgrade from your current version (${CURRENT_VERSION}) to get access to all the latest optimization patches!`,
+          title: t('updateModal.title', 'Update Available'),
+          message: t('updateModal.description', 'A newer version of the app ({{latest}}) is out. Upgrade from your current build ({{current}}) to get access to the latest changes.', { latest: rawLatestVersion, current: CURRENT_VERSION }),
           type: 'update',
-          actionText: 'Update Now',
+          actionText: t('updateModal.updateNow', 'Update Now'),
           onAction: () => Linking.openURL(data.html_url || APP_REPO_URL)
         });
       } else {
         setModalConfig({
-          title: 'Up to Date',
-          message: `You are already running our latest version (${CURRENT_VERSION}). No updates needed.`,
+          title: t('modals.upToDateTitle', 'Up to Date'),
+          message: t('modals.upToDateMessage', 'You are already running our latest version ({{version}}). No updates needed.', { version: CURRENT_VERSION }),
           type: 'success',
-          actionText: 'Awesome',
+          actionText: t('modals.upToDateAction', 'Awesome'),
           onAction: () => setModalVisible(false)
         });
       }
       setModalVisible(true);
     } catch (error) {
       setModalConfig({
-        title: 'Check Failed',
-        message: 'Could not complete version cross-reference check at this time. Please check your network connection and try again.',
+        title: t('modals.checkFailedTitle', 'Check Failed'),
+        message: t('modals.checkFailedMessage', 'Could not complete version cross-reference check at this time. Please check your network connection and try again.'),
         type: 'error',
-        actionText: 'Dismiss',
+        actionText: t('modals.dismiss', 'Dismiss'),
         onAction: () => setModalVisible(false)
       });
       setModalVisible(true);
@@ -202,7 +209,7 @@ export default function SettingsScreen() {
         contentContainerStyle={{ paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* --- BRAND HEADER ROW POLISHED TO MATCH COMPACT SIZES --- */}
+        {/* --- BRAND HEADER ROW --- */}
         <View className="flex-row items-center justify-between w-full mb-6">
           <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
             <View
@@ -216,12 +223,11 @@ export default function SettingsScreen() {
               />
             </View>
             <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">
-              Settings.
+              {t('header.title', 'Settings.')}
             </ThemedText>
           </Pressable>
 
           <View className="flex-row items-center gap-2">
-            {/* Hidden Easter Egg: Triple-tap this icon rapidly to trigger the push test */}
             <Pressable
               onPress={handleSettingsCogTap}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
@@ -245,12 +251,12 @@ export default function SettingsScreen() {
         </View>
 
         <ThemedText className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-6 font-mont">
-          Customize your application behavior, fine-tune notifications, toggle display settings, or read open source credentials.
+          {t('header.subtitle', 'Customize your application behavior, fine-tune notifications, toggle display settings, or read open source credentials.')}
         </ThemedText>
 
         {/* SECTION: PREFERENCES */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
-          Preferences.
+          {t('sections.preferences', 'Preferences.')}
         </ThemedText>
 
         <View
@@ -263,25 +269,56 @@ export default function SettingsScreen() {
               <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
                 {isDark ? <Sun1 size="18" color={monochromeIconColor} variant="Broken" /> : <Moon size="18" color={monochromeIconColor} variant="Broken" />}
               </View>
-              <ThemedText className="font-montBold text-sm">Theme Appearance</ThemedText>
+              <ThemedText className="font-montBold text-sm">
+                {t('preferences.themeAppearance', 'Theme Appearance')}
+              </ThemedText>
             </View>
             <View className="flex-row items-center gap-1.5">
-              <ThemedText className="text-xs text-zinc-400 font-montBold capitalize">{themeMode} Mode</ThemedText>
+              <ThemedText className="text-xs text-zinc-400 font-montBold capitalize">
+                {themeMode === 'dark' ? t('preferences.themeDark', 'Dark Mode') : t('preferences.themeLight', 'Light Mode')}
+              </ThemedText>
               <ArrowRight2 size="14" color="#a1a1aa" />
             </View>
           </Pressable>
 
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
 
-          {/* NEW: MY SAVED LIBRARY NAVIGATION ROW */}
+          {/* APP LANGUAGE SELECTION CELL */}
+          <Pressable onPress={() => setLanguageModalVisible(true)} className="flex-row items-center justify-between p-3 active:opacity-60">
+            <View className="flex-row items-center gap-3">
+              <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
+                <Global size="18" color={monochromeIconColor} variant="Broken" />
+              </View>
+              <View>
+                <ThemedText className="font-montBold text-sm">
+                  {t('preferences.appLanguage', 'App Language')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('preferences.appLanguageSub', 'Switch translation layers')}
+                </ThemedText>
+              </View>
+            </View>
+            <View className="flex-row items-center gap-1.5">
+              <ThemedText className="text-xs text-purple-500 font-montBold">{activeLanguageName}</ThemedText>
+              <ArrowRight2 size="14" color="#a1a1aa" />
+            </View>
+          </Pressable>
+
+          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
+
+          {/* MY SAVED LIBRARY NAVIGATION ROW */}
           <Pressable onPress={() => router.push('/saved')} className="flex-row items-center justify-between p-3 active:opacity-60">
             <View className="flex-row items-center gap-3">
               <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
                 <Heart size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">Saved Giveaways</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Access saved games</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('preferences.savedGiveaways', 'Saved Giveaways')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('preferences.savedGiveawaysSub', 'Access saved games')}
+                </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -296,9 +333,11 @@ export default function SettingsScreen() {
                 <Notification size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View className="flex-1">
-                <ThemedText className="font-montBold text-sm">Notification Settings</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('preferences.notificationSettings', 'Notification Settings')}
+                </ThemedText>
                 <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont" numberOfLines={2}>
-                  Turn Notifications On or Off
+                  {t('preferences.notificationSettingsSub', 'Turn Notifications On or Off')}
                 </ThemedText>
               </View>
             </View>
@@ -317,14 +356,19 @@ export default function SettingsScreen() {
 
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
 
+          {/* APP INTRODUCTION ONBOARDING */}
           <Pressable onPress={() => router.push('/onboarding')} className="flex-row items-center justify-between p-3 active:opacity-60">
             <View className="flex-row items-center gap-3">
               <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
                 <InfoCircle size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">App Introduction</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Revisit Onboarding</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('preferences.appIntroduction', 'App Introduction')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('preferences.appIntroductionSub', 'Revisit Onboarding')}
+                </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -339,8 +383,12 @@ export default function SettingsScreen() {
                 <Refresh2 size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">Check for Updates</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Verify server-side app builds</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('preferences.checkForUpdates', 'Check for Updates')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('preferences.checkForUpdatesSub', 'Verify server-side app builds')}
+                </ThemedText>
               </View>
             </View>
             <View className="flex-row items-center gap-1.5">
@@ -352,11 +400,11 @@ export default function SettingsScreen() {
 
         {/* SECTION: ABOUT */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
-          About.
+          {t('sections.about', 'About.')}
         </ThemedText>
 
-        <View 
-          style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} 
+        <View
+          style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]}
           className="rounded-2xl p-2 mb-6"
         >
           {/* ABOUT DEVELOPER */}
@@ -366,8 +414,12 @@ export default function SettingsScreen() {
                 <User size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">About Developer</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Visit personal portfolio</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('about.developer', 'About Developer')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('about.developerSub', 'Visit personal portfolio')}
+                </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -382,8 +434,12 @@ export default function SettingsScreen() {
                 <Mobile size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">More Apps</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Explore GitHub projects</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('about.moreApps', 'More Apps')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('about.moreAppsSub', 'Explore GitHub projects')}
+                </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -398,8 +454,12 @@ export default function SettingsScreen() {
                 <Share size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">Socials</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Connect across networks</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('about.socials', 'Socials')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('about.socialsSub', 'Connect across networks')}
+                </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -414,8 +474,12 @@ export default function SettingsScreen() {
                 <Lock1 size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">Privacy Policy</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">View Frapp's Policies</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('about.privacy', 'Privacy Policy')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('about.privacySub', "View Frapp's Policies")}
+                </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -424,37 +488,63 @@ export default function SettingsScreen() {
 
         {/* SECTION: COMMUNITY & SUPPORT */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
-          Community & Support.
+          {t('sections.community', 'Community & Support.')}
         </ThemedText>
 
         <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-5 mb-6">
           <View className="flex-row items-center gap-2 mb-2">
             <Heart size="18" color="#71717a" variant="Broken" />
-            <ThemedText className="font-montBlack text-sm tracking-tight">Support Open Source</ThemedText>
+            <ThemedText className="font-montBlack text-sm tracking-tight">
+              {t('community.supportOpenSource', 'Support Open Source')}
+            </ThemedText>
           </View>
           <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
-            This layout is independently engineered and hosted for free. If you find value in discovering these listings, giving us a star on GitHub goes a long way!
+            {t('community.supportOpenSourceSub', 'This layout is independently engineered and hosted for free. If you find value in discovering these listings, giving us a star on GitHub goes a long way!')}
           </ThemedText>
-          <Button onPress={() => Linking.openURL(APP_REPO_URL)} text="Star Us on GitHub" type="primary" className="font-montBold" />
+          <Button onPress={() => Linking.openURL(APP_REPO_URL)} text={t('community.starGithub', 'Star Us on GitHub')} type="primary" className="font-montBold" />
         </View>
 
         {/* SECTION: KO-FI SUPPORT */}
-        <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-5 mb-6">
+        <View
+          style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]}
+          className="rounded-2xl p-5 mb-6"
+        >
           <View className="flex-row items-center gap-2 mb-2">
             <Coffee size="18" color="#71717a" variant="Broken" />
-            <ThemedText className="font-montBlack text-sm tracking-tight">Buy me a Coffee</ThemedText>
+            <ThemedText className="font-montBlack text-sm tracking-tight">
+              {t('community.buyCoffee', 'Buy me a Coffee')}
+            </ThemedText>
           </View>
+
           <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
-            Help keep the servers running and the coffee flowing! A small donation helps us maintain the project and add new features.
+            {t('community.buyCoffeeSub', 'Help keep the servers running and the coffee flowing! A small donation helps us maintain the project and add new features.')}
           </ThemedText>
-          <Button onPress={() => Linking.openURL('https://ko-fi.com/brianalicodes')} text="Donate on Ko-fi" type="primary" className="font-montBold" />
-          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 my-4" />
-          <Button onPress={() => Linking.openURL('https://www.patreon.com/c/brianali_codes')} text="Donate on Patreon" type="primary" className="font-montBold" />
+
+          {/* Buttons container layout row */}
+          <View className="flex-row items-center gap-3 w-full">
+            <View className="flex-1">
+              <Button
+                onPress={() => Linking.openURL('https://ko-fi.com/brianalicodes')}
+                text={t('community.donateKofi', 'Donate on Ko-fi')}
+                type="primary"
+                className="font-montBold"
+              />
+            </View>
+
+            <View className="flex-1">
+              <Button
+                onPress={() => Linking.openURL('https://www.patreon.com/c/brianali_codes')}
+                text={t('community.donatePatreon', 'Patreon')}
+                type="primary"
+                className="font-montBold"
+              />
+            </View>
+          </View>
         </View>
 
         {/* SECTION: DATA PROVIDERS */}
         <ThemedText className="text-[11px] uppercase font-montBold tracking-widest text-zinc-400 mb-2.5 ml-1">
-          Data Providers.
+          {t('sections.providers', 'Data Providers.')}
         </ThemedText>
         <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-2">
           <Pressable onPress={() => Linking.openURL(APP_URLS.GAME_POWER_URL)} className="flex-row items-center justify-between p-3 active:opacity-60">
@@ -463,8 +553,12 @@ export default function SettingsScreen() {
                 <Global size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">Gamepower Site</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Primary giveaways API</ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('providers.gamepower', 'Gamepower Site')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('providers.gamepowerSub', 'Primary giveaways API')}
+                </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -476,8 +570,12 @@ export default function SettingsScreen() {
                 <Global size="18" color={monochromeIconColor} variant="Broken" />
               </View>
               <View>
-                <ThemedText className="font-montBold text-sm">CheapShark API</ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">Video Game Deals API </ThemedText>
+                <ThemedText className="font-montBold text-sm">
+                  {t('providers.cheapshark', 'CheapShark API')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('providers.cheapsharkSub', 'Video Game Deals API')}
+                </ThemedText>
               </View>
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
@@ -487,7 +585,7 @@ export default function SettingsScreen() {
         <View className="mt-8 mb-4 items-center justify-center">
           <Divider style={{ backgroundColor: textColor }} className="w-12 h-0.5 rounded-full opacity-10 mb-3" />
           <ThemedText className="text-center font-montBold text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-            Frapp Build {CURRENT_VERSION}
+            {t('footer.build', 'Frapp Build {{version}}', { version: CURRENT_VERSION })}
           </ThemedText>
         </View>
       </ScrollView>
@@ -523,14 +621,14 @@ export default function SettingsScreen() {
               {modalConfig.type === 'update' && (
                 <Button
                   type="dark"
-                  text="Later"
+                  text={t('updateModal.later', 'Later')}
                   onPress={() => modalVisible && setModalVisible(false)}
                   className="flex-1 font-montBold"
                 />
               )}
               <Button
                 type={modalConfig.type === 'error' ? 'dark' : 'primary'}
-                text={modalConfig.actionText || 'OK'}
+                text={modalConfig.actionText || t('modals.ok', 'OK')}
                 onPress={() => {
                   if (modalConfig.onAction) modalConfig.onAction();
                   setModalVisible(false);
@@ -542,9 +640,7 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
-      {/* =========================================================================
-          NEW: SOCIALS CONNECT SELECTION MODAL
-          ========================================================================= */}
+      {/* --- SOCIALS CONNECT SELECTION MODAL --- */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -564,7 +660,7 @@ export default function SettingsScreen() {
             </Pressable>
 
             <ThemedText className="font-montBlack text-lg text-center mt-2 mb-5 tracking-tight">
-              Connect with Me
+              {t('modals.socialsTitle', 'Connect with Me')}
             </ThemedText>
 
             <View className="gap-2 w-full mb-2">
@@ -581,20 +677,61 @@ export default function SettingsScreen() {
                 type="dark"
                 text="Instagram"
                 onPress={() => {
-                  Linking.openURL('https://instagram.com/luh_bryxe');
+                  Linking.openURL('https://instagram.com/brianali_codes');
                   setSocialsModalVisible(false);
                 }}
                 className="w-full font-montBold"
               />
-              <Button
-                type="dark"
-                text="Youtube"
-                onPress={() => {
-                  Linking.openURL('https://www.youtube.com/@frappgiveaways');
-                  setSocialsModalVisible(false);
-                }}
-                className="w-full font-montBold"
-              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* --- TWO-LANGUAGE MODAL COMPONENT SELECTION LAYER --- */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={languageModalVisible}
+        onRequestClose={() => setLanguageModalVisible(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60 px-6">
+          <View
+            style={{ backgroundColor: isDark ? '#1e1e24' : '#ffffff', borderColor: adaptiveBorderColor, borderWidth: 1 }}
+            className="w-full rounded-3xl p-6 shadow-2xl max-w-sm"
+          >
+            <Pressable
+              onPress={() => setLanguageModalVisible(false)}
+              className="absolute top-4 right-4 active:opacity-60 z-10"
+            >
+              <CloseCircle size="22" color={isDark ? '#a1a1aa' : '#71717a'} variant="Broken" />
+            </Pressable>
+
+            <ThemedText className="font-montBlack text-lg text-center mt-2 mb-5 tracking-tight">
+              {t('modals.languageTitle', 'Select Language')}
+            </ThemedText>
+
+            <View className="gap-3 w-full mb-2">
+              <Pressable
+                onPress={() => handleSelectLanguage('en')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">English</ThemedText>
+                {currentLanguageCode.startsWith('en') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleSelectLanguage('es')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">Español</ThemedText>
+                {currentLanguageCode.startsWith('es') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
             </View>
           </View>
         </View>

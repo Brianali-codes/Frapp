@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ScrollView, View, Pressable, Platform, LayoutAnimation, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next'; // Integrated Translation Hook
 import * as SecureStore from 'expo-secure-store';
 import { 
   Setting, 
@@ -10,7 +11,7 @@ import {
   Trash, 
   Element3, 
   RowVertical,
-  Home // Added Home3 icon
+  Home
 } from 'iconsax-react-nativejs';
 
 import DealItem from '@/components/custom/DealItem'; 
@@ -24,6 +25,7 @@ import { FreeGiveaway } from '@/types';
 
 export default function SavedItemsScreen() {
   const router = useRouter();
+  const { t } = useTranslation(); // Translation configuration hook injection
   const scrollRef = useRef<ScrollView>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -106,7 +108,7 @@ export default function SavedItemsScreen() {
             </View>
 
             <ThemedText numberOfLines={1} className="text-xl font-montBlack tracking-tight flex-shrink">
-              My Library
+              {t('preferences.savedGiveaways', { defaultValue: 'My Library' })}
             </ThemedText>
           </View>
 
@@ -186,9 +188,12 @@ export default function SavedItemsScreen() {
             className="rounded-2xl p-4 mb-5"
           >
             <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
-              You have pinned{' '}
-              <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{savedGiveaways.length}</ThemedText> giveaways to claim, saving you a total of{' '}
-              <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">${totalWorthSaved}</ThemedText>! Make sure to claim them before they expire.
+              {t('giveaways.summary.prefix', { defaultValue: 'We found ' })}
+              <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{savedGiveaways.length}</ThemedText>
+              {t('giveaways.summary.midActive', { defaultValue: ' active video game giveaways as of ' })}
+              {t('giveaways.summary.midWorth', { defaultValue: ', carrying a combined structural value of ' })}
+              <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">${totalWorthSaved}</ThemedText>
+              {t('giveaways.summary.suffix', { defaultValue: '. Claim yours before the countdown matrix expires!' })}
             </ThemedText>
           </View>
         )}
@@ -214,16 +219,16 @@ export default function SavedItemsScreen() {
               <Heart size="36" color="#9333ea" variant="Broken" />
             </View>
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
-              Your Library is Empty
+              {t('giveaways.empty.title', { defaultValue: 'Your Library is Empty' })}
             </ThemedText>
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              Explore ongoing free drops and tap the heart icon to save them here for easy claiming later!
+              {t('giveaways.empty.description', { defaultValue: 'Explore ongoing free drops and tap the heart icon to save them here for easy claiming later!' })}
             </ThemedText>
             <Button
               type="primary"
               onPress={() => router.push('/(tabs)')}
               className="w-full"
-              text="Explore the App"
+              text={t('giveaways.empty.viewAllButton', { defaultValue: 'Explore the App' })}
             />
           </View>
         ) : (
@@ -234,7 +239,7 @@ export default function SavedItemsScreen() {
                 key={giveaway.id}
                 giveaway={giveaway}
                 variant={layoutVariant}
-                ctaText="Claim Now"
+                ctaText={t('deals.claim', { defaultValue: 'Claim Now' })}
               />
             ))}
           </View>
@@ -274,11 +279,11 @@ export default function SavedItemsScreen() {
 
             {/* Title & Desc */}
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
-              Clear Saved Library?
+              {t('report.title', { defaultValue: 'Clear Saved Library?' })}
             </ThemedText>
             
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-[13px] text-center leading-relaxed mb-6 px-2">
-              This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually.
+              {t('report.github.bodyDescription', { defaultValue: "This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually." })}
             </ThemedText>
 
             {/* Actions Grid */}
@@ -290,7 +295,7 @@ export default function SavedItemsScreen() {
                 className="flex-1 h-11 rounded-full items-center justify-center active:opacity-75"
               >
                 <ThemedText className="font-montBold text-xs uppercase tracking-wider">
-                  Cancel
+                  {t('updateModal.later', { defaultValue: 'Cancel' })}
                 </ThemedText>
               </Pressable>
 
@@ -301,7 +306,7 @@ export default function SavedItemsScreen() {
                 className="flex-1 h-11 rounded-full items-center justify-center active:opacity-90 shadow-md shadow-red-500/20"
               >
                 <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                  Wipe All
+                  {t('modals.dismiss', { defaultValue: 'Wipe All' })}
                 </ThemedText>
               </Pressable>
             </View>

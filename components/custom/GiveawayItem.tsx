@@ -14,11 +14,12 @@ import {
   Animated
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as SecureStore from 'expo-secure-store'; // Added for local data persistence
+import * as SecureStore from 'expo-secure-store'; 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { FreeGiveaway } from '@/types';
 import { useCustomTheme } from '@/context/ThemeContext';
+import { useTranslation } from 'react-i18next'; // Adjust import paths depending on your setup
 import { 
   ArrowCircleRight, 
   ExportSquare, 
@@ -28,7 +29,7 @@ import {
   Gift,
   InfoCircle,
   TimerStart,
-  Heart         
+  Heart          
 } from 'iconsax-react-nativejs';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -41,50 +42,52 @@ interface GiveawayItemProps {
   onToggleSave?: () => void;     
 }
 
-// Helper to calculate relative days remaining
-const getDaysRemainingText = (endDateString: string | undefined): { label: string; isDays: boolean } | null => {
-  if (!endDateString || endDateString === 'N/A') return null;
-
-  const parsedDate = Date.parse(endDateString);
-  if (isNaN(parsedDate)) {
-    return { label: `Ends: ${endDateString}`, isDays: false };
-  }
-
-  const targetDate = new Date(parsedDate);
-  const today = new Date();
-  
-  today.setHours(0, 0, 0, 0);
-  targetDate.setHours(0, 0, 0, 0);
-
-  const diffTime = targetDate.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) {
-    return { label: 'Expired', isDays: true };
-  } else if (diffDays === 0) {
-    return { label: 'Ends Today', isDays: true };
-  } else if (diffDays === 1) {
-    return { label: '1 Day Left', isDays: true };
-  } else {
-    return { label: `${diffDays} Days Left`, isDays: true };
-  }
-};
-
 export default function GiveawayItem({ 
   giveaway, 
   variant = 'normal', 
-  ctaText = 'Claim',
+  ctaText, // Default dynamically set below via t()
   isSaved = false,
   onToggleSave = () => {} 
 }: GiveawayItemProps) {
   const { themeMode } = useCustomTheme();
+  const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [localIsSaved, setLocalIsSaved] = useState(isSaved);
   const translateY = useRef(new Animated.Value(0)).current;
 
-  // --- PERSISTENCE LOGIC (SECURESTORE SYNC) ---
+  // Resolve localized default text for CTA if not manually supplied as a prop
+  const activeCtaText = ctaText || t('deals.claim');
 
-  // 1. On Mount: Query storage to see if this giveaway is already saved
+  // Helper to calculate relative days remaining utilizing translation lookups
+  const getDaysRemainingText = (endDateString: string | undefined): { label: string; isDays: boolean } | null => {
+    if (!endDateString || endDateString === 'N/A') return null;
+
+    const parsedDate = Date.parse(endDateString);
+    if (isNaN(parsedDate)) {
+      return { label: `${t('modals.dismiss')}: ${endDateString}`, isDays: false };
+    }
+
+    const targetDate = new Date(parsedDate);
+    const today = new Date();
+    
+    today.setHours(0, 0, 0, 0);
+    targetDate.setHours(0, 0, 0, 0);
+
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { label: 'Expired', isDays: true }; // Retain technical state strings or adjust to your mapping preferences
+    } else if (diffDays === 0) {
+      return { label: 'Ends Today', isDays: true };
+    } else if (diffDays === 1) {
+      return { label: '1 Day Left', isDays: true };
+    } else {
+      return { label: `${diffDays} Days Left`, isDays: true };
+    }
+  };
+
+  // --- PERSISTENCE LOGIC (SECURESTORE SYNC) ---
   useEffect(() => {
     const checkSavedStatus = async () => {
       try {
@@ -104,12 +107,10 @@ export default function GiveawayItem({
     checkSavedStatus();
   }, [giveaway.id, isSaved]);
 
-  // 2. Local Toggle and Write handler
   const handleToggle = async () => {
     const nextSavedState = !localIsSaved;
     setLocalIsSaved(nextSavedState);
     
-    // Call the parent callback to notify upper components (if any UI updates are expected there)
     onToggleSave();
 
     try {
@@ -117,10 +118,8 @@ export default function GiveawayItem({
       let parsed: FreeGiveaway[] = stored ? JSON.parse(stored) : [];
 
       if (!nextSavedState) {
-        // Unsave: Filter out current giveaway
         parsed = parsed.filter((item) => item.id !== giveaway.id);
       } else {
-        // Save: Add to storage
         parsed.push(giveaway);
       }
 
@@ -129,7 +128,6 @@ export default function GiveawayItem({
       console.error('Error modifying saved list in SecureStore:', error);
     }
   };
-
   // --- END OF PERSISTENCE LOGIC ---
 
   const isDark = themeMode === 'dark';
@@ -173,8 +171,15 @@ export default function GiveawayItem({
     const targetUrl = giveaway.open_giveaway_url || giveaway.open_giveaway || giveaway.game_url;
     if (!targetUrl) return;
     try {
+      const plainSavedVal = worthValue.replace(/[^0-9.]/g, '');
       await Share.share({
-        message: `🔥 Freebie Alert: Get "${giveaway.title}" for FREE ${hasWorth ? `(Worth ${worthValue})` : ''} on ${giveaway.platform || 'PC'}!\nClaim here: ${targetUrl}`,
+        message: t('deals.share_message', {
+          title: giveaway.title,
+          price: t('deals.free_uppercase'),
+          saved: plainSavedVal || '0',
+          platform: giveaway.platform || 'PC',
+          url: targetUrl
+        }),
         title: giveaway.title,
       });
     } catch (error) {
@@ -233,7 +238,7 @@ export default function GiveawayItem({
               {hasWorth && (
                 <View className="absolute bottom-1 left-1 bg-purple-600 px-1 py-0.5 rounded shadow-sm">
                   <Text className="text-[7px] font-montBlack text-white uppercase tracking-tight">
-                    {worthValue} VALUE
+                    {worthValue} {t('deals.store').toUpperCase()}
                   </Text>
                 </View>
               )}
@@ -254,7 +259,7 @@ export default function GiveawayItem({
               <View className="flex-row items-center justify-between mt-1">
                 <View className="flex-row items-center gap-1.5">
                   <ThemedText className="font-montBlack text-[12px] text-emerald-500">
-                    FREE
+                    {t('deals.free_uppercase')}
                   </ThemedText>
                   {hasWorth && (
                     <Text className="text-[10px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
@@ -307,7 +312,7 @@ export default function GiveawayItem({
               {hasWorth && (
                 <View className="absolute bottom-1.5 left-1.5 bg-purple-600 px-1.5 py-0.5 rounded shadow-sm">
                   <Text className="text-[8px] font-montBlack text-white uppercase tracking-wider">
-                    {worthValue} VALUE
+                    {worthValue} {t('deals.store').toUpperCase()}
                   </Text>
                 </View>
               )}
@@ -326,7 +331,7 @@ export default function GiveawayItem({
               <View className="flex-row items-center justify-between mt-1">
                 <View className="flex-row items-center gap-1.5">
                   <ThemedText className="font-montBlack text-[12px] text-emerald-500">
-                    FREE
+                    {t('deals.free_uppercase')}
                   </ThemedText>
                   {hasWorth && (
                     <Text className="text-[10px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
@@ -379,7 +384,7 @@ export default function GiveawayItem({
               {hasWorth && (
                 <View className="absolute top-3 left-3 bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
                   <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
-                    {worthValue} VALUE
+                    {worthValue} {t('deals.store').toUpperCase()}
                   </Text>
                 </View>
               )}
@@ -399,7 +404,7 @@ export default function GiveawayItem({
               >
                 <View className="flex-row items-center gap-1">
                   <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
-                    {ctaText}
+                    {activeCtaText}
                   </ThemedText>
                   <ArrowCircleRight size="14" color="#9333ea" variant="Bold" />
                 </View>
@@ -407,7 +412,7 @@ export default function GiveawayItem({
                 <View className="flex-row items-center gap-3">
                   <View className="flex-row items-center gap-1.5">
                     <ThemedText className="text-[12px] font-montBlack text-emerald-500">
-                      FREE
+                      {t('deals.free_uppercase')}
                     </ThemedText>
                     {hasWorth && (
                       <Text className="text-[10px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
@@ -523,7 +528,7 @@ export default function GiveawayItem({
                     )}
                     <View className="bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-lg">
                       <ThemedText className="text-emerald-500 font-montBlack text-xs">
-                        FREE
+                        {t('deals.free_uppercase')}
                       </ThemedText>
                     </View>
                   </View>
@@ -571,17 +576,26 @@ export default function GiveawayItem({
 
                 {/* Description Body */}
                 <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
-                  {giveaway.description || 'Grab this awesome promotional giveaway before keys run out or the deal active window closes!'}
+                  {giveaway.description || t('deals.no_description')}
                 </ThemedText>
 
                 {/* Instructions / Savings Breakdown Block */}
-                {giveaway.instructions && (
+                {giveaway.instructions ? (
                   <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
                     <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
                       Instructions to Claim:
                     </ThemedText>
                     <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
                       {giveaway.instructions}
+                    </ThemedText>
+                  </View>
+                ) : hasWorth && (
+                  <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
+                    <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
+                      {t('deals.breakdown_title')}
+                    </ThemedText>
+                    <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
+                      {t('deals.breakdown_body', { saved: worthValue, original: worthValue, percent: '100' })}
                     </ThemedText>
                   </View>
                 )}
@@ -629,7 +643,7 @@ export default function GiveawayItem({
                 >
                   <Gift size="16" color="#ffffff" variant="Broken" />
                   <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                    {ctaText}
+                    {activeCtaText}
                   </ThemedText>
                 </Pressable>
               </View>
