@@ -111,15 +111,6 @@ Follow these steps to set up the development environment:
   ```
 
 
-
-## Developers
-
-
-- [@Brian Ali](https://www.github.com/brianali-codes)
-- [@Elijah Soladoye](https://www.github.com/shodown96)
-
-
-
 ## License
 
 This project contains the MIT LICENCE
