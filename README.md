@@ -10,11 +10,13 @@
 </p>
 <p align="center">
   <a href="#about">About</a> •
+  <a href="#features-some-features-are-still-being-worked-on">Features</a> •
   <a href="#deployment">Deployment</a> •
   <a href="#running-locally">Running Locally</a> •
   <a href="https://github.com/brianali-codes/frapp/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md" target="_blank">Request Feature</a> •
   <a href="https://github.com/brianali-codes/frapp/issues/new?assignees=&labels=bug&projects=&template=feature_request.md" target="_blank">Report Bug</a> •
   <a href="https://choosealicense.com/licenses/mit/" target="_blank">License</a>
+  
 </p>
 <p align="center">
   <strong>FRAPP (Freebie Radar App) aggregates the latest video game giveaways and premium game deals in one clean interface.</strong><br>
@@ -38,6 +40,22 @@ FRAPP acts as a centralized messenger for deal-hunting and budget gaming. It mon
   <img width="1920" height="1080" alt="1" src="https://github.com/user-attachments/assets/5581bac0-f7fd-471d-84f7-b040861d2f15" />
   <img width="1920" height="1080" alt="2" src="https://github.com/user-attachments/assets/d538d82c-bfb6-4c11-b390-4563abb734d8" />
 </div>
+
+
+## Features (Some features are still being worked on):
+
+- Claim game giveaways when stores avail them.
+- Claim game deals when stores update prices.
+- Favorite your game deals and giveaways to keep an eye on their prices or availability.
+- Filter your games by Store and (or) platform
+- Privacy focus due to serverless nature.
+- Reminder notifications to remind users when game giveaways or deals are free.
+- Zero ads and trackers.
+- Modern UI and UX.
+- Bug report functionality to help improve the app.
+- Dark and Light Mode support.
+- Localization (currently Working on) Contributions are welcome.
+ 
 
 
 ## Deployment
