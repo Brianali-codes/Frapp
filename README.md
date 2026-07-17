@@ -6,15 +6,17 @@
 <p align="center">
   <a href="https://github.com/brianali-codes/frapp"><img src="https://img.shields.io/github/downloads/brianali-codes/frapp/total.svg" alt="Github All Releases" /></a>
   <a href="https://choosealicense.com/licenses/mit/"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License" /></a>
-  <img src="https://img.shields.io/badge/Latest_version-v1.1.4-green" alt="Latest Version v1.1.4"/>
+  <img src="https://img.shields.io/badge/Latest_version-v1.1.3-green" alt="Latest Version v1.1.3"/>
 </p>
 <p align="center">
   <a href="#about">About</a> •
+  <a href="#features-some-features-are-still-being-worked-on">Features</a> •
   <a href="#deployment">Deployment</a> •
   <a href="#running-locally">Running Locally</a> •
   <a href="https://github.com/brianali-codes/frapp/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md" target="_blank">Request Feature</a> •
   <a href="https://github.com/brianali-codes/frapp/issues/new?assignees=&labels=bug&projects=&template=feature_request.md" target="_blank">Report Bug</a> •
   <a href="https://choosealicense.com/licenses/mit/" target="_blank">License</a>
+  
 </p>
 <p align="center">
   <strong>FRAPP (Freebie Radar App) aggregates the latest video game giveaways and premium game deals in one clean interface.</strong><br>
@@ -35,11 +37,25 @@ FRAPP acts as a centralized messenger for deal-hunting and budget gaming. It mon
 ## ScreenShots and Screens
 
 <div style="display: flex;" align="center">
- <img width="1920" height="1080" alt="Light Mode Frapp Design" src="https://github.com/user-attachments/assets/2ca0e036-5da5-4c2b-a030-b459471592a5" />
- <img width="1920" height="1080" alt="Untitled design (1)" src="https://github.com/user-attachments/assets/462a6ec9-403f-4d86-82d4-87020f7e77ed" />
- <img width="1920" height="1080" alt="Untitled design (3)" src="https://github.com/user-attachments/assets/307fd1af-021d-41e5-9012-6f01a74b68dc" />
- <img width="1920" height="1080" alt="Untitled design (2)" src="https://github.com/user-attachments/assets/41b1c1f5-fe10-4ebe-ab24-b79374efcf70" />
+  <img width="1920" height="1080" alt="1" src="https://github.com/user-attachments/assets/5581bac0-f7fd-471d-84f7-b040861d2f15" />
+  <img width="1920" height="1080" alt="2" src="https://github.com/user-attachments/assets/d538d82c-bfb6-4c11-b390-4563abb734d8" />
 </div>
+
+
+## Features (Some features are still being worked on):
+
+- Claim game giveaways when stores avail them.
+- Claim game deals when stores update prices.
+- Favorite your game deals and giveaways to keep an eye on their prices or availability.
+- Filter your games by Store and (or) platform
+- Privacy focus due to serverless nature.
+- Reminder notifications to remind users when game giveaways or deals are free.
+- Zero ads and trackers.
+- Modern UI and UX.
+- Bug report functionality to help improve the app.
+- Dark and Light Mode support.
+- Localization (currently Working on) Contributions are welcome.
+ 
 
 
 ## Deployment
@@ -93,15 +109,6 @@ Follow these steps to set up the development environment:
   ```bash
     expo start
   ```
-
-
-
-## Developers
-
-
-- [@Brian Ali](https://www.github.com/brianali-codes)
-- [@Elijah Soladoye](https://www.github.com/shodown96)
-
 
 
 ## License
