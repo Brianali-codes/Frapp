@@ -373,7 +373,7 @@ export default function GiveawayScreen() {
             </View>
 
             <ThemedText numberOfLines={1} className="text-xl font-montBlack tracking-tight flex-shrink">
-              {t('giveaways.title', 'Free to Redeem.')}
+              {t('giveaways.title', 'Giveaways')}
             </ThemedText>
           </View>
 
@@ -507,13 +507,13 @@ export default function GiveawayScreen() {
                 className="rounded-2xl p-4 mb-5"
               >
                 <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
-                  {t('giveaways.summary.prefix', 'We have found ')}
+                  {t('giveaways.summary.prefix', 'We found ')}
                   <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{prices}</ThemedText>
-                  {t('giveaways.summary.midActive', ' video game giveaways as of ')}
+                  {t('giveaways.summary.midActive', ' active game giveaways as of ')}
                   <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">{day} {localizedMonth} {year}</ThemedText>
-                  {t('giveaways.summary.midWorth', ', with a total value of ')}
+                  {t('giveaways.summary.midWorth', ', valued at a total of ')}
                   <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">${worth}</ThemedText>
-                  {t('giveaways.summary.suffix', '. Claim them before time runs out!')}
+                  {t('giveaways.summary.suffix', '. Claim them before they expire!')}
                 </ThemedText>
               </View>
               <HighestWorthCarousel />
@@ -537,10 +537,10 @@ export default function GiveawayScreen() {
               <WifiSquare size="36" color="#9333ea" variant="Broken" />
             </View>
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
-              {t('giveaways.error.title', 'Connection Interrupted')}
+              {t('giveaways.error.title', 'Connection Disrupted')}
             </ThemedText>
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              {t('giveaways.error.description', "We can't sync up with the servers right now. Make sure your device is online and let's try that again.")}
+              {t('giveaways.error.description', "We are unable to sync up with upstream lookup pipelines right now. Check your internet access and try again.")}
             </ThemedText>
             <Button
               type="primary"
@@ -573,16 +573,16 @@ export default function GiveawayScreen() {
               <Element3 size="36" color="#9333ea" variant="Broken" />
             </View>
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
-              {t('giveaways.empty.title', 'No Drops Available')}
+              {t('giveaways.empty.title', 'No Giveaways Found')}
             </ThemedText>
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              {t('giveaways.empty.description', 'It looks like there are no active giveaways for this platform right now.')}
+              {t('giveaways.empty.description', 'There are no active giveaways available for this platform right now.')}
             </ThemedText>
             <Button
               type="primary"
               onPress={() => handlePlatformChange('all')}
               className="w-full"
-              text={t('giveaways.empty.viewAllButton', 'View All Giveaways')}
+              text={t('giveaways.empty.viewAllButton', 'View All Platforms')}
             />
           </View>
         ) : (
@@ -604,7 +604,7 @@ export default function GiveawayScreen() {
               // Page 1: Single Full-Width Button
               endIndex < giveaways.length && (
                 <PaginationButton
-                  text={t('giveaways.pagination.next', 'Next Games')}
+                  text={t('giveaways.pagination.next', 'Next Page')}
                   onPress={handleNextPage}
                   isDark={isDark}
                 />
@@ -622,7 +622,7 @@ export default function GiveawayScreen() {
                 {endIndex < giveaways.length && (
                   <View className="flex-1">
                     <PaginationButton
-                      text={t('giveaways.pagination.next', 'Next Games')}
+                      text={t('giveaways.pagination.next', 'Next Page')}
                       onPress={handleNextPage}
                       isDark={isDark}
                     />

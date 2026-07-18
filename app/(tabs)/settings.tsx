@@ -34,7 +34,19 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { checkNotificationPermission } from '@/lib/notifications';
 
-const CURRENT_VERSION = 'v1.1.4';
+
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  es: 'Español',
+  fr: 'Français',
+  zh: '中文',
+  sw: 'Kiswahili',
+  pt: 'Português',
+  jp: '日本語',
+  de: 'Deutsch',
+};
+
+const CURRENT_VERSION = 'v1.1.4'; 
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -67,10 +79,14 @@ export default function SettingsScreen() {
   const monochromeIconColor = isDark ? '#ffffff' : '#000000';
   const iconWrapperBg = 'bg-zinc-500/10 dark:bg-zinc-400/10';
 
+  // This will now dynamically pick the correct name from the dictionary!
   const currentLanguageCode = i18n?.language || 'en';
-  const activeLanguageName = currentLanguageCode.startsWith('es') ? 'Español' : 'English';
 
-  const handleSelectLanguage = async (langCode: 'en' | 'fr' | 'es'  | 'zh' | 'sw' | 'pt' | 'jp' | 'de') => {
+  // Quick defensive tip: use .split('-')[0] in case i18n returns regional variations like 'es-US'
+  const shortLangCode = currentLanguageCode.split('-')[0];
+  const activeLanguageName = LANGUAGE_NAMES[shortLangCode] || 'English';
+
+  const handleSelectLanguage = async (langCode: 'en' | 'fr' | 'es' | 'zh' | 'sw' | 'pt' | 'jp' | 'de') => {
     try {
       await i18n.changeLanguage(langCode);
     } catch (e) {
@@ -80,6 +96,7 @@ export default function SettingsScreen() {
     }
   };
 
+  // ... rest of your useEffects and layout logic
   useEffect(() => {
     async function getInitialPermissionState() {
       const settings = await notifee.getNotificationSettings();
@@ -733,7 +750,7 @@ export default function SettingsScreen() {
                 )}
               </Pressable>
 
-               <Pressable
+              <Pressable
                 onPress={() => handleSelectLanguage('jp')}
                 style={{ backgroundColor: cardBgColor }}
                 className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
@@ -744,7 +761,7 @@ export default function SettingsScreen() {
                 )}
               </Pressable>
 
-               <Pressable
+              <Pressable
                 onPress={() => handleSelectLanguage('sw')}
                 style={{ backgroundColor: cardBgColor }}
                 className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
@@ -755,7 +772,7 @@ export default function SettingsScreen() {
                 )}
               </Pressable>
 
-               <Pressable
+              <Pressable
                 onPress={() => handleSelectLanguage('pt')}
                 style={{ backgroundColor: cardBgColor }}
                 className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
@@ -766,7 +783,7 @@ export default function SettingsScreen() {
                 )}
               </Pressable>
 
-               <Pressable
+              <Pressable
                 onPress={() => handleSelectLanguage('zh')}
                 style={{ backgroundColor: cardBgColor }}
                 className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"

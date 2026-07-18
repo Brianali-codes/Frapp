@@ -1,84 +1,83 @@
-// src/i18n/locales/ja.ts
-export const ja = {
+export const jp = {
   header: {
-    title: "設定",
-    subtitle: "アプリケーションの動作のカスタマイズ、通知の調整、ディスプレイ設定の切り替え、オープンソース認証情報の確認ができます。"
+    title: "設定.",
+    subtitle: "アプリの動作カスタマイズ、通知の調整、ディスプレイ設定の切り替え、またはオープンソース認証情報の確認を行います。"
   },
   sections: {
-    preferences: "環境設定",
-    about: "アプリについて",
-    community: "コミュニティ & サポート",
-    providers: "データプロバイダー"
+    preferences: "環境設定.",
+    about: "アプリについて.",
+    community: "コミュニティ & サポート.",
+    providers: "データプロバイダー."
   },
   preferences: {
     themeAppearance: "テーマの外観",
     themeDark: "ダークモード",
     themeLight: "ライトモード",
     appLanguage: "アプリの言語",
-    appLanguageSub: "翻訳レイヤーの切り替え",
-    savedGiveaways: "マイライブラリ",
-    savedGiveawaysSub: "ブックマークしたゲームにアクセス",
+    appLanguageSub: "言語の切り替え",
+    savedGiveaways: "マイライブラリ.",
+    savedGiveawaysSub: "保存されたゲームにアクセス",
     notificationSettings: "通知設定",
     notificationSettingsSub: "プッシュ通知の切り替え",
-    appIntroduction: "アプリの紹介",
-    appIntroductionSub: "オンボーディングの再確認",
-    checkForUpdates: "アップデートを確認",
-    checkForUpdatesSub: "アプリのビルドバージョンの確認"
+    appIntroduction: "オンボーディング",
+    appIntroductionSub: "オンボーディングの内容を確認",
+    checkForUpdates: "アプリのバージョン",
+    checkForUpdatesSub: "アップデートを確認"
   },
   about: {
     developer: "開発者について",
-    developerSub: "ポートフォリオサイトを訪問",
+    developerSub: "個人ポートフォリオを表示",
     moreApps: "その他のアプリ",
     moreAppsSub: "GitHubリポジトリを探索",
     socials: "ソーシャルメディア",
-    socialsSub: "各プラットフォームでつながる",
+    socialsSub: "各種プラットフォームでつながる",
     privacy: "プライバシーポリシー",
-    privacySub: "Frappのポリシーを表示"
+    privacySub: "プライバシーポリシーを表示します。"
   },
   community: {
     supportOpenSource: "オープンソースを支援",
-    supportOpenSourceSub: "このアプリケーションは、個人で開発され無料で提供されています。これらのセール情報が役に立った場合は、GitHubでスターを付けていただけると励みになります！",
+    supportOpenSourceSub: "このアプリは個人で開発され、無料でホストされています。もしこれらのセール情報が役に立ったなら、GitHubでスターを付けていただけると大変励みになります！",
     starGithub: "GitHubでスターを付ける",
-    buyCoffee: "プロジェクトを支援",
-    buyCoffeeSub: "サーバーの維持にご協力ください！少額の寄付をいただくことで、プロジェクトの維持や新機能の追加が可能になります。",
-    donateKofi: "Ko-fiで寄付する",
-    donatePatreon: "Patreonで寄付する"
+    buyCoffee: "開発者をコーヒーで応援",
+    buyCoffeeSub: "サーバーの維持にご協力ください！少額の寄付をいただくことで、プロジェクトの維持や新機能の追加を行うことができます。",
+    donateKofi: "Ko-fi",
+    donatePatreon: "Patreon"
   },
   providers: {
     gamepower: "Gamepower サイト",
-    gamepowerSub: "主なギブアウェイのデータソース",
+    gamepowerSub: "主要な無料配布データソース",
     cheapshark: "CheapShark API",
-    cheapsharkSub: "ゲームセールのAPIマトリックス"
+    cheapsharkSub: "ビデオゲームセールAPI"
   },
   report: {
-    title: "保存されたライブラリをクリアしますか？",
-    subtitle: "アプリケーションの問題が発生した場合、または価格や値の不一致に気付いた場合は、以下のカテゴリを選択してレポートを送信してください。",
-    sectionTitle: "バグカテゴリの選択",
+    title: "バグを報告する.",
+    subtitle: "アプリでお困りの場合は、テンプレートを選択して報告を送信してください。(報告は確認のためGitHubリポジトリに送信されます)",
+    sectionTitle: "バグのカテゴリを選択",
     categories: {
-      ui: "UI/UXのバグ",
+      ui: "UI/UXの不具合",
       api: "API / データエラー",
-      crash: "パフォーマンス / クラッシュ",
-      feature: "機能リクエスト"
+      crash: "パフォーマンス / 強制終了",
+      feature: "機能要望"
     },
     githubCard: {
-      title: "GitHub Issuesから直接送信",
-      description: "下のボタンをクリックすると、選択したカテゴリとローカルデバイスの環境パラメータがパッケージ化され、GitHubのIssueページが開きます。",
-      buttonText: "{{category}}を報告"
+      title: "GitHub Issuesから直接報告する",
+      description: "下のボタンをクリックすると、選択した内容とローカルデバイスの環境パラメータが安全にバンドルされ、GitHubのバグ追跡ページが開きます。",
+      buttonText: "{{category}}を報告する"
     },
     attributionCard: {
-      title: "プロジェクトとAPIの帰属",
-      description: "このオープンソース配信は、GamepowerおよびFree To Gameのアーキテクチャから提供されるストリームに完全に依存しています。これらの独立したAPIまたは関連コンテンツは、FRAPPに直接帰属するものではありません。"
+      title: "サードパーティAPIに関する開示",
+      description: "インターフェース上に表示されるすべてのデータインデックスは、GamepowerおよびCheapSharkのオープンパブリックアーキテクチャを介して外部ネットワークから直接取得されています。これらのインデックスの使用は、それぞれのネイティブ配信ルールに準拠しています。Frappは、個々のアイテムリストの操作、価格構造の変更、または配信スケジュールの管理を行いません。したがって、これらのプラットフォームを通じて配信される外部ノードまたはキーの継続的な利用可能性、正確性、または継続的なサポートを保証することはできません。"
     },
     footerVersion: "Frapp バージョン v1.1.4",
     alerts: {
       errorTitle: "エラー",
-      errorMessage: "GitHubにリダイレクトできませんでした。ブラウザの権限を確認してください。"
+      errorMessage: "GitHubにリダイレクトできませんでした。ブラウザのルーティング権限を確認してください。"
     },
     github: {
-      bodyDescription: "この操作を行うと、ピン留めされたすべてのギブアウェイがリストから完全に削除されます。手動で再度検索して追加する必要があります。",
+      bodyDescription: "この操作を行うと、保存されたリストからピン留めされたすべての無料配布が完全に削除されます。手動で再度探して追加する必要があります。",
       step1: "アプリを開く",
-      step2: "画面を移動...",
-      step3: "現象を確認..."
+      step2: "次へ進む...",
+      step3: "状態を確認する..."
     }
   },
   footer: {
@@ -87,30 +86,30 @@ export const ja = {
   updateModal: {
     title: "アップデートがあります",
     subtitle: "{{version}} が利用可能です！",
-    description: "アプリの新しいバージョン ({{latest}}) があります。現在のバージョン ({{current}}) からアップデートして、最新の変更を適用してください！",
+    description: "アプリの新しいバージョン ({{latest}}) が利用可能です。最新の変更を適用するために、現在のバージョン ({{current}}) からアップデートしてください！",
     later: "キャンセル",
     updateNow: "今すぐアップデート"
   },
   modals: {
-    dismiss: "すべて削除",
+    dismiss: "すべて消去",
     ok: "OK",
     testFailedTitle: "テストターゲットの失敗",
-    testFailedMessage: "レンダリングループを実行できませんでした。ローカルの権限を確認してください。",
+    testFailedMessage: "即時展開レンダリングループを実行できませんでした。ローカルの権限を確認してください。",
     upToDateTitle: "最新の状態です",
-    upToDateMessage: "すでに最新のビルド ({{version}}) を実行しています。アップデートは不要です。",
+    upToDateMessage: "すでに最新のリビジョンビルド ({{version}}) を実行しています。アップデートは必要ありません。",
     upToDateAction: "素晴らしい",
     checkFailedTitle: "検証失敗",
-    checkFailedMessage: "現在、ルックアップクエリを完了できませんでした。接続を確認して再試行してください。",
-    socialsTitle: "開発者とつながる",
+    checkFailedMessage: "現時点で検索クエリを完了できませんでした。接続状態を確認して再試行してください。",
+    socialsTitle: "セールを共有",
     languageTitle: "言語を選択"
   },
   giveaways: {
-    title: "無料で受け取る",
+    title: "無料配布.",
     summary: {
-      prefix: "あなたは ",
-      midActive: " 個のギブアウェイをピン留めしており、合計 ",
-      midWorth: "",
-      suffix: " 節約できます！有効期限が切れる前に受け取ってください。"
+      prefix: "現在、",
+      midActive: " 時点でアクティブなゲームの無料配布が ",
+      midWorth: " 個見つかりました。総額価値は ",
+      suffix: " です。期限が切れる前に手に入れましょう！"
     },
     platforms: {
       all: "すべて",
@@ -130,54 +129,83 @@ export const ja = {
     },
     error: {
       title: "接続が切断されました",
-      description: "現在、データパイプラインと同期できません。インターネット接続を確認して再試行してください。",
+      description: "現在、データパイプラインとの同期ができません。インターネット接続を確認して再試行してください。",
       retryButton: "接続を再試行"
     },
     empty: {
-      title: "ライブラリが空です",
-      description: "開催中のフリードロップを探索し、ハートアイコンをタップしてここに保存し、後で簡単に受け取れるようにしましょう！",
-      viewAllButton: "アプリを探索"
+      title: "無料配布が見つかりません",
+      description: "現在、このプラットフォームで利用可能なアクティブな無料配布はありません。",
+      viewAllButton: "すべてのプラットフォームを表示"
     },
     tracking: {
       days_left: "残り {{count}} 日",
       day_left: "残り 1 日",
       ends_today: "本日終了",
-      expired: "期間終了",
+      expired: "期限切れ",
       keys_left: "残りキー数: {{count}}",
       instructions_title: "獲得手順:"
     },
     pagination: {
       previous: "前へ",
-      next: "次のゲーム"
+      next: "次のページ"
+    }
+  },
+  giveaways1: {
+    summary: {
+      prefix: "保存されたゲームが ",
+      midActive: " 件あります ",
+      midWorth: "、総額価値は ",
+      suffix: " です。期限が切れる前に手に入れましょう！"
+    },
+    empty: {
+      viewAllButton: "アプリを探索"
+    },
+    delete: {
+      title: "すべてのゲームを削除しますか？",
+      description: "この操作を行うと、保存されたリストからピン留めされたすべての無料配布が完全に削除されます。手動で再度探して追加する必要があります。",
+      confirmButton: "すべて消去"
     }
   },
   deals: {
-    title: "ゲームセール",
-    claim: "今すぐ獲得",
-    retailer: "小売店",
+    title: "ゲームセール.",
+    titleClaim: "セールを利用する.",
+    claim: "セールを利用する",
+    retailer: "小売業者",
     store: "ストア",
     free_uppercase: "無料",
-    share_message: "🔥 セール情報: {{platform}}で{{title}}が{{price}}に値下げされました（{{saved}}の節約）！\nこちらからチェック: {{url}}",
-    save_amount: "${{amount}} 節約",
-    hot_deal: "価値",
-    rating: "支持率 {{percent}}%",
-    released: "終了: ",
-    no_description: "追加の説明コンテキストが見つかりません。価格が変更される前にこのセール情報を獲得してください！",
-    breakdown_title: "セール情報の詳細を表示",
-    breakdown_body: "元の小売価格 {{original}} から {{saved}} 節約できます（全体で {{percent}}% 割引）。",
+    share_message: "🔥 セール情報: {{platform}} で {{title}} が {{price}} に値下げされました（{{saved}} お得）！\nこちらからチェック: {{url}}",
+    save_amount: "{{amount}}% OFF",
+    hot_deal: "圧倒的バリューセール",
+    rating: "{{percent}}",
+    released: "終了日: ",
+    no_description: "プロモーション期間が終了するか、価格が変更される前に、この特別な価値の特典を手に入れましょう！",
+    breakdown_title: "詳細を見る",
+    breakdown_body: "通常の小売価格 {{original}} から合計 {{saved}} の割引（{{percent}}% の値引き）が適用されています。",
     summary: {
-      prefix: "アクティブなウェブストアのインデックスをスクラブし、",
-      midActive: " にライブ配信されたプレミア価値の割引を検出しました ",
-      suffix: "。任意のカードを操作してキーを確保してください！"
+      prefix: "アクティブなゲームストアを解析した結果、",
+      midActive: " に実施中の大規模な割引を ",
+      suffix: " 件発見しました。タイトルをタップしてキーを確保しましょう！"
     },
     stores: {
       all: "すべてのストア",
+      steam: "Steam",
+      epic: "Epic Games",
+      gog: "GOG",
       amazon: "Amazon"
     },
+    error: {
+      title: "接続が中断されました",
+      description: "サーバーと同期できません。デバイスがオンラインであることを確認して、もう一度お試しください。",
+      retryButton: "接続を再試行"
+    },
     empty: {
-      title: "一致する結果が見つかりません",
-      description: "このストアの選択に一致する割引ゲームのインデックスはカタログに登録されていません。",
+      title: "一致する情報が見つかりません",
+      description: "このストアカテゴリの下に現在有効なセールはありません。",
       resetButton: "フィルターをリセット"
+    },
+    pagination: {
+      prev: "前へ",
+      next: "次のゲーム"
     }
   },
   months: {
@@ -193,5 +221,15 @@ export const ja = {
     october: "10月",
     november: "11月",
     december: "12月"
+  },
+  onboarding: {
+    welcome: "Frapp へようこそ",
+    legalTitle: "法的同意事項",
+    privacyHeader: "プライバシー コア フレームワーク",
+    privacyBody: "Frappは、完全にオープンソースのデータアグリゲーターツールとして動作します。ローカルストレージプラットフォームの維持、物理的なアカウント構造の収集、ユーザーのテレメトリ履歴の追跡は一切行いません。すべてのプロセスはハードウェア上で直接実行されるため、内部のマスターハブや中央の管理ネットワークにデータが送信、処理、またはログ記録されることはありません。ローカルの設定プロファイル、履歴キャッシュファイル、インタラクティブな設定は、デバイス内に安全に保持されます。",
+    consentLabel: "利用規約およびプライバシーに関する声明に同意します",
+    btnStep1: "次へ",
+    btnStep2: "始める",
+    versionLabel: "Frapp • v1.1.3"
   }
 } as const;

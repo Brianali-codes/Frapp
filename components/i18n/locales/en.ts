@@ -1,4 +1,3 @@
-// src/i18n/locales/en.ts
 export const en = {
   header: {
     title: "Settings.",
@@ -15,15 +14,15 @@ export const en = {
     themeDark: "Dark Mode",
     themeLight: "Light Mode",
     appLanguage: "App Language",
-    appLanguageSub: "Switch translation layers",
-    savedGiveaways: "My Library",
-    savedGiveawaysSub: "Access bookmarked games",
+    appLanguageSub: "Switch Languages",
+    savedGiveaways: "My Library.",
+    savedGiveawaysSub: "Access Saved games",
     notificationSettings: "Notification Settings",
-    notificationSettingsSub: "Toggle push configurations",
-    appIntroduction: "App Introduction",
+    notificationSettingsSub: "Toggle push notifications",
+    appIntroduction: "Onboarding",
     appIntroductionSub: "Review onboarding context",
-    checkForUpdates: "Check for Updates",
-    checkForUpdatesSub: "Verify app build iterations"
+    checkForUpdates: "App Version",
+    checkForUpdatesSub: "Check For Updates"
   },
   about: {
     developer: "About Developer",
@@ -33,7 +32,7 @@ export const en = {
     socials: "Social Media",
     socialsSub: "Connect across platforms",
     privacy: "Privacy Policy",
-    privacySub: "View Frapp policies"
+    privacySub: "View Our Privacy Policy."
   },
   community: {
     supportOpenSource: "Support Open Source",
@@ -41,18 +40,18 @@ export const en = {
     starGithub: "Star us on GitHub",
     buyCoffee: "Buy Me a Coffee",
     buyCoffeeSub: "Help keep the servers alive and the coffee flowing! A small donation enables us to maintain the project and add new features.",
-    donateKofi: "Donate on Ko-fi",
-    donatePatreon: "Donate on Patreon"
+    donateKofi: "Ko-fi",
+    donatePatreon: "Patreon"
   },
   providers: {
     gamepower: "Gamepower Site",
     gamepowerSub: "Primary giveaways data source",
     cheapshark: "CheapShark API",
-    cheapsharkSub: "Video game deals API matrix"
+    cheapsharkSub: "Video game deals API"
   },
   report: {
-    title: "Clear Saved Library?",
-    subtitle: "Encountering application issues or noticed inconsistent prices or values? Choose a category below and fire away a live tracker report.",
+    title: "Report a Bug.",
+    subtitle: "Having Issues with the app, choose your template to submit a report. (Reports will be submitted to our GitHub repository for review )",
     sectionTitle: "Select a Bug Category",
     categories: {
       ui: "UI/UX Glitch",
@@ -66,8 +65,8 @@ export const en = {
       buttonText: "Report {{category}}"
     },
     attributionCard: {
-      title: "Project & API Attribution",
-      description: "This open-source distribution relies completely on structural streams supplied by the Gamepower and Free To Game architectures. None of these independent APIs or associated content entities belong directly to FRAPP."
+      title: "Third-Party API Disclosures",
+      description: "All data indexes visible throughout the interface are fetched directly from external networks via the Gamepower and CheapShark open public architectures. Use of these indexes complies directly with their native distribution rules. Frapp does not manipulate individual item listings, alter pricing structures, or manage distribution timelines. Consequently, we cannot guarantee the uninterrupted availability, accuracy, or ongoing support of external nodes or keys distributed through those respective platforms."
     },
     footerVersion: "Frapp Version v1.1.4",
     alerts: {
@@ -101,16 +100,17 @@ export const en = {
     upToDateAction: "Awesome",
     checkFailedTitle: "Verification Failure",
     checkFailedMessage: "Could not complete lookup queries at this moment. Check your connectivity index and retry.",
-    socialsTitle: "Connect with me",
+    socialsTitle: "Share Promo",
     languageTitle: "Select Language"
   },
+
   giveaways: {
-    title: "Free to Claim.",
+    title: "Giveaways.",
     summary: {
-      prefix: "You have pinned ",
-      midActive: " giveaways to claim, saving you a total of ",
-      midWorth: "",
-      suffix: "! Make sure to claim them before they expire."
+      prefix: "We found ",
+      midActive: " active game giveaways as of ",
+      midWorth: ", valued at a total of ",
+      suffix: ". Claim them before they expire!"
     },
     platforms: {
       all: "All",
@@ -134,9 +134,9 @@ export const en = {
       retryButton: "Retry Connection"
     },
     empty: {
-      title: "Your Library is Empty",
-      description: "Explore ongoing free drops and tap the heart icon to save them here for easy claiming later!",
-      viewAllButton: "Explore the App"
+      title: "No Giveaways Found",
+      description: "There are no active giveaways available for this platform right now.",
+      viewAllButton: "View All Platforms"
     },
     tracking: {
       days_left: "{{count}} Days Left",
@@ -146,38 +146,69 @@ export const en = {
       keys_left: "Keys Left: {{count}}",
       instructions_title: "Instructions to Claim:"
     },
-    誠ination: {
+    pagination: {
       previous: "Previous",
-      next: "Next Games"
+      next: "Next Page"
     }
   },
+
+  giveaways1: {
+        
+      summary: {
+      prefix: "You have ",
+      midActive: " saved games ",
+      midWorth: ", valued at a total of ",
+      suffix: ". Claim them before they expire!"
+      },
+      empty: {
+        viewAllButton: "Explore the App"
+      },
+      delete: {
+        title: "Delete All games?",
+        description: "This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually.",
+        confirmButton: "Wipe All"
+      },
+    },
   deals: {
     title: "Game Deals.",
-    claim: "Claim Now",
+    titleClaim: "Claim Deal.",
+    claim: "Claim Deal",
     retailer: "Retailer",
-    store: "Storefront",
+    store: "Store",
     free_uppercase: "FREE",
-    share_message: "🔥 Deal Alert: {{title}} is down to {{price}} (Save {{saved}}) on {{platform}}!\nGrab it here: {{url}}",
-    save_amount: "SAVE ${{amount}}",
-    hot_deal: "VALUED",
-    rating: "{{percent}}% Approval Rating",
+    share_message: "🔥 Deal Alert: {{title}} is down to {{price}} (Saved {{saved}}) on {{platform}}!\nGet it here: {{url}}",
+    save_amount: "{{amount}}% OFF",
+    hot_deal: "Top Value Deal",
+    rating: "{{percent}}",
     released: "Ends: ",
-    no_description: "No additional description context found. Grab this deal payload before target values alter!",
-    breakdown_title: "View Deal Info",
-    breakdown_body: "You save {{saved}} off the original retail valuation of {{original}} ({{percent}}% discount overall).",
+    no_description: "Grab this exceptional value offer before the promotion period expires or pricing tiers change!",
+    breakdown_title: "View Details",
+    breakdown_body: "Pocket a total of {{saved}} off the regular retail price list of {{original}} (reflecting a solid {{percent}}% value markdown layout).",
     summary: {
-      prefix: "We have scrubbed current active web store indices and detected ",
-      midActive: " premier value discounts live as of ",
-      suffix: ". Interact with any target title card to secure keys!"
+      prefix: "We parsed through active gaming storefronts and discovered ",
+      midActive: " massive discounts live as of ",
+      suffix: ". Tap any title to secure your key!"
     },
     stores: {
       all: "All Stores",
+      steam: "Steam",
+      epic: "Epic Games",
+      gog: "GOG",
       amazon: "Amazon"
+    },
+    error: {
+      title: "Connection Interrupted",
+      description: "We can't sync up with the servers right now. Make sure your device is online and let's try that again.",
+      retryButton: "Retry Connection"
     },
     empty: {
       title: "No Matches Found",
-      description: "No discounted game indices cataloged matching this storefront choice.",
+      description: "No live deals found under this storefront category.",
       resetButton: "Reset Filters"
+    },
+    pagination: {
+      prev: "Previous",
+      next: "Next Games"
     }
   },
   months: {
@@ -193,5 +224,15 @@ export const en = {
     october: "October",
     november: "November",
     december: "December"
+  },
+  onboarding: {
+    welcome: "Welcome to Frapp",
+    legalTitle: "Legal Agreements",
+    privacyHeader: "Privacy Core Framework",
+    privacyBody: "Frapp operates entirely as an open-source data aggregator tool. We do not maintain localized storage platforms, harvest physical account structures, or trace user telemetry histories. Because all processes run directly on your hardware, no data is ever transmitted, processed, or logged by an internal master hub or centralized administrative network. Your localized configuration profiles, historical cache files, and interactive preferences remain securely on your device.",
+    consentLabel: "I accept the Terms of Service & Privacy Statement",
+    btnStep1: "Continue",
+    btnStep2: "Get Started",
+    versionLabel: "Frapp • v1.1.3"
   }
 } as const;

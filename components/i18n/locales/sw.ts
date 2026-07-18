@@ -1,81 +1,80 @@
-// src/i18n/locales/sw.ts
 export const sw = {
   header: {
     title: "Mipangilio.",
-    subtitle: "Badilisha tabia ya programu, rekebisha arifa, badilisha mipangilio ya onyesho, au soma taarifa za programu huria (open-source)."
+    subtitle: "Badilisha tabia ya programu, rekebisha arifa, uwashe au uzime mipangilio ya skrini, au usome maelezo ya programu huria."
   },
   sections: {
     preferences: "Mapendeleo.",
     about: "Kuhusu.",
-    community: "Jumuiya na Usaidizi.",
+    community: "Jamii na Msaada.",
     providers: "Watoa Data."
   },
   preferences: {
-    themeAppearance: "Mwonekano wa Mandhari",
+    themeAppearance: "Muonekano wa Mandhari",
     themeDark: "Hali ya Giza",
-    themeLight: "Hali ya Mwanga",
+    themeLight: "Hali ya Mwangaza",
     appLanguage: "Lugha ya Programu",
-    appLanguageSub: "Badilisha lugha ya tafsiri",
-    savedGiveaways: "Maktaba Yangu",
-    savedGiveawaysSub: "Fikia michezo uliyohifadhi",
+    appLanguageSub: "Badilisha Lugha",
+    savedGiveaways: "Maktaba Yangu.",
+    savedGiveawaysSub: "Fungua michezo uliyohifadhi",
     notificationSettings: "Mipangilio ya Arifa",
-    notificationSettingsSub: "Washa au zima arifa za papo hapo",
-    appIntroduction: "Utangulizi wa Programu",
-    appIntroductionSub: "Pitia mwongozo wa kuanza",
-    checkForUpdates: "Angalia Masasisho",
-    checkForUpdatesSub: "Thibitisha toleo la programu"
+    notificationSettingsSub: "Washa au uzime arifa za push",
+    appIntroduction: "Kuanza",
+    appIntroductionSub: "Angalia maelezo ya kuanza",
+    checkForUpdates: "Toleo la Programu",
+    checkForUpdatesSub: "Angalia Masasisho"
   },
   about: {
-    developer: "Kuhusu Msanidi",
-    developerSub: "Tembelea kwingineko (portfolio) ya kibinafsi",
-    moreApps: "Programu Nyingine",
-    moreAppsSub: "Chunguza hazina (repositories) za GitHub",
+    developer: "Kuhusu Msanidi Programu",
+    developerSub: "Zuru tovuti ya kazi zangu",
+    moreApps: "Programu Zaidi",
+    moreAppsSub: "Gundua hazina za GitHub",
     socials: "Mitandao ya Kijamii",
-    socialsSub: "Ungana nasi kwenye majukwaa mbalimbali",
+    socialsSub: "Ungana nasi kwenye mitandao mbalimbali",
     privacy: "Sera ya Faragha",
-    privacySub: "Tazama sera za Frapp"
+    privacySub: "Angalia Sera yetu ya Faragha."
   },
   community: {
-    supportOpenSource: "Saidia Programu Huria",
-    supportOpenSourceSub: "Programu hii imetengenezwa kwa kujitegemea na kuhudumiwa bila malipo. Ikiwa unaona thamani katika kugundua ofa hizi, kutupa 'nyota' (star) kwenye GitHub inasaidia sana!",
-    starGithub: "Tupe nyota kwenye GitHub",
-    buyCoffee: "Saidia Mradi",
-    buyCoffeeSub: "Saidia kuweka seva zikiwa hai! Mchango mdogo unatuwezesha kudumisha mradi na kuongeza vipengele vipya.",
-    donateKofi: "Changia kupitia Ko-fi",
-    donatePatreon: "Changia kupitia Patreon"
+    supportOpenSource: "Msaada kwa Programu Huria",
+    supportOpenSourceSub: "Programu hii imeundwa kwa kujitegemea na inapatikana bure. Ikiwa unaona faida ya kupata ofa hizi, kutupatia nyota kwenye GitHub itakuwa msaada mkubwa sana!",
+    starGithub: "Tupe Nyota kwenye GitHub",
+    buyCoffee: "Ninunulie Kahawa",
+    buyCoffeeSub: "Saidia kuweka seva zetu hai! Mchango mdogo unatuwezesha kuendeleza mradi huu na kuongeza vipengele vipya.",
+    donateKofi: "Ko-fi",
+    donatePatreon: "Patreon"
   },
   providers: {
     gamepower: "Tovuti ya Gamepower",
     gamepowerSub: "Chanzo kikuu cha data ya zawadi",
-    cheapshark: "API ya CheapShark",
+    cheapshark: "CheapShark API",
     cheapsharkSub: "API ya ofa za michezo ya video"
   },
   report: {
-    title: "Futa Maktaba uliyohifadhi?",
-    subtitle: "Je, unakumbana na matatizo kwenye programu au umeona bei zisizo sahihi? Chagua kategoria hapa chini na utume ripoti ya mdudu (bug).",
-    sectionTitle: "Chagua Kategoria ya Hitilafu",
+    title: "Ripoti Hitilafu.",
+    subtitle: "Je, una matatizo na programu? Chagua kiolezo ili utume ripoti. (Ripoti zitatumwa kwenye hazina yetu ya GitHub kwa ukaguzi)",
+    sectionTitle: "Chagua Aina ya Hitilafu",
     categories: {
-      ui: "Hitilafu ya Muonekano (UI/UX)",
+      ui: "Hitilafu ya UI/UX",
       api: "Hitilafu ya API / Data",
       crash: "Utendaji / Programu Kujifunga",
       feature: "Ombi la Kipengele Kipya"
     },
     githubCard: {
-      title: "Wasilisha moja kwa moja kupitia GitHub Issues",
-      description: "Kubofya kitufe cha kitendo hapa chini kutaweka pamoja chaguo lako, vigezo vya kifaa chako, na kufungua ukurasa wa kufuatilia matatizo kwenye GitHub.",
+      title: "Tuma moja kwa moja kupitia GitHub Issues",
+      description: "Kubonyeza kitufe cha hatua hapa chini kutafungasha salama chaguo lako, vipimo vya kifaa chako cha ndani, na kufungua ukurasa wa kufuatilia hitilafu wa GitHub.",
       buttonText: "Ripoti {{category}}"
     },
     attributionCard: {
-      title: "Uhusika wa Mradi na API",
-      description: "Usambazaji huu wa programu huria unategemea kabisa mitiririko ya data iliyotolewa na Gamepower na Free To Game. Hakuna hata moja ya API hizi au maudhui yanayohusiana yanayomilikiwa moja kwa moja na FRAPP."
+      title: "Ufumbuzi wa API za Watu Wengine",
+      description: "Data zote zinazoonekana kwenye programu hii zinachukuliwa moja kwa moja kutoka kwenye mitandao ya nje kupitia mifumo ya wazi ya Gamepower na CheapShark. Matumizi ya data hizi yanazingatia kikamilifu sheria zao za usambazaji. Frapp haibadilishi orodha ya vitu, haibadilishi bei, ou kusimamia muda wa usambazaji. Kwa hiyo, hatuwezi kuhakikisha upatikanaji wa kudumu, usahihi, au msaada endelevu wa seva za nje au funguo za michezo zinazosambazwa kupitia mifumo hiyo."
     },
     footerVersion: "Toleo la Frapp v1.1.4",
     alerts: {
       errorTitle: "Hitilafu",
-      errorMessage: "Imeshindwa kuelekeza kwenye GitHub. Hakikisha ruhusa za kivinjari chako."
+      errorMessage: "Imeshindikana kwenda GitHub. Thibitisha ruhusa za kivinjari chako."
     },
     github: {
-      bodyDescription: "Kitendo hiki kitafuta kabisa zawadi zote ulizozihifadhi kwenye orodha yako. Utahitaji kuzitafuta na kuziongeza tena mwenyewe.",
+      bodyDescription: "Hatua hii itafuta kabisa zawadi zote zilizohifadhiwa kwenye orodha yako. Utahitaji kuzitafuta na kuziongeza tena kwa mikono.",
       step1: "Fungua programu",
       step2: "Nenda kwenye...",
       step3: "Angalia..."
@@ -86,31 +85,31 @@ export const sw = {
   },
   updateModal: {
     title: "Masasisho Yanapatikana",
-    subtitle: "{{version}} imefika!",
+    subtitle: "{{version}} ipo tayari!",
     description: "Toleo jipya la programu ({{latest}}) linapatikana. Sasisha kutoka toleo lako la sasa ({{current}}) ili kupata mabadiliko ya hivi punde!",
     later: "Ghairi",
     updateNow: "Sasisha Sasa"
   },
   modals: {
-    dismiss: "Futa Yote",
-    ok: "SAWA",
-    testFailedTitle: "Jaribio la Lengo Imeshindwa",
-    testFailedMessage: "Imeshindwa kutekeleza mzunguko wa uonyeshaji. Thibitisha ruhusa za kifaa.",
-    upToDateTitle: "Ipo katika Toleo la Hivi Punde",
-    upToDateMessage: "Tayari unatumia toleo letu la hivi punde ({{version}}). Hakuna masasisho yanayohitajika.",
-    upToDateAction: "Safi sana",
-    checkFailedTitle: "Imeshindwa Kuthibitisha",
-    checkFailedMessage: "Imeshindwa kukamilisha utafutaji kwa wakati huu. Angalia muunganisho wako wa intaneti na ujaribu tena.",
-    socialsTitle: "Ungana nami",
+    dismiss: "Futa Zote",
+    ok: "Sawa",
+    testFailedTitle: "Jaribio Imeshindikana",
+    testFailedMessage: "Imeshindikana kutekeleza mfumo wa upimaji wa haraka. Thibitisha ruhusa za kifaa.",
+    upToDateTitle: "Imesasishwa",
+    upToDateMessage: "Tayari unatumia toleo letu la hivi punde zaidi ({{version}}). Hakuna masasisho yanayohitajika.",
+    upToDateAction: "Safi Sana",
+    checkFailedTitle: "Uthibitishaji Umeshindikana",
+    checkFailedMessage: "Imeshindikana kukamilisha utafutaji kwa sasa. Angalia mtandao wako na ujaribu tena.",
+    socialsTitle: "Shiriki Ofa",
     languageTitle: "Chagua Lugha"
   },
   giveaways: {
-    title: "Zawadi za Kudai.",
+    title: "Zawadi.",
     summary: {
-      prefix: "Umehifadhi ",
-      midActive: " zawadi za kudai, ukijiokoa jumla ya ",
-      midWorth: "",
-      suffix: "! Hakikisha unazidai kabla muda wake haujaisha."
+      prefix: "Tumepata ",
+      midActive: " zawadi za michezo zinazotumika kufikia tarehe ",
+      midWorth: ", zenye thamani ya jumla ya ",
+      suffix: ". Zidai kabla hazijaisha muda wake!"
     },
     platforms: {
       all: "Zote",
@@ -125,59 +124,88 @@ export const sw = {
       switch: "Switch",
       android: "Android",
       ios: "iOS",
-      drmFree: "Haina DRM",
+      drmFree: "DRM-Free",
       itchio: "itch.io"
     },
     error: {
-      title: "Muunganisho Umekatizwa",
-      description: "Hatuwezi kusawazisha na seva za data kwa wakati huu. Angalia muunganisho wako wa intaneti na ujaribu tena.",
-      retryButton: "Jaribu tena"
+      title: "Mtandao Umekatika",
+      description: "Hatuwezi kusawazisha data na seva kuu kwa sasa. Angalia mtandao wako wa intaneti na ujaribu tena.",
+      retryButton: "Jaribu Tena Kuunganisha"
     },
     empty: {
-      title: "Maktaba Yako haina kitu",
-      description: "Chunguza zawadi zinazoendelea na uguse ikoni ya moyo ili kuzihifadhi hapa ili uweze kuzidai kwa urahisi baadaye!",
-      viewAllButton: "Chunguza Programu"
+      title: "Hakuna Zawadi Zilizopatikana",
+      description: "Hakuna zawadi zinazopatikana kwa ajili ya jukwaa hili kwa sasa.",
+      viewAllButton: "Angalia Majukwaa Yote"
     },
     tracking: {
-      days_left: "Zimesalia Siku {{count}}",
-      day_left: "Imesalia Siku 1",
+      days_left: "Zimebaki Siku {{count}}",
+      day_left: "Imebaki Siku 1",
       ends_today: "Inaisha Leo",
-      expired: "Muda Umeisha",
+      expired: "Imeisha Muda",
       keys_left: "Funguo Zilizobaki: {{count}}",
-      instructions_title: "Maagizo ya Kudai:"
+      instructions_title: "Maelekezo ya Kudai:"
     },
     pagination: {
-      previous: "Iliyotangulia",
-      next: "Michezo Inayofuata"
+      previous: "Iliyopita",
+      next: "Ukurasa Ujao"
+    }
+  },
+  giveaways1: {
+    summary: {
+      prefix: "Una michezo ",
+      midActive: " uliyohifadhi ",
+      midWorth: ", yenye thamani ya jumla ya ",
+      suffix: ". Zidai kabla hazijaisha muda wake!"
+    },
+    empty: {
+      viewAllButton: "Gundua Programu"
+    },
+    delete: {
+      title: "Futa Michezo Yote?",
+      description: "Hatua hii itafuta kabisa zawadi zote zilizohifadhiwa kwenye orodha yako. Utahitaji kuzitafuta na kuziongeza tena kwa mikono.",
+      confirmButton: "Futa Zote"
     }
   },
   deals: {
     title: "Ofa za Michezo.",
-    claim: "Dai Sasa",
+    titleClaim: "Chukua Ofa.",
+    claim: "Chukua Ofa",
     retailer: "Muuzaji",
     store: "Duka",
     free_uppercase: "BURE",
-    share_message: "🔥 Ofa ya Moto: {{title}} imeshuka hadi {{price}} (Okoa {{saved}}) kwenye {{platform}}!\nIchukue hapa: {{url}}",
-    save_amount: "OKOA ${{amount}}",
-    hot_deal: "THAMANI YA",
-    rating: "Ukadiriaji wa {{percent}}%",
+    share_message: "🔥 Taarifa ya Ofa: {{title}} imeshuka bei hadi {{price}} (Umeokoa {{saved}}) kwenye {{platform}}!\nIpate hapa: {{url}}",
+    save_amount: "PUNGUZO {{amount}}%",
+    hot_deal: "Ofa ya Thamani ya Juu",
+    rating: "{{percent}}",
     released: "Inaisha: ",
-    no_description: "Hakuna maelezo ya ziada yaliyopatikana. Chukua ofa hii kabla bei haijabadilika!",
-    breakdown_title: "Tazama Taarifa za Ofa",
-    breakdown_body: "Unaokoa {{saved}} kutoka kwa thamani ya awali ya {{original}} (punguzo la jumla la {{percent}}%).",
+    no_description: "Chukua ofa hii ya thamani ya kipekee kabla ya muda wa matangazo kuisha au bei kubadilika!",
+    breakdown_title: "Angalia Maelezo",
+    breakdown_body: "Okoa jumla ya {{saved}} kutoka kwenye bei ya kawaida ya {{original}} (sawa na punguzo dhabiti la {{percent}}%).",
     summary: {
-      prefix: "Tumekagua maduka ya mtandaoni na tumegundua ",
-      midActive: " ofa za kipekee zilizopo hadi ",
-      suffix: ". Gusa kadi yoyote ili kupata funguo!"
+      prefix: "Tumekagua maduka ya michezo yanayotumika na kugundua ",
+      midActive: " punguzo kubwa la bei kuanzia tarehe ",
+      suffix: ". Gusa jina lolote ili kujipatia ufunguo wako!"
     },
     stores: {
       all: "Maduka Yote",
+      steam: "Steam",
+      epic: "Epic Games",
+      gog: "GOG",
       amazon: "Amazon"
+    },
+    error: {
+      title: "Mtandao Umekatika",
+      description: "Hatuwezi kusawazisha data na seva kwa sasa. Hakikisha kifaa chako kiko mtandaoni na ujaribu tena.",
+      retryButton: "Jaribu Tena Kuunganisha"
     },
     empty: {
       title: "Hakuna Matokeo Yaliyopatikana",
-      description: "Hakuna michezo iliyopunguzwa bei inayolingana na duka hili.",
-      resetButton: "Weka Upya Vichujio"
+      description: "Hakuna ofa zilizopatikana chini ya kundi hili la duka.",
+      resetButton: "Rudisha Mipangilio"
+    },
+    pagination: {
+      prev: "Iliyopita",
+      next: "Michezo Ijayayo"
     }
   },
   months: {
@@ -189,9 +217,19 @@ export const sw = {
     june: "Juni",
     july: "Julai",
     august: "Agosti",
-    september: "Septemba",
+    september: "Sepetemba",
     october: "Oktoba",
     november: "Novemba",
     december: "Desemba"
+  },
+  onboarding: {
+    welcome: "Karibu kwenye Frapp",
+    legalTitle: "Makubaliano ya Kisheria",
+    privacyHeader: "Mfumo Mkuu wa Faragha",
+    privacyBody: "Frapp inafanya kazi kikamilifu kama zana huria ya kukusanya data. Hatumiliki hifadhi ya ndani ya data, hatukusanyi maelezo ya akaunti zako, wala kufuatilia historia ya matumizi ya mtumiaji. Kwa sababu michakato yote inaendeshwa moja kwa moja kwenye kifaa chako, hakuna data inayotumwa, kuchakatwa, au kuhifadhiwa kwenye seva kuu ya usimamizi. Mipangilio yako ya ndani, faili za cache, na mapendeleo yako yanabaki salama kwenye kifaa chako.",
+    consentLabel: "Ninakubali Masharti ya Matumizi na Taarifa ya Faragha",
+    btnStep1: "Endelea",
+    btnStep2: "Anza Sasa",
+    versionLabel: "Frapp • v1.1.3"
   }
 } as const;

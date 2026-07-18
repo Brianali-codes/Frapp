@@ -108,7 +108,7 @@ export default function SavedItemsScreen() {
             </View>
 
             <ThemedText numberOfLines={1} className="text-xl font-montBlack tracking-tight flex-shrink">
-              {t('preferences.savedGiveaways', { defaultValue: 'My Library' })}
+              {t('preferences.savedGiveaways', { defaultValue: 'My Library.' })}
             </ThemedText>
           </View>
 
@@ -188,12 +188,12 @@ export default function SavedItemsScreen() {
             className="rounded-2xl p-4 mb-5"
           >
             <ThemedText className="font-mont text-xs leading-relaxed opacity-90">
-              {t('giveaways.summary.prefix', { defaultValue: 'We found ' })}
+              {t('giveaways1.summary.prefix', { defaultValue: 'We found ' })}
               <ThemedText style={{ color: '#22c55e' }} className="font-montBlack">{savedGiveaways.length}</ThemedText>
-              {t('giveaways.summary.midActive', { defaultValue: ' active video game giveaways as of ' })}
-              {t('giveaways.summary.midWorth', { defaultValue: ', carrying a combined structural value of ' })}
+              {t('giveaways1.summary.midActive', { defaultValue: ' active video game giveaways as of ' })}
+              {t('giveaways1.summary.midWorth', { defaultValue: ', carrying a combined structural value of ' })}
               <ThemedText style={{ color: '#a855f7' }} className="font-montBlack">${totalWorthSaved}</ThemedText>
-              {t('giveaways.summary.suffix', { defaultValue: '. Claim yours before the countdown matrix expires!' })}
+              {t('giveaways1.summary.suffix', { defaultValue: '. Claim yours before the countdown matrix expires!' })}
             </ThemedText>
           </View>
         )}
@@ -228,7 +228,7 @@ export default function SavedItemsScreen() {
               type="primary"
               onPress={() => router.push('/(tabs)')}
               className="w-full"
-              text={t('giveaways.empty.viewAllButton', { defaultValue: 'Explore the App' })}
+              text={t('giveaways1.empty.viewAllButton', { defaultValue: 'Explore the App' })}
             />
           </View>
         ) : (
@@ -279,11 +279,11 @@ export default function SavedItemsScreen() {
 
             {/* Title & Desc */}
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
-              {t('report.title', { defaultValue: 'Clear Saved Library?' })}
+              {t('giveaways1.delete.title', { defaultValue: 'Clear Saved Library?' })}
             </ThemedText>
             
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-[13px] text-center leading-relaxed mb-6 px-2">
-              {t('report.github.bodyDescription', { defaultValue: "This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually." })}
+              {t('giveaways1.delete.description', { defaultValue: "This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually." })}
             </ThemedText>
 
             {/* Actions Grid */}
@@ -306,7 +306,7 @@ export default function SavedItemsScreen() {
                 className="flex-1 h-11 rounded-full items-center justify-center active:opacity-90 shadow-md shadow-red-500/20"
               >
                 <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                  {t('modals.dismiss', { defaultValue: 'Wipe All' })}
+                  {t('giveaways1.delete.confirmButton', { defaultValue: 'Wipe All' })}
                 </ThemedText>
               </Pressable>
             </View>

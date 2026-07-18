@@ -279,7 +279,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
           <View style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} className="flex-row items-center justify-between pt-2.5 mt-0.5">
             <View className="flex-row items-center gap-1">
               <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
-                {t('deals.title').replace('.', '')}
+                {t('deals.titleClaim').replace('.', '')}
               </ThemedText>
               <ArrowRight size="11" color="#9333ea" variant="Bold" />
             </View>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Dimensions, Pressable, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next'; // Integrated Translation Hook
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/ThemedText';
 import {
   SecuritySafe,
@@ -19,7 +19,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { t } = useTranslation(); // Translation configuration hook injection
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [agreed, setAgreed] = useState(false);
 
@@ -61,7 +61,7 @@ export default function OnboardingScreen() {
             </View>
 
             <ThemedText className="text-3xl font-montBlack tracking-tight text-center">
-              {t('appIntroduction.welcomeTitle', { defaultValue: 'Welcome to Frapp' })}
+              {t('onboarding.welcome', { defaultValue: 'Welcome to Frapp' })}
             </ThemedText>
 
             <View className="bg-purple-500/10 px-3 py-1 rounded-full mt-2 border border-purple-500/20">
@@ -102,7 +102,7 @@ export default function OnboardingScreen() {
               <SecuritySafe size="28" color="#9333ea" variant="Broken" />
             </View>
             <ThemedText className="text-2xl font-montBlack tracking-tight text-center">
-              {t('about.privacy', { defaultValue: 'Legal Agreements' })}
+              {t('onboarding.legalTitle', { defaultValue: 'Legal Agreements' })}
             </ThemedText>
             <ThemedText className="text-zinc-500 dark:text-zinc-400 text-sm text-center px-4 mt-1 leading-relaxed font-mont">
               {t('report.subtitle', { defaultValue: 'Please review the privacy conditions before accessing our global data sync pipelines.' })}
@@ -118,11 +118,11 @@ export default function OnboardingScreen() {
               <View className="flex-row items-center gap-2 mb-2">
                 <Eye size="14" color="#a855f7" variant="Broken" />
                 <ThemedText className="text-xs font-montBlack uppercase text-purple-500 tracking-wider">
-                  {t('preferences.themeAppearance', { defaultValue: 'Privacy Core Framework' })}
+                  {t('onboarding.privacyHeader', { defaultValue: 'Privacy Core Framework' })}
                 </ThemedText>
               </View>
               <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
-                {t('community.supportOpenSourceSub', { defaultValue: 'Frapp operates entirely as an open-source data aggregator tool. We do not maintain localized storage platforms, harvest physical account structures, or trace user telemetry histories. Because all processes run directly on your hardware, no data is ever transmitted, processed, or logged by an internal master hub or centralized administrative network. Your localized configuration profiles, historical cache files, and interactive preferences remain securely on your device.' })}
+                {t('onboarding.privacyBody', { defaultValue: 'Frapp operates entirely as an open-source data aggregator tool. We do not maintain localized storage platforms, harvest physical account structures, or trace user telemetry histories. Because all processes run directly on your hardware, no data is ever transmitted, processed, or logged by an internal master hub or centralized administrative network. Your localized configuration profiles, historical cache files, and interactive preferences remain securely on your device.' })}
               </ThemedText>
 
               <View className="flex-row items-center gap-2 mb-2">
@@ -153,7 +153,7 @@ export default function OnboardingScreen() {
             <View className="flex-1">
               <View className="flex-1">
                 <ThemedText className="font-montBold text-xs leading-tight">
-                  {t('report.github.bodyDescription', { defaultValue: 'I accept the Terms of Service & Privacy Statement' })}
+                  {t('onboarding.consentLabel', { defaultValue: 'I accept the Terms of Service & Privacy Statement' })}
                 </ThemedText>
               </View>
             </View>
@@ -182,8 +182,8 @@ export default function OnboardingScreen() {
             className="font-montBlack text-sm tracking-wide"
           >
             {currentStep === 1 
-              ? t('giveaways.pagination.next', { defaultValue: 'Continue' }) 
-              : t('updateModal.updateNow', { defaultValue: 'Get Started' })
+              ? t('onboarding.btnStep1', { defaultValue: 'Continue' }) 
+              : t('onboarding.btnStep2', { defaultValue: 'Get Started' })
             }
           </ThemedText>
           <ArrowRight2
@@ -194,7 +194,7 @@ export default function OnboardingScreen() {
         </Pressable>
 
         <ThemedText className="text-zinc-400 dark:text-zinc-600 text-xs text-center font-mont tracking-widest mt-5">
-          {t('report.footerVersion', { version: 'v1.1.4', defaultValue: 'Frapp • v1.1.4' })}
+          {t('onboarding.versionLabel', { defaultValue: 'Frapp • v1.1.3' })}
         </ThemedText>
       </View>
 
