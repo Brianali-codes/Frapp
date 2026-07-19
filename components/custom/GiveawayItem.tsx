@@ -583,7 +583,7 @@ export default function GiveawayItem({
                 {giveaway.instructions ? (
                   <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
                     <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
-                      Instructions to Claim:
+                      {t('deals.instructions_title')}
                     </ThemedText>
                     <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
                       {giveaway.instructions}

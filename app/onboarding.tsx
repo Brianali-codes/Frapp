@@ -66,7 +66,7 @@ export default function OnboardingScreen() {
 
             <View className="bg-purple-500/10 px-3 py-1 rounded-full mt-2 border border-purple-500/20">
               <ThemedText className="text-purple-500 font-montBold text-[11px] uppercase">
-                {t('preferences.appIntroduction', { defaultValue: 'Giveaways and Deals in One Place' })}
+                {t('onboarding.title2', { defaultValue: 'Giveaways and Deals in One Place' })}
               </ThemedText>
             </View>
           </View>
@@ -85,10 +85,10 @@ export default function OnboardingScreen() {
           {/* New Hybrid Value Proposition Text */}
           <View className="max-w-md self-center w-full px-4 mb-6">
             <ThemedText className="text-center font-montBold text-base leading-snug tracking-tight mb-2">
-              {t('giveaways.title', { defaultValue: 'Track Video game giveaways and premium game deals.' })}
+              {t('onboarding.title', { defaultValue: 'Track Video game giveaways and premium game deals.' })}
             </ThemedText>
             <ThemedText className="text-zinc-500 dark:text-zinc-400 text-center text-xs leading-relaxed font-mont">
-              {t('about.privacySub', { defaultValue: 'Frapp deals in both game giveaways and massive video game Deals, We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.' })}
+              {t('onboarding.description', { defaultValue: 'Frapp deals in both game giveaways and massive video game Deals, We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.' })}
             </ThemedText>
           </View>
         </View>
@@ -105,7 +105,7 @@ export default function OnboardingScreen() {
               {t('onboarding.legalTitle', { defaultValue: 'Legal Agreements' })}
             </ThemedText>
             <ThemedText className="text-zinc-500 dark:text-zinc-400 text-sm text-center px-4 mt-1 leading-relaxed font-mont">
-              {t('report.subtitle', { defaultValue: 'Please review the privacy conditions before accessing our global data sync pipelines.' })}
+              {t('onboarding.legalSubtitle', { defaultValue: 'Please review the privacy conditions before accessing our global data sync pipelines.' })}
             </ThemedText>
           </View>
 
@@ -194,7 +194,7 @@ export default function OnboardingScreen() {
         </Pressable>
 
         <ThemedText className="text-zinc-400 dark:text-zinc-600 text-xs text-center font-mont tracking-widest mt-5">
-          {t('onboarding.versionLabel', { defaultValue: 'Frapp • v1.1.3' })}
+          {t('onboarding.versionLabel', { defaultValue: 'Frapp • v1.1.4' })}
         </ThemedText>
       </View>
 

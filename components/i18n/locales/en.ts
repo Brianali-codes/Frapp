@@ -225,14 +225,18 @@ export const en = {
     november: "November",
     december: "December"
   },
-  onboarding: {
+ onboarding: {
     welcome: "Welcome to Frapp",
     legalTitle: "Legal Agreements",
-    privacyHeader: "Privacy Core Framework",
-    privacyBody: "Frapp operates entirely as an open-source data aggregator tool. We do not maintain localized storage platforms, harvest physical account structures, or trace user telemetry histories. Because all processes run directly on your hardware, no data is ever transmitted, processed, or logged by an internal master hub or centralized administrative network. Your localized configuration profiles, historical cache files, and interactive preferences remain securely on your device.",
+    legalSubtitle: "Please review the privacy conditions before accessing our global data sync pipelines.",
+    title: "Track Video game giveaways and premium game deals.",
+    title2: "Get Giveaways and Deals",
+    description: "Frapp deals in both game giveaways and massive video game Deals, We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.",
+    privacyHeader: "Privacy & Data Core Framework",
+    privacyBody: "Frapp is an open-source data aggregator that unifies your disparate data streams, API feeds, and digital touchpoints into a single, cohesive dashboard. Because we operate entirely as a local-first tool, we do not maintain centralized storage, harvest physical account structures, or trace user telemetry histories. All aggregation, processing, and visualization run directly on your hardware—meaning your data is never transmitted to, or logged by, an external master hub. Your localized configuration profiles, historical cache files, and interactive preferences remain securely on your device.",
     consentLabel: "I accept the Terms of Service & Privacy Statement",
     btnStep1: "Continue",
     btnStep2: "Get Started",
-    versionLabel: "Frapp • v1.1.3"
-  }
+    versionLabel: "Frapp • v1.1.4"
+}
 } as const;

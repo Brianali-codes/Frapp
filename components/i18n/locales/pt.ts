@@ -1,7 +1,7 @@
 export const pt = {
   header: {
     title: "Configurações.",
-    subtitle: "Personalize o comportamento do aplicativo, ajuste as notificações, altere as configurações de exibição ou leia as credenciais de código aberto."
+    subtitle: "Personalize o comportamento do aplicativo, ajuste as notificações, alterne as configurações de exibição ou leia as credenciais de código aberto."
   },
   sections: {
     preferences: "Preferências.",
@@ -17,7 +17,7 @@ export const pt = {
     appLanguageSub: "Alterar Idiomas",
     savedGiveaways: "Minha Biblioteca.",
     savedGiveawaysSub: "Acessar jogos salvos",
-    notificationSettings: "Notificações",
+    notificationSettings: "Configurações de Notificação",
     notificationSettingsSub: "Alternar notificações push",
     appIntroduction: "Integração",
     appIntroductionSub: "Rever o contexto de introdução",
@@ -26,58 +26,58 @@ export const pt = {
   },
   about: {
     developer: "Sobre o Desenvolvedor",
-    developerSub: "Visitar portafólio pessoal",
+    developerSub: "Visitar portfólio pessoal",
     moreApps: "Mais Aplicativos",
     moreAppsSub: "Explorar repositórios no GitHub",
     socials: "Redes Sociais",
-    socialsSub: "Conectar-se em várias plataformas",
+    socialsSub: "Conectar em várias plataformas",
     privacy: "Política de Privacidade",
-    privacySub: "Veja nossa Política de Privacidade."
+    privacySub: "Ver Nossa Política de Privacidade."
   },
   community: {
-    supportOpenSource: "Apoiar Código Aberto",
-    supportOpenSourceSub: "Este aplicativo é desenvolvido de forma independente e hospedado gratuitamente. Se você vê valor em descobrir essas ofertas, deixar uma estrela no GitHub ajuda muito!",
-    starGithub: "Dê uma estrela no GitHub",
+    supportOpenSource: "Apoie o Código Aberto",
+    supportOpenSourceSub: "Este aplicativo foi desenvolvido de forma independente e é hospedado gratuitamente. Se você acha útil descobrir essas ofertas, deixar uma estrela no GitHub ajuda muito!",
+    starGithub: "Dê-nos uma estrela no GitHub",
     buyCoffee: "Pague-me um Café",
-    buyCoffeeSub: "Ajude a manter os servidores ativos! Uma pequena doação nos permite manter o projeto e adicionar novos recursos.",
+    buyCoffeeSub: "Ajude a manter os servidores ativos e o café fluindo! Uma pequena doação nos permite manter o projeto e adicionar novos recursos.",
     donateKofi: "Ko-fi",
     donatePatreon: "Patreon"
   },
   providers: {
     gamepower: "Site Gamepower",
-    gamepowerSub: "Fonte principal de dados de brindes",
-    cheapshark: "CheapShark API",
-    cheapsharkSub: "API de ofertas de jogos"
+    gamepowerSub: "Fonte primária de dados de brindes",
+    cheapshark: "API CheapShark",
+    cheapsharkSub: "API de ofertas de jogos eletrônicos"
   },
   report: {
     title: "Reportar um Erro.",
-    subtitle: "Está tendo problemas com o app? Escolha um modelo para enviar um relatório. (Os relatórios serão enviados ao nosso repositório no GitHub para análise)",
-    sectionTitle: "Selecione uma categoria de erro",
+    subtitle: "Se tiver problemas com o aplicativo, escolha um modelo para enviar um relatório. (Os relatórios serão enviados ao nosso repositório no GitHub para revisão)",
+    sectionTitle: "Selecione uma Categoria de Erro",
     categories: {
-      ui: "Erro de UI/UX",
+      ui: "Problema de UI/UX",
       api: "Erro de API / Dados",
-      crash: "Performance / Travamento",
+      crash: "Desempenho / Fechamento Forçado",
       feature: "Solicitação de Recurso"
     },
     githubCard: {
       title: "Enviar diretamente via GitHub Issues",
-      description: "Ao clicar no botão abaixo, sua seleção e os parâmetros do dispositivo local serão empacotados com segurança para abrir a página de rastreamento de problemas do GitHub.",
+      description: "Ao clicar no botão de ação abaixo, o modelo escolhido e os parâmetros do ambiente do seu dispositivo local são compactados com segurança, abrindo a página de rastreamento de problemas do GitHub.",
       buttonText: "Reportar {{category}}"
     },
     attributionCard: {
       title: "Divulgações de APIs de Terceiros",
-      description: "Todos os índices de dados visíveis na interface são obtidos diretamente de redes externas por meio das arquiteturas públicas abertas do Gamepower e CheapShark. O uso desses índices cumpre diretamente as suas regras nativas de distribuição. O Frapp não manipula listagens individuais de itens, não altera estruturas de preços ou gerencia prazos de distribuição. Portanto, não podemos garantir a disponibilidade ininterrompida, precisão ou suporte contínuo de nós externos ou chaves distribuídas por meio dessas respectivas plataformas."
+      description: "Todos os índices de dados visíveis na interface são obtidos diretamente de redes externas através das arquiteturas públicas abertas da Gamepower e da CheapShark. O uso desses índices cumpre diretamente as suas regras de distribuição nativas. O Frapp não manipula listagens de itens individuais, não altera estruturas de preços ou gerencia cronogramas de distribuição. Consequentemente, não podemos garantir a disponibilidade ininterrupta, a precisão ou o suporte contínuo de nós externos ou chaves distribuídas por meio dessas respectivas plataformas."
     },
     footerVersion: "Versão do Frapp v1.1.4",
     alerts: {
       errorTitle: "Erro",
-      errorMessage: "Não foi possível redirecionar para o GitHub. Verifique as permissões de navegação."
+      errorMessage: "Não foi possível redirecionar para o GitHub. Verifique as permissões de roteamento do navegador."
     },
     github: {
-      bodyDescription: "Esta ação removerá permanentemente todos os brindes salvos da sua lista. Você precisará procurá-los e adicioná-los manualmente outra vez.",
-      step1: "Abrir o aplicativo",
-      step2: "Navegar para...",
-      step3: "Observar..."
+      bodyDescription: "Esta ação removerá permanentemente todos os brindes fixados da sua lista de salvos. Você precisará explorar e adicioná-los novamente de forma manual.",
+      step1: "Abra o aplicativo",
+      step2: "Navegue até...",
+      step3: "Observe..."
     }
   },
   footer: {
@@ -85,8 +85,8 @@ export const pt = {
   },
   updateModal: {
     title: "Atualização Disponível",
-    subtitle: "O {{version}} chegou!",
-    description: "Uma nova versão do aplicativo ({{latest}}) está disponível. Atualize a partir da sua versão atual ({{current}}) para acessar as mudanças mais recentes!",
+    subtitle: "A {{version}} chegou!",
+    description: "Uma nova versão do aplicativo ({{latest}}) está disponível. Atualize a partir da sua versão atual ({{current}}) para acessar as alterações mais recentes!",
     later: "Cancelar",
     updateNow: "Atualizar Agora"
   },
@@ -96,18 +96,18 @@ export const pt = {
     testFailedTitle: "Falha no Alvo de Teste",
     testFailedMessage: "Não foi possível executar o loop de renderização de implantação instantânea. Confirme as permissões locais.",
     upToDateTitle: "Atualizado",
-    upToDateMessage: "Você já está rodando a nossa build de revisão mais recente ({{version}}). Nenhuma atualização é necessária.",
+    upToDateMessage: "Você já está executando nossa versão de revisão mais recente ({{version}}). Nenhuma atualização é necessária.",
     upToDateAction: "Incrível",
     checkFailedTitle: "Falha na Verificação",
-    checkFailedMessage: "Não foi possível concluir as consultas de busca no momento. Verifique sua conexão e tente novamente.",
-    socialsTitle: "Compartilhar Oferta",
+    checkFailedMessage: "Não foi possível concluir as consultas de busca neste momento. Verifique seu índice de conectividade e tente novamente.",
+    socialsTitle: "Compartilhar Promo",
     languageTitle: "Selecionar Idioma"
   },
   giveaways: {
     title: "Brindes.",
     summary: {
       prefix: "Encontramos ",
-      midActive: " brindes de jogos ativos a partir de ",
+      midActive: " brindes de jogos ativos em ",
       midWorth: ", avaliados em um total de ",
       suffix: ". Resgate-os antes que expirem!"
     },
@@ -129,8 +129,8 @@ export const pt = {
     },
     error: {
       title: "Conexão Interrompida",
-      description: "Não conseguimos sincronizar com os servidores de dados principais no momento. Verifique seu acesso à internet e tente novamente.",
-      retryButton: "Reintentar Conexão"
+      description: "Não conseguimos sincronizar com os canais de busca ascendentes no momento. Verifique seu acesso à internet e tente novamente.",
+      retryButton: "Repetir Conexão"
     },
     empty: {
       title: "Nenhum Brinde Encontrado",
@@ -142,7 +142,7 @@ export const pt = {
       day_left: "Resta 1 Dia",
       ends_today: "Termina Hoje",
       expired: "Expirado",
-      keys_left: "Chaves restantes: {{count}}",
+      keys_left: "Chaves Restantes: {{count}}",
       instructions_title: "Instruções para Resgatar:"
     },
     pagination: {
@@ -158,32 +158,32 @@ export const pt = {
       suffix: ". Resgate-os antes que expirem!"
     },
     empty: {
-      viewAllButton: "Explorar o App"
+      viewAllButton: "Explorar o Aplicativo"
     },
     delete: {
-      title: "Deletar todos os jogos?",
-      description: "Esta ação removerá permanentemente todos os brindes fixados da sua lista de salvos. Você precisará procurá-los e adicioná-los novamente de forma manual.",
+      title: "Excluir todos os jogos?",
+      description: "Esta ação removerá permanentemente todos os brindes fixados da sua lista de salvos. Você precisará explorar e adicioná-los novamente de forma manual.",
       confirmButton: "Apagar Tudo"
     }
   },
   deals: {
-    title: "Ofertas.",
+    title: "Ofertas de Jogos.",
     titleClaim: "Resgatar Oferta.",
     claim: "Resgatar Oferta",
-    retailer: "Varejista",
+    retailer: "Vendedor",
     store: "Loja",
     free_uppercase: "GRÁTIS",
-    share_message: "🔥 Alerta de Oferta: {{title}} baixou para {{price}} (Você economiza {{saved}}) na {{platform}}!\nPegue aqui: {{url}}",
+    share_message: "🔥 Alerta de Oferta: {{title}} baixou para {{price}} (Economia de {{saved}}) no {{platform}}!\nConsiga aqui: {{url}}",
     save_amount: "{{amount}}% DE DESCONTO",
     hot_deal: "Oferta de Alto Valor",
     rating: "{{percent}}",
     released: "Termina em: ",
     no_description: "Aproveite esta oferta de valor excepcional antes que o período promocional termine ou as faixas de preço mudem!",
     breakdown_title: "Ver Detalhes",
-    breakdown_body: "Economize um total de {{saved}} em relação ao preço de varejo normal de {{original}} (representando um sólido desconto de {{percent}}%).",
+    breakdown_body: "Economize um total de {{saved}} em relação ao preço de tabela normal de {{original}} (refletindo um sólido desconto de valor de {{percent}}%).",
     summary: {
-      prefix: "Analisamos as lojas de jogos ativas e descobrimos ",
-      midActive: " descontos massivos disponíveis em ",
+      prefix: "Analisamos lojas de jogos ativas e descobrimos ",
+      midActive: " descontos massivos ao vivo em ",
       suffix: ". Toque em qualquer título para garantir sua chave!"
     },
     stores: {
@@ -195,8 +195,8 @@ export const pt = {
     },
     error: {
       title: "Conexão Interrompida",
-      description: "Não conseguimos sincronizar com os servidores no momento. Verifique se o seu dispositivo está online e tente novamente.",
-      retryButton: "Reintentar Conexão"
+      description: "Não conseguimos sincronizar com os servidores agora. Certifique-se de que seu dispositivo está online e vamos tentar novamente.",
+      retryButton: "Repetir Conexão"
     },
     empty: {
       title: "Nenhum Resultado Encontrado",
@@ -225,11 +225,15 @@ export const pt = {
   onboarding: {
     welcome: "Bem-vindo ao Frapp",
     legalTitle: "Acordos Legais",
-    privacyHeader: "Estrutura Central de Privacidade",
-    privacyBody: "O Frapp funciona inteiramente como uma ferramenta agregadora de dados de código aberto. Não mantemos plataformas de armazenamento localizadas, não coletamos estruturas de contas físicas ou rastreamos históricos de telemetria de usuários. Como todos os processos rodam diretamente no seu hardware, nenhum dado é transmitido, processado ou registrado por uma central mestre interna ou rede administrativa centralizada. Seus perfis de configuração localizados, arquivos de cache históricos e preferências interativas permanecem armazenados de forma segura no seu dispositivo.",
-    consentLabel: "Aceito os Termos de Serviço e a Declaração de Privacidade",
+    legalSubtitle: "Por favor, revise as condições de privacidade antes de acessar nossos canais globais de sincronização de dados.",
+    title: "Acompanhe brindes de jogos eletrônicos e ofertas de jogos premium.",
+    title2: "Receba Brindes e Ofertas",
+    description: "O Frapp lida tanto com brindes de jogos quanto com ofertas massivas de jogos eletrônicos. Agregamos as recompensas mais recentes 100% gratuitas e resgatáveis junto com grandes descontos de varejo em todas as lojas para que você sempre jogue mais por menos.",
+    privacyHeader: "Estrutura Central de Privacidade e Dados",
+    privacyBody: "O Frapp é um agregador de dados de código aberto que unifica seus fluxos de dados dispersos, feeds de API e pontos de contato digitais em um painel único e coeso. Como operamos inteiramente como uma ferramenta local-first, não mantemos armazenamento centralizado, não coletamos estruturas de contas físicas ou rastreamos históricos de telemetria dos usuários. Toda a agregação, processamento e visualização são executados diretamente no seu hardware — o que significa que seus dados nunca são transmitidos ou registrados por um hub mestre externo ou rede administrativa centralizada. Seus perfis de configuração localizados, arquivos de cache históricos e preferências interativas permanecem de forma segura no seu dispositivo.",
+    consentLabel: "Aceito os Terminos de Serviço e a Declaração de Privacidade",
     btnStep1: "Continuar",
     btnStep2: "Começar",
-    versionLabel: "Frapp • v1.1.3"
+    versionLabel: "Frapp • v1.1.4"
   }
 } as const;
