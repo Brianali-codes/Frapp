@@ -54,7 +54,7 @@ FRAPP acts as a centralized messenger for deal-hunting and budget gaming. It mon
 - Modern UI and UX.
 - Bug report functionality to help improve the app.
 - Dark and Light Mode support.
-- Localization (currently Working on) Contributions are welcome.
+- Support for 8 languages, read the <a href="https://github.com/Brianali-codes/Frapp/blob/main/CONTRIBUTION.md">Contribution Guide<a/> to contribute on more languages
  
 
 
