@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter } from 'iconsax-react-nativejs'; 
+import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter } from 'iconsax-react-nativejs';
 import { useTranslation } from 'react-i18next';
-import i18nInstanceSource from '@/components/i18n'; 
+import i18nInstanceSource from '@/components/i18n';
 
 import DealItem from '@/components/custom/DealItem';
-import BestDealsCarousel from '@/components/custom/BestDealsCarousel'; 
+import BestDealsCarousel from '@/components/custom/BestDealsCarousel';
 import Button from '@/components/custom/Button';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -38,8 +38,8 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
       className="w-full h-12 rounded-full border items-center justify-center active:opacity-60 bg-transparent"
       style={{ borderColor: dynamicBorderColor }}
     >
-      <ThemedText 
-        style={{ color: dynamicTextColor }} 
+      <ThemedText
+        style={{ color: dynamicTextColor }}
         className="font-montBold text-sm uppercase tracking-wider"
       >
         {text}
@@ -55,7 +55,7 @@ function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { is
   const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
 
   return (
-    <View 
+    <View
       style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
       className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-85"
     >
@@ -80,10 +80,10 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
   return (
     <View className="w-full mb-6 animate-pulse opacity-85">
       <View
-        style={{ 
-          borderWidth: 1, 
+        style={{
+          borderWidth: 1,
           borderColor: adaptiveBorderColor,
-          backgroundColor: cardBgColor 
+          backgroundColor: cardBgColor
         }}
         className="rounded-2xl overflow-hidden w-full mb-2"
       >
@@ -103,15 +103,15 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
             </View>
           </View>
 
-          <View 
-            style={{ borderTopWidth: 1, borderColor: borderLine }} 
+          <View
+            style={{ borderTopWidth: 1, borderColor: borderLine }}
             className="flex-row items-center justify-between pt-2.5 mt-0.5"
           >
             <View className="flex-row items-center gap-1">
               <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
               <View className="w-3.5 h-3.5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
             </View>
-            
+
             <View className="flex-row items-center gap-1.5">
               <View className="w-8 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
               <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
@@ -127,8 +127,8 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
             style={{
               width: dotIndex === 0 ? 14 : 6,
               height: 6,
-              backgroundColor: dotIndex === 0 
-                ? '#9333ea' 
+              backgroundColor: dotIndex === 0
+                ? '#9333ea'
                 : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'),
               borderRadius: 999,
             }}
@@ -162,14 +162,14 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
           {variant === 'normal' ? (
             <View>
               <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full" />
-              
+
               <View className="p-4 space-y-3">
                 <View className="w-3/4 h-4 rounded" style={{ backgroundColor: shimmerBg }} />
                 <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
                 <View className="w-1/2 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                
-                <View 
-                  style={{ borderTopWidth: 1, borderColor: borderLine }} 
+
+                <View
+                  style={{ borderTopWidth: 1, borderColor: borderLine }}
                   className="flex-row items-center justify-between pt-3 mt-1"
                 >
                   <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
@@ -179,11 +179,11 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
             </View>
           ) : (
             <View className="p-3 flex-row items-center">
-              <View 
-                style={{ width: 84, height: 84, backgroundColor: shimmerBg }} 
-                className="rounded-xl shrink-0 mr-3" 
+              <View
+                style={{ width: 84, height: 84, backgroundColor: shimmerBg }}
+                className="rounded-xl shrink-0 mr-3"
               />
-              
+
               <View className="flex-1 justify-between h-20 py-0.5">
                 <View className="space-y-2">
                   <View className="w-5/6 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
@@ -205,18 +205,18 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
 
 export default function FreeScreen() {
   const router = useRouter();
-  const scrollRef = useRef<ScrollView>(null); 
+  const scrollRef = useRef<ScrollView>(null);
   const { t } = useTranslation(undefined, { i18n: i18nInstanceSource });
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<FreeGiveaway[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [layoutVariant, setLayoutVariant] = useState<'compact' | 'normal'>('compact');
-  
+
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
-  
+
   const itemsPerPage = 10;
 
   const backgroundColor = useThemeColor({}, 'background');
@@ -236,27 +236,32 @@ export default function FreeScreen() {
     setIsLoading(true);
     setHasError(false);
     try {
-      let url = `https://www.cheapshark.com/api/1.0/deals?upperPrice=100&pageSize=50`; 
+      let url = `https://www.cheapshark.com/api/1.0/deals?upperPrice=100&pageSize=50`;
       if (storeId !== 'all') {
         url += `&storeID=${storeId}`;
       }
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'FrappApp/1.1 (React Native)',
+        },
+      });
       if (!response.ok) throw new Error('Server payload error');
-      
+
       const rawDeals = await response.json();
-      
+
       const normalizedData: FreeGiveaway[] = (Array.isArray(rawDeals) ? rawDeals : []).map((deal: any, index: number) => {
         const percentSavings = deal.savings ? Math.round(parseFloat(deal.savings)) : 0;
         const currentSalePrice = parseFloat(deal.salePrice || '0');
         const guaranteedUniqueId = deal.dealID ? deal.dealID : `deal-${index}-${deal.gameID}`;
 
         return {
-          id: guaranteedUniqueId as any, 
+          id: guaranteedUniqueId as any,
           title: deal.title || 'Unknown Title',
           thumbnail: deal.thumb || '',
           image: deal.thumb || '',
-          description: percentSavings > 0 
+          description: percentSavings > 0
             ? `Save ${percentSavings}% off! Now $${deal.salePrice} down from $${deal.normalPrice}.`
             : `Available now for $${deal.salePrice}.`,
           short_description: `Score this offer on Store #${deal.storeID}. Deal Rating: ${deal.dealRating || 'N/A'}/10`,
@@ -265,7 +270,7 @@ export default function FreeScreen() {
           game_url: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
           worth: currentSalePrice === 0 ? 'FREE' : `$${deal.salePrice}`,
           end_date: 'Limited Time Offer',
-          platform: deal.storeID || storeId, 
+          platform: deal.storeID || storeId,
           genre: 'Video Game Deal',
           publisher: 'Retail Distribution',
           release_date: deal.releaseDate && deal.releaseDate > 0 ? new Date(deal.releaseDate * 1000).toISOString() : '',
@@ -327,7 +332,7 @@ export default function FreeScreen() {
   const now = new Date();
   const day = now.getDate();
   const year = now.getFullYear();
-  
+
   const monthKeys = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
   const monthDefaults = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const currentMonthIndex = now.getMonth();
@@ -385,8 +390,8 @@ export default function FreeScreen() {
         {/* --- UNCLIPPED HORIZONTAL SCROLLFILTER SECTION --- */}
         {showFilterBar && (
           <View className="w-full mb-5">
-            <ScrollView 
-              horizontal 
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
               className="-mx-4 py-1"
               style={{ height: 50 }}
@@ -420,15 +425,15 @@ export default function FreeScreen() {
         {isLoading ? (
           selectedPlatform === 'all' && (
             <View className="w-full">
-              <WorthSummarySkeleton 
+              <WorthSummarySkeleton
                 isDark={isDark}
-                cardBgColor={cardBgColor} 
-                adaptiveBorderColor={adaptiveBorderColor} 
+                cardBgColor={cardBgColor}
+                adaptiveBorderColor={adaptiveBorderColor}
               />
-              <CarouselSkeleton 
-                isDark={isDark} 
-                cardBgColor={cardBgColor} 
-                adaptiveBorderColor={adaptiveBorderColor} 
+              <CarouselSkeleton
+                isDark={isDark}
+                cardBgColor={cardBgColor}
+                adaptiveBorderColor={adaptiveBorderColor}
               />
             </View>
           )
@@ -462,14 +467,14 @@ export default function FreeScreen() {
 
         {/* --- MAIN DATA CONTENT BLOCKS --- */}
         {hasError ? (
-          <View 
+          <View
             style={[
               { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
               Platform.select({
                 ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
                 android: { elevation: 4 }
               })
-            ]} 
+            ]}
             className="rounded-3xl p-6 items-center justify-center my-6"
           >
             <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">
@@ -484,21 +489,21 @@ export default function FreeScreen() {
             <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform)} className="w-full" text={t('deals.error.retryButton', 'Retry Connection')} />
           </View>
         ) : isLoading ? (
-          <CardListSkeleton 
-            variant={layoutVariant} 
+          <CardListSkeleton
+            variant={layoutVariant}
             cardBgColor={cardBgColor}
             adaptiveBorderColor={adaptiveBorderColor}
             isDark={isDark}
           />
         ) : giveaways.length === 0 ? (
-          <View 
+          <View
             style={[
               { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
               Platform.select({
                 ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: isDark ? 0.30 : 0.08, shadowRadius: 12 },
                 android: { elevation: 4 }
               })
-            ]} 
+            ]}
             className="rounded-3xl p-6 items-center justify-center my-6"
           >
             <View className="w-16 h-16 rounded-2xl bg-purple-600/10 dark:bg-purple-500/10 items-center justify-center mb-4">

@@ -361,20 +361,14 @@ export default function GiveawayScreen() {
         {/* --- PREMIUM BRAND HEADER ROW --- */}
         <View className="flex-row items-center justify-between w-full mb-6">
           <View className="flex-row items-center gap-2.5 flex-1 mr-2">
-            <View
-              style={{ backgroundColor: '#9333ea' }}
-              className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0"
-            >
-              <Image
-                source={require('../../assets/images/FRAPP_ICON1.png')}
-                style={{ width: '100%', height: '100%' }}
-                resizeMode="cover"
-              />
-            </View>
-
-            <ThemedText numberOfLines={1} className="text-xl font-montBlack tracking-tight flex-shrink">
-              {t('giveaways.title', 'Giveaways')}
-            </ThemedText>
+            <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
+                        <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
+                          <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        </View>
+                        <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">
+                          {t('giveaways.title', 'Giveaways.')}
+                        </ThemedText>
+                      </Pressable>
           </View>
 
           {/* Symmetrical Header Action Controls Group */}

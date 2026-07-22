@@ -64,7 +64,12 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
     const fetchBestValueDeals = async () => {
       try {
         const url = `https://www.cheapshark.com/api/1.0/deals?sortBy=DealRating&onSale=1&pageSize=5`;
-        const response = await fetch(url);
+       const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'FrappApp/1.1 (React Native)',
+        },
+      });
         if (!response.ok) throw new Error('API request breakdown');
         const rawDeals = await response.json();
         
