@@ -99,7 +99,8 @@ export const en = {
     upToDateMessage: "You are already running our most recent revision build ({{version}}). No updates needed.",
     upToDateAction: "Awesome",
     checkFailedTitle: "Verification Failure",
-    checkFailedMessage: "Could not complete lookup queries at this moment. Check your connectivity index and retry.",
+    checkFailedMessage: "Could not complete lookup queries at this moment. Check your Internet Connection and Try Again.",
+    failedAction: "Close",
     socialsTitle: "Share Promo",
     languageTitle: "Select Language"
   },
@@ -129,8 +130,8 @@ export const en = {
       itchio: "itch.io"
     },
     error: {
-      title: "Connection Disrupted",
-      description: "We are unable to sync up with upstream lookup pipelines right now. Check your internet access and try again.",
+      title: "Connection Interrupted",
+      description: "We can't sync up with the servers right now. Make sure your device is online and let's try that again.",
       retryButton: "Retry Connection"
     },
     empty: {
@@ -153,22 +154,22 @@ export const en = {
   },
 
   giveaways1: {
-        
-      summary: {
+
+    summary: {
       prefix: "You have ",
       midActive: " saved games ",
       midWorth: ", valued at a total of ",
       suffix: ". Claim them before they expire!"
-      },
-      empty: {
-        viewAllButton: "Explore the App"
-      },
-      delete: {
-        title: "Delete All games?",
-        description: "This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually.",
-        confirmButton: "Wipe All"
-      },
     },
+    empty: {
+      viewAllButton: "Explore the App"
+    },
+    delete: {
+      title: "Delete All games?",
+      description: "This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually.",
+      confirmButton: "Wipe All"
+    },
+  },
   deals: {
     title: "Game Deals.",
     titleClaim: "Claim Deal.",
@@ -225,7 +226,7 @@ export const en = {
     november: "November",
     december: "December"
   },
- onboarding: {
+  onboarding: {
     welcome: "Welcome to Frapp",
     legalTitle: "Legal Agreements",
     legalSubtitle: "Please review the privacy conditions before accessing our global data sync pipelines.",
@@ -238,5 +239,5 @@ export const en = {
     btnStep1: "Continue",
     btnStep2: "Get Started",
     versionLabel: "Frapp • v1.1.4"
-}
+  }
 } as const;

@@ -140,8 +140,8 @@ export default function SettingsScreen() {
       });
 
       await notifee.displayNotification({
-        title: '🎯 FRAPP Radar Active',
-        body: 'Local notification pipeline responding. System verification test passed!',
+        title: 'You discovered an Easter Egg!',
+        body: 'You have successfully triggered a test notification. This confirms that your device is ready to receive FRAPP notifications.',
         android: {
           channelId,
           importance: AndroidImportance.HIGH,
@@ -209,7 +209,7 @@ export default function SettingsScreen() {
         title: t('modals.checkFailedTitle', 'Check Failed'),
         message: t('modals.checkFailedMessage', 'Could not complete version cross-reference check at this time. Please check your network connection and try again.'),
         type: 'error',
-        actionText: t('modals.dismiss', 'Dismiss'),
+        actionText: t('modals.failedAction', 'Close'),
         onAction: () => setModalVisible(false)
       });
       setModalVisible(true);
