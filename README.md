@@ -23,7 +23,7 @@
   Never miss a limited-time offer or massive discount across major distribution platforms, powered by the GamerPower and CheapShark APIs.
 </p>
 
----
+<h1></h1>
 
 ## About
 
@@ -32,7 +32,7 @@
 
 FRAPP acts as a centralized messenger for deal-hunting and budget gaming. It monitors platforms like Steam, Epic Games Store, GOG, and itch.io, tracking both 100% free giveaways and active premium game discounts so you can expand your library without scouring multiple storefronts daily.
 
----
+<h1></h1>
 
 ## ScreenShots and Screens
 
@@ -64,7 +64,7 @@ This is a mobile application built with [Expo](https://expo.dev) using [`create-
 
 To get started, fork this repository to your own GitHub account and clone it to your machine.
 
----
+
 
 ## Running Locally
 
