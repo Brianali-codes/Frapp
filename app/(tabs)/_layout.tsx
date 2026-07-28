@@ -3,12 +3,13 @@ import React from 'react';
 import { Platform, View, Dimensions, TouchableOpacity } from 'react-native';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { ThemedText } from '@/components/ThemedText';
-import { DollarCircle, Gift, Warning2 } from 'iconsax-react-nativejs';
+import { DollarCircle, Gift, HeartCircle, Setting } from 'iconsax-react-nativejs';
 
 const TABS = [
   { name: 'index', href: '/', title: 'Get', icon: Gift },
   { name: 'deals', href: '/deals', title: 'Deals', icon: DollarCircle },
-  { name: 'report', href: '/report', title: 'Bug', icon: Warning2 },
+  { name: 'saved', href: '/saved', title: 'Saved', icon: HeartCircle },
+  { name: 'settings', href: '/settings', title: 'Settings', icon: Setting },
 ];
 
 function FloatingTabBar() {
@@ -108,6 +109,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" />
       <Tabs.Screen name="deals" />
       <Tabs.Screen name="report" />
+      <Tabs.Screen name="saved" options={{ href: null }} />
       <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );

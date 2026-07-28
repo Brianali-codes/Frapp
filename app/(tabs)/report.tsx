@@ -8,10 +8,10 @@ import {
   Moon, 
   Flag, 
   InfoCircle,
-  BrushBig,     // Icon for UI/UX
-  Danger,       // Icon for Performance / Crash
-  Wifi,         // Icon for API / Data Error
-  LampCharge,    // Icon for Feature Request
+  BrushBig,     
+  Danger,       
+  Wifi,         
+  LampCharge,    
   Sun1
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';

@@ -401,17 +401,7 @@ export default function GiveawayScreen() {
               />
             </Pressable>
 
-            <Pressable
-              onPress={() => router.push('/(tabs)/settings')}
-              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
-            >
-              <Setting
-                size="18"
-                color={isDark ? '#f4f4f5' : '#3f3f46'}
-                variant="Broken"
-              />
-            </Pressable>
+            
 
             <Pressable
               onPress={toggleTheme}

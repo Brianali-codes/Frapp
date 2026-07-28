@@ -23,6 +23,7 @@ import {
   Share,
   Lock1,
   TickCircle,
+  Warning2,
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
@@ -32,7 +33,6 @@ import i18nInstanceSource from '@/components/i18n';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
-import { checkNotificationPermission } from '@/lib/notifications';
 
 
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -117,17 +117,8 @@ export default function SettingsScreen() {
   };
 
   const handleNotificationToggle = async (newValue: boolean) => {
-    if (newValue) {
-      await checkNotificationPermission();
-      const settings = await notifee.getNotificationSettings();
-      setNotificationsEnabled(
-        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
-      );
-    } else {
-      await notifee.cancelAllNotifications();
-      setNotificationsEnabled(false);
-    }
+   // If the user is trying to enable notifications, request permission first
+   // feature is being worked on.
   };
 
   const triggerTestNotification = async () => {
@@ -245,13 +236,7 @@ export default function SettingsScreen() {
           </Pressable>
 
           <View className="flex-row items-center gap-2">
-            <Pressable
-              onPress={handleSettingsCogTap}
-              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-9 h-9 rounded-full items-center justify-center shadow-sm active:opacity-70 shrink-0"
-            >
-              <Setting size="18" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
-            </Pressable>
+            
 
             <Pressable
               onPress={toggleTheme}
@@ -323,25 +308,6 @@ export default function SettingsScreen() {
 
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
 
-          {/* MY SAVED LIBRARY NAVIGATION ROW */}
-          <Pressable onPress={() => router.push('/saved')} className="flex-row items-center justify-between p-3 active:opacity-60">
-            <View className="flex-row items-center gap-3">
-              <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
-                <Heart size="18" color={monochromeIconColor} variant="Broken" />
-              </View>
-              <View>
-                <ThemedText className="font-montBold text-sm">
-                  {t('preferences.savedGiveaways', 'Saved Giveaways')}
-                </ThemedText>
-                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
-                  {t('preferences.savedGiveawaysSub', 'Access saved games')}
-                </ThemedText>
-              </View>
-            </View>
-            <ArrowRight2 size="14" color="#a1a1aa" />
-          </Pressable>
-
-          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
 
           {/* DYNAMIC TIMING ALERTS INTERACTION ROW */}
           <View className="flex-row items-center justify-between p-3">
@@ -385,6 +351,26 @@ export default function SettingsScreen() {
                 </ThemedText>
                 <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
                   {t('preferences.appIntroductionSub', 'Revisit Onboarding')}
+                </ThemedText>
+              </View>
+            </View>
+            <ArrowRight2 size="14" color="#a1a1aa" />
+          </Pressable>
+
+          <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
+
+           {/*  Report Bug*/}
+          <Pressable onPress={() => router.push('/report')} className="flex-row items-center justify-between p-3 active:opacity-60">
+            <View className="flex-row items-center gap-3">
+              <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>
+                <Warning2 size="18" color={monochromeIconColor} variant="Broken" />
+              </View>
+              <View>
+                <ThemedText className="font-montBold text-sm">
+                  {t('preferences.Report', 'Report Bug')}
+                </ThemedText>
+                <ThemedText className="text-[11px] text-zinc-400 mt-0.5 font-mont">
+                  {t('preferences.ReportSub', 'Report Bugs or Issues')}
                 </ThemedText>
               </View>
             </View>

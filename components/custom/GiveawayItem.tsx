@@ -14,12 +14,12 @@ import {
   Animated
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as SecureStore from 'expo-secure-store'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { FreeGiveaway } from '@/types';
 import { useCustomTheme } from '@/context/ThemeContext';
-import { useTranslation } from 'react-i18next'; // Adjust import paths depending on your setup
+import { useTranslation } from 'react-i18next';
 import { 
   ArrowCircleRight, 
   ExportSquare, 
@@ -45,7 +45,7 @@ interface GiveawayItemProps {
 export default function GiveawayItem({ 
   giveaway, 
   variant = 'normal', 
-  ctaText, // Default dynamically set below via t()
+  ctaText,
   isSaved = false,
   onToggleSave = () => {} 
 }: GiveawayItemProps) {
@@ -55,10 +55,15 @@ export default function GiveawayItem({
   const [localIsSaved, setLocalIsSaved] = useState(isSaved);
   const translateY = useRef(new Animated.Value(0)).current;
 
-  // Resolve localized default text for CTA if not manually supplied as a prop
   const activeCtaText = ctaText || t('deals.claim');
 
-  // Helper to calculate relative days remaining utilizing translation lookups
+  // Reset drag position whenever modal visibility changes
+  useEffect(() => {
+    if (modalVisible) {
+      translateY.setValue(0);
+    }
+  }, [modalVisible]);
+
   const getDaysRemainingText = (endDateString: string | undefined): { label: string; isDays: boolean } | null => {
     if (!endDateString || endDateString === 'N/A') return null;
 
@@ -77,7 +82,7 @@ export default function GiveawayItem({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return { label: 'Expired', isDays: true }; // Retain technical state strings or adjust to your mapping preferences
+      return { label: 'Expired', isDays: true };
     } else if (diffDays === 0) {
       return { label: 'Ends Today', isDays: true };
     } else if (diffDays === 1) {
@@ -87,11 +92,10 @@ export default function GiveawayItem({
     }
   };
 
-  // --- PERSISTENCE LOGIC (SECURESTORE SYNC) ---
   useEffect(() => {
     const checkSavedStatus = async () => {
       try {
-        const stored = await SecureStore.getItemAsync('saved_giveaways');
+        const stored = await AsyncStorage.getItem('saved_giveaways');
         if (stored) {
           const parsed: FreeGiveaway[] = JSON.parse(stored);
           const exists = parsed.some((item) => item.id === giveaway.id);
@@ -114,7 +118,7 @@ export default function GiveawayItem({
     onToggleSave();
 
     try {
-      const stored = await SecureStore.getItemAsync('saved_giveaways');
+      const stored = await AsyncStorage.getItem('saved_giveaways');
       let parsed: FreeGiveaway[] = stored ? JSON.parse(stored) : [];
 
       if (!nextSavedState) {
@@ -123,12 +127,11 @@ export default function GiveawayItem({
         parsed.push(giveaway);
       }
 
-      await SecureStore.setItemAsync('saved_giveaways', JSON.stringify(parsed));
+      await AsyncStorage.setItem('saved_giveaways', JSON.stringify(parsed));
     } catch (error) {
-      console.error('Error modifying saved list in SecureStore:', error);
+      console.error('Error modifying saved list in AsyncStorage:', error);
     }
   };
-  // --- END OF PERSISTENCE LOGIC ---
 
   const isDark = themeMode === 'dark';
   const isCompact = variant === 'compact';
@@ -147,6 +150,7 @@ export default function GiveawayItem({
 
   const worthValue = giveaway.worth || 'N/A';
   const hasWorth = worthValue !== 'N/A' && worthValue !== '0' && worthValue !== '$0.00';
+  const imageUri = giveaway.thumbnail || giveaway.image;
 
   const daysRemainingInfo = getDaysRemainingText(giveaway.end_date);
 
@@ -190,9 +194,7 @@ export default function GiveawayItem({
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return gestureState.dy > 5;
-      },
+      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 5,
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dy > 0) {
           translateY.setValue(gestureState.dy);
@@ -221,9 +223,7 @@ export default function GiveawayItem({
 
   return (
     <>
-      {/* =========================================================================
-          MINIMAL VARIANT
-          ========================================================================= */}
+      {/* MINIMAL VARIANT */}
       {isMinimal && (
         <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
           <ThemedView
@@ -232,7 +232,7 @@ export default function GiveawayItem({
             style={{ backgroundColor: minimalBgColor, borderColor: adaptiveBorderColor }}
           >
             <View className="relative w-24 h-24 rounded-xl overflow-hidden bg-zinc-800">
-              <Image source={{ uri: giveaway.thumbnail || giveaway.image }} className="w-full h-full" resizeMode="cover" />
+              <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
               <View className="absolute inset-0 bg-black/10" />
 
               {hasWorth && (
@@ -289,9 +289,7 @@ export default function GiveawayItem({
         </Pressable>
       )}
 
-      {/* =========================================================================
-          COMPACT VARIANT
-          ========================================================================= */}
+      {/* COMPACT VARIANT */}
       {isCompact && (
         <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
           <ThemedView
@@ -306,7 +304,7 @@ export default function GiveawayItem({
             ]}
           >
             <View className="relative w-28 h-28 rounded-xl overflow-hidden bg-zinc-800">
-              <Image source={{ uri: giveaway.thumbnail || giveaway.image }} className="w-full h-full" resizeMode="cover" />
+              <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
               <View className="absolute inset-0 bg-black/10" />
 
               {hasWorth && (
@@ -361,9 +359,7 @@ export default function GiveawayItem({
         </Pressable>
       )}
 
-      {/* =========================================================================
-          NORMAL VARIANT
-          ========================================================================= */}
+      {/* NORMAL VARIANT */}
       {!isMinimal && !isCompact && (
         <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
           <ThemedView
@@ -378,7 +374,7 @@ export default function GiveawayItem({
             ]}
           >
             <View className="relative w-full h-40 bg-zinc-900">
-              <Image source={{ uri: giveaway.image || giveaway.thumbnail }} className="w-full h-full" resizeMode="cover" />
+              <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
               <View className="absolute inset-0 bg-black/10" />
 
               {hasWorth && (
@@ -445,9 +441,7 @@ export default function GiveawayItem({
         </Pressable>
       )}
 
-      {/* =========================================================================
-          70% HEIGHT INTERACTIVE DETAIL MODAL WITH SWIPE GESTURE
-          ========================================================================= */}
+      {/* 70% HEIGHT INTERACTIVE DETAIL MODAL */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -455,13 +449,11 @@ export default function GiveawayItem({
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-end">
-          {/* Transparent Backdrop to detect tap-outside dismissal */}
           <Pressable 
-            style={{ ...Platform.select({ web: { cursor: 'default' } }), position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
             onPress={() => setModalVisible(false)}
           />
 
-          {/* Sheet container constrained to 70% height */}
           <Animated.View 
             style={{ 
               height: SCREEN_HEIGHT * 0.7, 
@@ -473,14 +465,13 @@ export default function GiveawayItem({
             }}
             className="w-full flex-col shadow-2xl"
           >
-            {/* Gesture banner area (Image + Swipe Indicator overlay) */}
             <View 
               {...panResponder.panHandlers} 
               className="w-full h-[35%] relative bg-zinc-950"
             >
-              {giveaway.image || giveaway.thumbnail ? (
+              {imageUri ? (
                 <Image
-                  source={{ uri: giveaway.image || giveaway.thumbnail }}
+                  source={{ uri: imageUri }}
                   className="w-full h-full"
                   resizeMode="cover"
                 />
@@ -491,7 +482,6 @@ export default function GiveawayItem({
               )}
               <View className="absolute inset-0 bg-black/35" />
 
-              {/* Floating modern visual drag handle bar */}
               <View className="absolute top-3 inset-x-0 items-center">
                 <View 
                   style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }} 
@@ -499,7 +489,6 @@ export default function GiveawayItem({
                 />
               </View>
 
-              {/* Floating Platform Badge */}
               <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-0.5 rounded border border-purple-500/30">
                 <Text className="text-[9px] font-montBlack text-purple-400 tracking-wider uppercase">
                   {giveaway.platform || 'Multi-platform'}
@@ -507,14 +496,12 @@ export default function GiveawayItem({
               </View>
             </View>
 
-            {/* Scrollable Information Body */}
             <View className="flex-1">
               <ScrollView 
                 className="flex-1 px-5 pt-4"
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
-                {/* Type & Value Line */}
                 <View className="flex-row items-center justify-between mb-2">
                   <ThemedText className="font-mont text-xs tracking-wider uppercase opacity-60">
                     {giveaway.type || 'Free Game Loot'}
@@ -534,12 +521,10 @@ export default function GiveawayItem({
                   </View>
                 </View>
 
-                {/* Title */}
                 <ThemedText className="font-montBlack text-xl tracking-tight mb-3 leading-tight">
                   {giveaway.title}
                 </ThemedText>
 
-                {/* Status Info Chips */}
                 <View className="flex-row flex-wrap gap-2 mb-4">
                   {giveaway.status && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
@@ -550,7 +535,6 @@ export default function GiveawayItem({
                     </View>
                   )}
                   
-                  {/* DYNAMIC DAYS REMAINING CHIP */}
                   {daysRemainingInfo && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                       {daysRemainingInfo.isDays ? (
@@ -574,12 +558,10 @@ export default function GiveawayItem({
                   )}
                 </View>
 
-                {/* Description Body */}
                 <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
                   {giveaway.description || t('deals.no_description')}
                 </ThemedText>
 
-                {/* Instructions / Savings Breakdown Block */}
                 {giveaway.instructions ? (
                   <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
                     <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
@@ -601,7 +583,6 @@ export default function GiveawayItem({
                 )}
               </ScrollView>
 
-              {/* Action Buttons Sticky Footer */}
               <View 
                 style={{ 
                   borderTopWidth: 1, 
@@ -611,7 +592,6 @@ export default function GiveawayItem({
                 }}
                 className="flex-row items-center gap-3 px-5 pt-3.5"
               >
-                {/* Left side actions: Sync Local Save state inside Modal footer */}
                 <View className="flex-row items-center gap-3">
                   <Pressable
                     onPress={handleToggle}
@@ -635,7 +615,6 @@ export default function GiveawayItem({
                   </Pressable>
                 </View>
 
-                {/* Right side CTA Button */}
                 <Pressable
                   onPress={handleOpenClaimSite}
                   style={{ backgroundColor: '#9333ea' }}

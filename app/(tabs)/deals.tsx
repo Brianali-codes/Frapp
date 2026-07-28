@@ -377,9 +377,6 @@ export default function FreeScreen() {
               <Filter size="18" color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
             </Pressable>
 
-            <Pressable onPress={() => router.push('/(tabs)/settings')} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
-              <Setting size="18" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
-            </Pressable>
 
             <Pressable onPress={toggleTheme} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
               {isDark ? <Sun1 size="18" color="#f4f4f5" variant="Broken" /> : <Moon size="18" color="#3f3f46" variant="Broken" />}

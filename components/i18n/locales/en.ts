@@ -22,7 +22,9 @@ export const en = {
     appIntroduction: "Onboarding",
     appIntroductionSub: "Review onboarding context",
     checkForUpdates: "App Version",
-    checkForUpdatesSub: "Check For Updates"
+    checkForUpdatesSub: "Check For Updates",
+    Report: "Report a Bug",
+    ReportSub: "Report Bug or issues",
   },
   about: {
     developer: "About Developer",

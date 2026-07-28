@@ -14,7 +14,7 @@ import {
   Animated
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -37,13 +37,26 @@ interface DealItemProps {
   giveaway: FreeGiveaway;
   variant?: 'normal' | 'compact' | 'minimal';
   ctaText?: string;
+  // External props if parent controls state (Optional overrides)
+  isSaved?: boolean;
+  onToggleSave?: () => void;
 }
 
-export default function DealItem({ giveaway, variant = 'normal', ctaText }: DealItemProps) {
+export default function DealItem({ 
+  giveaway, 
+  variant = 'normal', 
+  ctaText,
+  isSaved: externalIsSaved,
+  onToggleSave: externalOnToggleSave
+}: DealItemProps) {
   const { themeMode } = useCustomTheme();
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [internalIsSaved, setInternalIsSaved] = useState(false);
+  
+  // Use controlled state if provided by parent, otherwise fall back to internal
+  const isSaved = externalIsSaved !== undefined ? externalIsSaved : internalIsSaved;
+
   const translateY = useRef(new Animated.Value(0)).current;
 
   // Resolve localized CTA text fallback chain
@@ -64,57 +77,64 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
   const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const iconColor = isDark ? '#a78bfa' : '#7c3aed';
 
-  // --- PERSISTENCE LOGIC (SECURESTORE SYNC) ---
+  // --- PERSISTENCE LOGIC (AsyncStorage Sync) ---
 
-  // 1. On Mount: Check if this item is already saved
+  // 1. On Mount: Check if this item is saved (only if parent doesn't handle state)
   useEffect(() => {
+    if (externalIsSaved !== undefined) return;
+
+    let isMounted = true;
     const checkSavedStatus = async () => {
       try {
-        const stored = await SecureStore.getItemAsync('saved_giveaways');
-        if (stored) {
+        const stored = await AsyncStorage.getItem('saved_giveaways');
+        if (stored && isMounted) {
           const parsed: FreeGiveaway[] = JSON.parse(stored);
           const exists = parsed.some((item) => item.id === giveaway.id);
-          setIsSaved(exists);
+          setInternalIsSaved(exists);
         }
       } catch (error) {
         console.error('Failed to read saved list:', error);
       }
     };
     checkSavedStatus();
-  }, [giveaway.id]);
+    return () => { isMounted = false; };
+  }, [giveaway.id, externalIsSaved]);
 
-  // 2. Toggle Handler: Write, append, or delete from SecureStore
+  // 2. Toggle Handler
   const handleToggleSave = async () => {
+    if (externalOnToggleSave) {
+      externalOnToggleSave();
+      return;
+    }
+
     try {
-      const stored = await SecureStore.getItemAsync('saved_giveaways');
+      const stored = await AsyncStorage.getItem('saved_giveaways');
       let parsed: FreeGiveaway[] = stored ? JSON.parse(stored) : [];
 
       if (isSaved) {
-        // Unsave: Filter this item out
         parsed = parsed.filter((item) => item.id !== giveaway.id);
-        setIsSaved(false);
+        setInternalIsSaved(false);
       } else {
-        // Save: Add this item to the array
         parsed.push(giveaway);
-        setIsSaved(true);
+        setInternalIsSaved(true);
       }
 
-      await SecureStore.setItemAsync('saved_giveaways', JSON.stringify(parsed));
+      await AsyncStorage.setItem('saved_giveaways', JSON.stringify(parsed));
     } catch (error) {
       console.error('Error modifying saved list:', error);
     }
   };
 
-  // --- END OF PERSISTENCE LOGIC ---
+  // --- HELPERS & MATH SAFEGUARDS ---
 
-  const normalizeStorePlatform = (storeId: string) => {
+  const normalizeStorePlatform = (storeId?: string | number) => {
     if (!storeId) return t('deals.retailer', 'Retailer');
     switch (storeId.toString()) {
       case '1': return 'Steam';
       case '2': return 'GamersGate';
       case '3': return 'GreenManGaming';
       case '7': return 'GOG';
-      case '11': return 'Epic Games';
+      case '11': 
       case '25': return 'Epic Games';
       case '34': return 'Amazon';
       default: return `${t('deals.store', 'Store')} #${storeId}`;
@@ -123,11 +143,11 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
 
   const displayPlatform = normalizeStorePlatform(giveaway.storeID || giveaway.platform);
 
-  const salePriceNum = parseFloat(giveaway.salePrice || '0');
-  const normalPriceNum = parseFloat(giveaway.normalPrice || '0');
+  const salePriceNum = Number.isNaN(parseFloat(giveaway.salePrice || '0')) ? 0 : parseFloat(giveaway.salePrice || '0');
+  const normalPriceNum = Number.isNaN(parseFloat(giveaway.normalPrice || '0')) ? 0 : parseFloat(giveaway.normalPrice || '0');
   const isFree = salePriceNum === 0;
 
-  const totalCashSaved = (normalPriceNum - salePriceNum).toFixed(2);
+  const totalCashSaved = Math.max(0, normalPriceNum - salePriceNum).toFixed(2);
   const hasValidPrice = giveaway.normalPrice && normalPriceNum > salePriceNum && parseFloat(totalCashSaved) > 0;
 
   const handleOpenClaimSite = async () => {
@@ -170,13 +190,11 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
     }
   };
 
-  // Memoized PanResponder creation to optimize render performance
-  const panResponder = useMemo(() =>
+  // Static PanResponder initialization
+  const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return gestureState.dy > 5;
-      },
+      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 5,
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dy > 0) {
           translateY.setValue(gestureState.dy);
@@ -201,9 +219,8 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
           }).start();
         }
       },
-    }),
-    [translateY]
-  );
+    })
+  ).current;
 
   return (
     <>
@@ -319,7 +336,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
                   </ThemedText>
                 </View>
 
-                {/* Compact Mode Actions: Heart -> Export Link -> Share */}
+                {/* Compact Mode Actions */}
                 <View className="flex-row items-center gap-2">
                   <Pressable onPress={handleToggleSave} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
                     <Heart size="15" color={isSaved ? '#22c55e' : iconColor} variant={isSaved ? 'Bold' : 'Outline'} />
@@ -418,7 +435,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
       )}
 
       {/* =========================================================================
-          70% HEIGHT INTERACTIVE DETAIL MODAL WITH SWIPE GESTURE
+          DETAIL MODAL
           ========================================================================= */}
       <Modal
         visible={modalVisible}
@@ -427,13 +444,11 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-end">
-          {/* Transparent Backdrop to detect tap-outside dismissal */}
           <Pressable
             style={{ ...Platform.select({ web: { cursor: 'default' } }), position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
             onPress={() => setModalVisible(false)}
           />
 
-          {/* Sheet container constrained to 70% height */}
           <Animated.View
             style={{
               height: SCREEN_HEIGHT * 0.7,
@@ -445,7 +460,6 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
             }}
             className="w-full flex-col shadow-2xl"
           >
-            {/* Gesture banner area (Image + Swipe Indicator overlay) */}
             <View
               {...panResponder.panHandlers}
               className="w-full h-[35%] relative bg-zinc-950"
@@ -463,7 +477,6 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
               )}
               <View className="absolute inset-0 bg-black/35" />
 
-              {/* Floating modern visual drag handle bar */}
               <View className="absolute top-3 inset-x-0 items-center">
                 <View
                   style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
@@ -471,7 +484,6 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
                 />
               </View>
 
-              {/* Floating Platform Badge */}
               <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-0.5 rounded border border-purple-500/30">
                 <Text className="text-[9px] font-montBlack text-purple-400 tracking-wider uppercase">
                   {displayPlatform}
@@ -479,14 +491,12 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
               </View>
             </View>
 
-            {/* Scrollable Information Body */}
             <View className="flex-1">
               <ScrollView
                 className="flex-1 px-5 pt-4"
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
-                {/* Genre & Pricing Line */}
                 <View className="flex-row items-center justify-between mb-2">
                   <ThemedText className="font-mont text-xs tracking-wider uppercase opacity-60">
                     {giveaway.genre || t('deals.hot_deal', 'Hot Game Deal')}
@@ -506,12 +516,10 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
                   </View>
                 </View>
 
-                {/* Title */}
                 <ThemedText className="font-montBlack text-xl tracking-tight mb-3 leading-tight">
                   {giveaway.title}
                 </ThemedText>
 
-                {/* Status Info Chips */}
                 <View className="flex-row flex-wrap gap-2 mb-4">
                   {giveaway.steamRatingPercent && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
@@ -539,12 +547,10 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
                   )}
                 </View>
 
-                {/* Description Body */}
                 <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
                   {giveaway.description || giveaway.short_description || t('deals.no_description', 'No additional description provided. Grab this deal before it expires or store pricing shifts back!')}
                 </ThemedText>
 
-                {/* Savings Breakdown Callout Block */}
                 {hasValidPrice && giveaway.savings && (
                   <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
                     <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
@@ -562,7 +568,6 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
                 )}
               </ScrollView>
 
-              {/* Action Buttons Sticky Footer */}
               <View
                 style={{
                   borderTopWidth: 1,
@@ -572,9 +577,7 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
                 }}
                 className="flex-row items-center gap-3 px-5 pt-3.5"
               >
-                {/* Left Side Actions: Heart Icon -> Share Icon */}
                 <View className="flex-row items-center gap-3">
-                  {/* Heart Icon Button */}
                   <Pressable
                     onPress={handleToggleSave}
                     style={{ backgroundColor: cardBgColor }}
@@ -587,7 +590,6 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
                     />
                   </Pressable>
 
-                  {/* Share Icon Button */}
                   <Pressable
                     onPress={handleShare}
                     hitSlop={10}
@@ -598,7 +600,6 @@ export default function DealItem({ giveaway, variant = 'normal', ctaText }: Deal
                   </Pressable>
                 </View>
 
-                {/* Right Side Action: Primary CTA Claim Button */}
                 <Pressable
                   onPress={handleOpenClaimSite}
                   style={{ backgroundColor: '#9333ea' }}

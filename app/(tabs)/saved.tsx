@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { ScrollView, View, Pressable, Platform, LayoutAnimation, Modal } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next'; // Integrated Translation Hook
-import * as SecureStore from 'expo-secure-store';
+import React, { useState, useRef, useCallback } from 'react';
+import { ScrollView, View, Pressable, Platform, LayoutAnimation,UIManager, Modal } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router'; // 1. Added useFocusEffect
+import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   Setting, 
   Moon, 
@@ -10,8 +10,7 @@ import {
   Heart, 
   Trash, 
   Element3, 
-  RowVertical,
-  Home
+  RowVertical
 } from 'iconsax-react-nativejs';
 
 import DealItem from '@/components/custom/DealItem'; 
@@ -23,16 +22,19 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { FreeGiveaway } from '@/types';
 
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 export default function SavedItemsScreen() {
   const router = useRouter();
-  const { t } = useTranslation(); // Translation configuration hook injection
+  const { t } = useTranslation();
   const scrollRef = useRef<ScrollView>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [savedGiveaways, setSavedGiveaways] = useState<FreeGiveaway[]>([]);
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('compact');
   
-  // State to control the themed confirmation modal
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const backgroundColor = useThemeColor({}, 'background');
@@ -43,11 +45,10 @@ export default function SavedItemsScreen() {
   const modalOverlayColor = isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)';
   const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
 
-  // Load Saved giveaways from local storage on mount/focus
+  // Load Saved giveaways from local storage
   const loadSavedItems = async () => {
-    setIsLoading(true);
     try {
-      const stored = await SecureStore.getItemAsync('saved_giveaways');
+      const stored = await AsyncStorage.getItem('saved_giveaways');
       if (stored) {
         const parsed: FreeGiveaway[] = JSON.parse(stored);
         setSavedGiveaways(parsed);
@@ -61,9 +62,12 @@ export default function SavedItemsScreen() {
     }
   };
 
-  useEffect(() => {
-    loadSavedItems();
-  }, []);
+  // 2. Automatically re-loads items EVERY TIME the screen gains tab focus
+  useFocusEffect(
+    useCallback(() => {
+      loadSavedItems();
+    }, [])
+  );
 
   // Calculate the total worth of saved games
   const totalWorthSaved = savedGiveaways.reduce((accum, current) => {
@@ -78,10 +82,10 @@ export default function SavedItemsScreen() {
   };
 
   const clearAllSaved = async () => {
-    setShowClearConfirm(false); // Hide the confirmation prompt
+    setShowClearConfirm(false);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     try {
-      await SecureStore.deleteItemAsync('saved_giveaways');
+      await AsyncStorage.removeItem('saved_giveaways');
       setSavedGiveaways([]);
     } catch (error) {
       console.error('Error wiping saved list:', error);
@@ -116,7 +120,7 @@ export default function SavedItemsScreen() {
           <View className="flex-row items-center gap-2">
             {savedGiveaways.length > 0 && (
               <Pressable
-                onPress={() => setShowClearConfirm(true)} // Triggers custom themed confirmation modal
+                onPress={() => setShowClearConfirm(true)}
                 style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
                 className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
               >
@@ -136,30 +140,6 @@ export default function SavedItemsScreen() {
               )}
             </Pressable>
 
-            {/* --- HOME BUTTON --- */}
-            <Pressable
-              onPress={() => router.replace('/(tabs)')}
-              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
-            >
-              <Home
-                size="18"
-                color={isDark ? '#f4f4f5' : '#3f3f46'}
-                variant="Broken"
-              />
-            </Pressable>
-
-            <Pressable
-              onPress={() => router.push('/(tabs)/settings')}
-              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
-            >
-              <Setting
-                size="18"
-                color={isDark ? '#f4f4f5' : '#3f3f46'}
-                variant="Broken"
-              />
-            </Pressable>
 
             <Pressable
               onPress={toggleTheme}
@@ -204,7 +184,6 @@ export default function SavedItemsScreen() {
             <></>
           </GiveawaySkeleton>
         ) : savedGiveaways.length === 0 ? (
-          /* Empty State view matching App layout styling */
           <View
             style={[
               { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
@@ -232,7 +211,6 @@ export default function SavedItemsScreen() {
             />
           </View>
         ) : (
-          /* Render list using your updated custom DealItem component */
           <View className="w-full mb-20">
             {savedGiveaways.map(giveaway => (
               <DealItem
@@ -240,15 +218,19 @@ export default function SavedItemsScreen() {
                 giveaway={giveaway}
                 variant={layoutVariant}
                 ctaText={t('deals.claim', { defaultValue: 'Claim Now' })}
+                isSaved={true}
+                // 3. Instant UI feedback when toggled off directly in this screen
+                onToggleSave={() => {
+                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                  setSavedGiveaways(prev => prev.filter(item => item.id !== giveaway.id));
+                }}
               />
             ))}
           </View>
         )}
       </ScrollView>
 
-      {/* =========================================================================
-          THEMED DELETE CONFIRMATION MODAL
-          ========================================================================= */}
+      {/* --- THEMED DELETE CONFIRMATION MODAL --- */}
       <Modal
         visible={showClearConfirm}
         transparent={true}
@@ -270,14 +252,12 @@ export default function SavedItemsScreen() {
             ]}
             className="w-full rounded-3xl p-6 max-w-sm overflow-hidden"
           >
-            {/* Warning Icon Badge */}
             <View className="items-center justify-center mb-4">
               <View className="w-14 h-14 rounded-2xl bg-red-500/10 items-center justify-center">
                 <Trash size="28" color="#ef4444" variant="Broken" />
               </View>
             </View>
 
-            {/* Title & Desc */}
             <ThemedText className="font-montBlack text-lg text-center mb-2 tracking-tight">
               {t('giveaways1.delete.title', { defaultValue: 'Clear Saved Library?' })}
             </ThemedText>
@@ -286,9 +266,7 @@ export default function SavedItemsScreen() {
               {t('giveaways1.delete.description', { defaultValue: "This action will permanently remove all pinned giveaways from your saved list. You'll need to explore and re-add them manually." })}
             </ThemedText>
 
-            {/* Actions Grid */}
             <View className="flex-row gap-3">
-              {/* Cancel Button */}
               <Pressable
                 onPress={() => setShowClearConfirm(false)}
                 style={{ backgroundColor: isDark ? '#2c2c35' : '#f1f2f6' }}
@@ -299,7 +277,6 @@ export default function SavedItemsScreen() {
                 </ThemedText>
               </Pressable>
 
-              {/* Confirm / Delete Button */}
               <Pressable
                 onPress={clearAllSaved}
                 style={{ backgroundColor: '#ef4444' }}

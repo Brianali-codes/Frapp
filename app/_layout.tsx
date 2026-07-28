@@ -9,7 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
 import "../global.css";
-import { checkNotificationPermission, initNotifications } from '@/lib/notifications';
+import { initNotifications} from '@/lib/notifications';
 import { useAssets } from 'expo-asset';
 import { ThemedText } from '@/components/ThemedText';
 import Button from '@/components/custom/Button';
@@ -113,20 +113,20 @@ function RootLayoutContent() {
     return unsubscribe;
   }, [rootNavigationRef]);
 
-  useEffect(() => {
+ useEffect(() => {
     const isAppReady = !isCheckingStorage && (fontsLoaded || fontError) && (assets || assetsError);
 
     if (isAppReady && isNavigationReady) {
       SplashScreen.hideAsync();
+      
+      // Request permission and schedule local alarm.
       initNotifications();
-      checkNotificationPermission();
 
       if (targetRoute === '/onboarding') {
         router.replace('/onboarding');
       }
     }
   }, [isCheckingStorage, fontsLoaded, fontError, assets, assetsError, isNavigationReady, targetRoute]);
-
   if (isCheckingStorage || !fontsLoaded || !assets) {
     return (
       <View className="flex-1 items-center justify-center bg-zinc-950">
@@ -147,7 +147,6 @@ function RootLayoutContent() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="saved" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="+not-found" options={{ headerShown: true }} />
       </Stack>
 

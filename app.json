@@ -23,7 +23,12 @@
         "monochromeImage": "./assets/images/FRAPP_ICON2.png",
         "backgroundColor": "#9333ea"
       },
-      "package": "com.brianali.Frapp"
+      "package": "com.brianali.Frapp",
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM",
+        "POST_NOTIFICATIONS"
+      ]
     },
     "web": {
       "bundler": "metro",
