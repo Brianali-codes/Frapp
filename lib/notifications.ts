@@ -62,19 +62,19 @@ export const scheduleAllGiveawayTimers = async () => {
       {
         id: NOTIFICATION_IDS.MORNING,
         hour: 9,
-        title: '🌅 Morning Giveaway Drop!',
+        title: 'Morning Giveaway Drop!',
         body: 'New free giveaway keys are live right now! Tap to claim.',
       },
       {
         id: NOTIFICATION_IDS.LUNCH,
         hour: 13,
-        title: '🍕 Lunch Break Giveaway!',
+        title: 'Lunch Break Giveaway!',
         body: 'Check out the midday free loot drop before keys run out!',
       },
       {
         id: NOTIFICATION_IDS.EVENING,
         hour: 20,
-        title: '🎮 Evening Gaming Hours Drop!',
+        title: 'Evening Gaming Hours Drop!',
         body: "Tonight's featured giveaway is live! Tap to enter.",
       },
     ];
