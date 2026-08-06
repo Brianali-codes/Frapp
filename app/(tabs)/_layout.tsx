@@ -9,7 +9,7 @@ const TABS = [
   { name: 'index', href: '/', title: 'Get', icon: Gift },
   { name: 'deals', href: '/deals', title: 'Deals', icon: DollarCircle },
   { name: 'saved', href: '/saved', title: 'Saved', icon: HeartCircle },
-  { name: 'settings', href: '/settings', title: 'Settings', icon: Setting },
+  { name: 'settings', href: '/settings', title: 'Set', icon: Setting },
 ];
 
 function FloatingTabBar() {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation } from 'react-native';
+import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter } from 'iconsax-react-nativejs';
+import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter, SearchNormal1, CloseCircle } from 'iconsax-react-nativejs';
 import { useTranslation } from 'react-i18next';
 import i18nInstanceSource from '@/components/i18n';
 
@@ -206,6 +206,7 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
 export default function FreeScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const { t } = useTranslation(undefined, { i18n: i18nInstanceSource });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -216,6 +217,10 @@ export default function FreeScreen() {
 
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
+
+  // Search States
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const itemsPerPage = 10;
 
@@ -232,13 +237,16 @@ export default function FreeScreen() {
     return giveaways.slice(startIndex, endIndex);
   }, [giveaways, startIndex, endIndex]);
 
-  const fetchData = async (storeId: string = 'all') => {
+  const fetchData = async (storeId: string = 'all', query: string = '') => {
     setIsLoading(true);
     setHasError(false);
     try {
       let url = `https://www.cheapshark.com/api/1.0/deals?upperPrice=100&pageSize=50`;
       if (storeId !== 'all') {
         url += `&storeID=${storeId}`;
+      }
+      if (query.trim()) {
+        url += `&title=${encodeURIComponent(query.trim())}`;
       }
 
       const response = await fetch(url, {
@@ -292,9 +300,15 @@ export default function FreeScreen() {
     }
   };
 
+  // Debounced search / platform update trigger
   useEffect(() => {
-    fetchData(selectedPlatform);
-  }, [selectedPlatform]);
+    const handler = setTimeout(() => {
+      setCurrentPage(1);
+      fetchData(selectedPlatform, searchQuery);
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [selectedPlatform, searchQuery]);
 
   const safeScrollToTop = () => {
     setTimeout(() => {
@@ -329,6 +343,21 @@ export default function FreeScreen() {
     setShowFilterBar(prev => !prev);
   };
 
+  const handleSearchBarToggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const nextState = !showSearchBar;
+    setShowSearchBar(nextState);
+    if (!nextState) {
+      setSearchQuery('');
+    } else {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+  };
+
   const now = new Date();
   const day = now.getDate();
   const year = now.getFullYear();
@@ -350,7 +379,7 @@ export default function FreeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* --- BRAND HEADER ROW --- */}
-        <View className="flex-row items-center justify-between w-full mb-6">
+        <View className="flex-row items-center justify-between w-full mb-4">
           <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
             <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
               <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -361,6 +390,16 @@ export default function FreeScreen() {
           </Pressable>
 
           <View className="flex-row items-center gap-2">
+            {/* Search Toggle Icon */}
+            <Pressable
+              onPress={handleSearchBarToggle}
+              style={{ backgroundColor: showSearchBar ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+            >
+              <SearchNormal1 size="18" color={showSearchBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
+            </Pressable>
+
+            {/* Layout Toggle Icon */}
             <Pressable
               onPress={handleLayoutVariantToggle}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
@@ -369,6 +408,7 @@ export default function FreeScreen() {
               {layoutVariant === 'normal' ? <Element3 size="18" color="#9333ea" variant="Broken" /> : <RowVertical size="18" color="#9333ea" variant="Broken" />}
             </Pressable>
 
+            {/* Filter Bar Toggle Icon */}
             <Pressable
               onPress={handleFilterBarToggle}
               style={{ backgroundColor: showFilterBar ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
@@ -377,12 +417,45 @@ export default function FreeScreen() {
               <Filter size="18" color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
             </Pressable>
 
-
+            {/* Theme Toggle Icon */}
             <Pressable onPress={toggleTheme} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
               {isDark ? <Sun1 size="18" color="#f4f4f5" variant="Broken" /> : <Moon size="18" color="#3f3f46" variant="Broken" />}
             </Pressable>
           </View>
         </View>
+
+        {/* --- SEARCH INPUT BAR SECTION --- */}
+        {showSearchBar && (
+          <View className="w-full mb-4">
+            <View
+              style={{
+                backgroundColor: cardBgColor,
+                borderWidth: 1,
+                borderColor: adaptiveBorderColor,
+              }}
+              className="flex-row items-center px-3.5 h-12 rounded-2xl shadow-sm"
+            >
+              <SearchNormal1 size="18" color={isDark ? '#a3a3b5' : '#71717a'} variant="Broken" />
+              <TextInput
+                ref={searchInputRef}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={t('deals.search.placeholder', 'Search game titles...')}
+                placeholderTextColor={isDark ? '#71717a' : '#a1a1aa'}
+                style={{ color: isDark ? '#ffffff' : '#1c1c1e' }}
+                className="flex-1 ml-2.5 mr-1 font-mont text-sm h-full"
+                returnKeyType="search"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={handleClearSearch} className="p-1 active:opacity-60">
+                  <CloseCircle size="18" color={isDark ? '#a3a3b5' : '#71717a'} variant="Bold" />
+                </Pressable>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* --- UNCLIPPED HORIZONTAL SCROLLFILTER SECTION --- */}
         {showFilterBar && (
@@ -420,7 +493,7 @@ export default function FreeScreen() {
 
         {/* --- CAROUSEL OR SKELETON LOADER SECTION --- */}
         {isLoading ? (
-          selectedPlatform === 'all' && (
+          selectedPlatform === 'all' && !searchQuery && (
             <View className="w-full">
               <WorthSummarySkeleton
                 isDark={isDark}
@@ -435,7 +508,7 @@ export default function FreeScreen() {
             </View>
           )
         ) : (
-          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && (
+          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && !searchQuery && (
             <>
               {/* --- SUMMARY SECTION CONTAINER --- */}
               <View
@@ -483,7 +556,7 @@ export default function FreeScreen() {
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
               {t('deals.error.description', "We can't sync up with the servers right now. Make sure your device is online and let's try that again.")}
             </ThemedText>
-            <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform)} className="w-full" text={t('deals.error.retryButton', 'Retry Connection')} />
+            <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform, searchQuery)} className="w-full" text={t('deals.error.retryButton', 'Retry Connection')} />
           </View>
         ) : isLoading ? (
           <CardListSkeleton
@@ -510,9 +583,17 @@ export default function FreeScreen() {
               {t('deals.empty.title', 'No Matches Found')}
             </ThemedText>
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              {t('deals.empty.description', 'No live deals found under this storefront category.')}
+              {t('deals.empty.description', searchQuery ? `No games matching "${searchQuery}" were found.` : 'No live deals found under this storefront category.')}
             </ThemedText>
-            <Button type="primary" onPress={() => handlePlatformChange('all')} className="w-full" text={t('deals.empty.resetButton', 'Reset Filters')} />
+            <Button
+              type="primary"
+              onPress={() => {
+                setSearchQuery('');
+                handlePlatformChange('all');
+              }}
+              className="w-full"
+              text={t('deals.empty.resetButton', 'Reset Filters')}
+            />
           </View>
         ) : (
           <View className="w-full">

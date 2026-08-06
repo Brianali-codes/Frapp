@@ -27,13 +27,14 @@ import {
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import i18nInstanceSource from '@/components/i18n';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 
+const NOTIFICATIONS_KEY = '@frapp_user_notifications_enabled';
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
@@ -46,7 +47,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
   de: 'Deutsch',
 };
 
-const CURRENT_VERSION = 'v1.1.4'; 
+const CURRENT_VERSION = 'v1.1.4';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -96,7 +97,34 @@ export default function SettingsScreen() {
     }
   };
 
-  // ... rest of your useEffects and layout logic
+  
+
+  useEffect(() => {
+    async function syncNotificationState() {
+      try {
+        const savedPref = await AsyncStorage.getItem(NOTIFICATIONS_KEY);
+        const settings = await notifee.getNotificationSettings();
+        const isGranted =
+          settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+          settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+
+        if (savedPref !== null) {
+          const userChoice = JSON.parse(savedPref);
+          setNotificationsEnabled(userChoice && isGranted);
+        } else {
+          setNotificationsEnabled(isGranted);
+        }
+      } catch (e) {
+        console.error('Error loading notification preference:', e);
+      }
+    }
+
+    syncNotificationState();
+
+    return () => {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    };
+  }, []);
   useEffect(() => {
     async function getInitialPermissionState() {
       const settings = await notifee.getNotificationSettings();
@@ -117,9 +145,38 @@ export default function SettingsScreen() {
   };
 
   const handleNotificationToggle = async (newValue: boolean) => {
-   // If the user is trying to enable notifications, request permission first
-   // feature is being worked on.
-  };
+  try {
+    if (newValue) {
+      const settings = await notifee.requestPermission();
+      const isGranted =
+        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+
+      if (!isGranted) {
+        Alert.alert(
+          t('notifications.permissionDeniedTitle', 'Permissions Required'),
+          t('notifications.permissionDeniedMsg', 'Please enable notifications in system settings to receive giveaway alerts.'),
+          [
+            { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+            { text: t('common.settings', 'Open Settings'), onPress: () => Linking.openSettings() },
+          ]
+        );
+        setNotificationsEnabled(false);
+        await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
+        return;
+      }
+
+      await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(true));
+      setNotificationsEnabled(true);
+    } else {
+      await notifee.cancelAllNotifications();
+      await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
+      setNotificationsEnabled(false);
+    }
+  } catch (error) {
+    console.error('Failed to toggle notifications:', error);
+  }
+};
 
   const triggerTestNotification = async () => {
     try {
@@ -151,19 +208,7 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleSettingsCogTap = () => {
-    tapCountRef.current += 1;
-    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
 
-    if (tapCountRef.current === 3) {
-      triggerTestNotification();
-      tapCountRef.current = 0;
-    } else {
-      tapTimeoutRef.current = setTimeout(() => {
-        tapCountRef.current = 0;
-      }, 1000);
-    }
-  };
 
   const handleCheckVersion = async () => {
     setIsCheckingUpdate(true);
@@ -236,7 +281,7 @@ export default function SettingsScreen() {
           </Pressable>
 
           <View className="flex-row items-center gap-2">
-            
+
 
             <Pressable
               onPress={toggleTheme}
@@ -359,7 +404,7 @@ export default function SettingsScreen() {
 
           <Divider className="opacity-10 bg-zinc-400 dark:bg-zinc-500 mx-3" />
 
-           {/*  Report Bug*/}
+          {/*  Report Bug*/}
           <Pressable onPress={() => router.push('/report')} className="flex-row items-center justify-between p-3 active:opacity-60">
             <View className="flex-row items-center gap-3">
               <View className={`w-8 h-8 rounded-xl items-center justify-center ${iconWrapperBg}`}>

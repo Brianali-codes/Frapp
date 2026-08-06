@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/ThemedText';
 
 // Import translation hooks and explicit context instance
 import { useTranslation } from 'react-i18next';
-import  i18nInstanceSource from '@/components/i18n'; 
+import i18nInstanceSource from '@/components/i18n';
 
 import { API_ENDPOINTS } from '@/constants/api';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -67,7 +67,7 @@ function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { is
   const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
 
   return (
-    <View 
+    <View
       style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
       className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-85"
     >
@@ -93,10 +93,10 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
   return (
     <View className="w-full mb-6 animate-pulse opacity-85">
       <View
-        style={{ 
-          borderWidth: 1, 
+        style={{
+          borderWidth: 1,
           borderColor: adaptiveBorderColor,
-          backgroundColor: cardBgColor 
+          backgroundColor: cardBgColor
         }}
         className="rounded-2xl overflow-hidden w-full mb-2"
       >
@@ -105,7 +105,7 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
           <View className="flex-row justify-between items-center w-full">
             {/* Worth / Value Badge */}
             <View className="w-28 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
-            
+
             {/* Promo Tag Badge */}
             <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.25)' : 'rgba(147,51,234,0.15)' }} />
           </View>
@@ -124,8 +124,8 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
           </View>
 
           {/* Separation Border & Call-To-Action Mock placeholders */}
-          <View 
-            style={{ borderTopWidth: 1, borderColor: borderLine }} 
+          <View
+            style={{ borderTopWidth: 1, borderColor: borderLine }}
             className="flex-row items-center justify-between pt-2.5 mt-0.5"
           >
             {/* Platform / Store link component */}
@@ -133,7 +133,7 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
               <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
               <View className="w-3.5 h-3.5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
             </View>
-            
+
             {/* Value tags */}
             <View className="flex-row items-center gap-1.5">
               <View className="w-8 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
@@ -151,8 +151,8 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
             style={{
               width: dotIndex === 0 ? 14 : 6,
               height: 6,
-              backgroundColor: dotIndex === 0 
-                ? '#9333ea' 
+              backgroundColor: dotIndex === 0
+                ? '#9333ea'
                 : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'),
               borderRadius: 999,
             }}
@@ -188,16 +188,16 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
             <View>
               {/* Full Width Image Space Frame */}
               <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full" />
-              
+
               {/* Content text stack details */}
               <View className="p-4 space-y-3">
                 <View className="w-3/4 h-4 rounded" style={{ backgroundColor: shimmerBg }} />
                 <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
                 <View className="w-1/2 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                
+
                 {/* Horizontal footer action area separation mock */}
-                <View 
-                  style={{ borderTopWidth: 1, borderColor: borderLine }} 
+                <View
+                  style={{ borderTopWidth: 1, borderColor: borderLine }}
                   className="flex-row items-center justify-between pt-3 mt-1"
                 >
                   <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
@@ -209,11 +209,11 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
             /* --- COMPACT LIST STYLE VARIANT --- */
             <View className="p-3 flex-row items-center">
               {/* Left Square Thumbnail Image frame */}
-              <View 
-                style={{ width: 84, height: 84, backgroundColor: shimmerBg }} 
-                className="rounded-xl shrink-0 mr-3" 
+              <View
+                style={{ width: 84, height: 84, backgroundColor: shimmerBg }}
+                className="rounded-xl shrink-0 mr-3"
               />
-              
+
               {/* Right Side Info Stack details */}
               <View className="flex-1 justify-between h-20 py-0.5">
                 <View className="space-y-2">
@@ -240,7 +240,7 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
 export default function GiveawayScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  
+
   // Initialize the translation hook tied directly to your explicit source
   const { t } = useTranslation(undefined, { i18n: i18nInstanceSource });
 
@@ -336,7 +336,7 @@ export default function GiveawayScreen() {
   const now = new Date();
   const day = now.getDate();
   const year = now.getFullYear();
-  
+
   // Array mapping for localized months
   const monthKeys = [
     'january', 'february', 'march', 'april', 'may', 'june',
@@ -360,16 +360,16 @@ export default function GiveawayScreen() {
       >
         {/* --- PREMIUM BRAND HEADER ROW --- */}
         <View className="flex-row items-center justify-between w-full mb-6">
-          <View className="flex-row items-center gap-2.5 flex-1 mr-2">
-            <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
-                        <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
-                          <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                        </View>
-                        <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">
-                          {t('giveaways.title', 'Giveaways.')}
-                        </ThemedText>
-                      </Pressable>
-          </View>
+
+          <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
+            <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
+              <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            </View>
+            <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">
+              {t('giveaways.title', 'Giveaways.')}
+            </ThemedText>
+          </Pressable>
+
 
           {/* Symmetrical Header Action Controls Group */}
           <View className="flex-row items-center gap-2">
@@ -401,7 +401,7 @@ export default function GiveawayScreen() {
               />
             </Pressable>
 
-            
+
 
             <Pressable
               onPress={toggleTheme}
@@ -464,16 +464,16 @@ export default function GiveawayScreen() {
           selectedPlatform === 'all' && (
             <View className="w-full">
               {/* High Fidelity Worth Summary Skeleton */}
-              <WorthSummarySkeleton 
+              <WorthSummarySkeleton
                 isDark={isDark}
-                cardBgColor={cardBgColor} 
-                adaptiveBorderColor={adaptiveBorderColor} 
+                cardBgColor={cardBgColor}
+                adaptiveBorderColor={adaptiveBorderColor}
               />
               {/* High Fidelity Carousel Skeleton */}
-              <CarouselSkeleton 
-                isDark={isDark} 
-                cardBgColor={cardBgColor} 
-                adaptiveBorderColor={adaptiveBorderColor} 
+              <CarouselSkeleton
+                isDark={isDark}
+                cardBgColor={cardBgColor}
+                adaptiveBorderColor={adaptiveBorderColor}
               />
             </View>
           )
@@ -536,8 +536,8 @@ export default function GiveawayScreen() {
           </View>
         ) : isLoading ? (
           /* High Fidelity List Card Skeletons mirroring regular data structure styles */
-          <CardListSkeleton 
-            variant={layoutVariant} 
+          <CardListSkeleton
+            variant={layoutVariant}
             cardBgColor={cardBgColor}
             adaptiveBorderColor={adaptiveBorderColor}
             isDark={isDark}
