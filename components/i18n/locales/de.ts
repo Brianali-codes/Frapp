@@ -1,28 +1,30 @@
 export const de = {
   header: {
     title: "Einstellungen.",
-    subtitle: "Anwendungsverhalten anpassen, Benachrichtigungen verwalten, Anzeigeeinstellungen ändern oder Open-Source-Quellangaben lesen."
+    subtitle: "App-Verhalten anpassen, Benachrichtigungen verwalten, Anzeigeeinstellungen ändern oder Open-Source-Lizenzen lesen."
   },
   sections: {
     preferences: "Einstellungen.",
-    about: "Über.",
+    about: "Über uns.",
     community: "Community & Support.",
     providers: "Datenanbieter."
   },
   preferences: {
     themeAppearance: "Erscheinungsbild",
-    themeDark: "Dunkelmodus",
-    themeLight: "Hellmodus",
+    themeDark: "Dunkler Modus",
+    themeLight: "Heller Modus",
     appLanguage: "App-Sprache",
     appLanguageSub: "Sprache wechseln",
     savedGiveaways: "Meine Bibliothek.",
-    savedGiveawaysSub: "Auf gespeicherte Spiele zugreifen",
-    notificationSettings: "Benachrichtigungseinstellungen",
-    notificationSettingsSub: "Push-Benachrichtigungen aktivieren",
-    appIntroduction: "Onboarding",
-    appIntroductionSub: "Onboarding-Kontext überprüfen",
+    savedGiveawaysSub: "Gespeicherte Spiele anzeigen",
+    notificationSettings: "Benachrichtigungen",
+    notificationSettingsSub: "Push-Benachrichtigungen einstellen",
+    appIntroduction: "Einführung",
+    appIntroductionSub: "Einführungskontext anzeigen",
     checkForUpdates: "App-Version",
-    checkForUpdatesSub: "Nach Updates suchen"
+    checkForUpdatesSub: "Auf Updates prüfen",
+    Report: "Fehler melden",
+    ReportSub: "Fehler oder Probleme melden",
   },
   about: {
     developer: "Über den Entwickler",
@@ -30,54 +32,54 @@ export const de = {
     moreApps: "Weitere Anwendungen",
     moreAppsSub: "GitHub-Repositories erkunden",
     socials: "Soziale Medien",
-    socialsSub: "Plattformübergreifend verbinden",
-    privacy: "Datenschutz-Bestimmungen",
-    privacySub: "Unsere Datenschutzrichtlinie anzeigen."
+    socialsSub: "Auf Plattformen vernetzen",
+    privacy: "Datenschutzrichtlinie",
+    privacySub: "Datenschutzrichtlinie anzeigen."
   },
   community: {
     supportOpenSource: "Open Source unterstützen",
-    supportOpenSourceSub: "Diese Anwendung wird unabhängig entwickelt und kostenlos gehostet. Wenn Sie Nutzen aus diesen Angeboten ziehen, hilft uns ein Stern auf GitHub sehr weiter!",
+    supportOpenSourceSub: "Diese Anwendung wird unabhängig entwickelt und kostenlos bereitgestellt. Wenn Ihnen diese Angebote gefallen, hilft uns ein Stern auf GitHub sehr!",
     starGithub: "Stern auf GitHub geben",
     buyCoffee: "Kaffee spenden",
-    buyCoffeeSub: "Helfen Sie mit, die Server online und den Kaffee im Fluss zu halten! Eine kleine Spende ermöglicht es uns, das Projekt zu warten und neue Funktionen hinzuzufügen.",
+    buyCoffeeSub: "Helfen Sie mit, die Server online und den Kaffee am Laufen zu halten! Eine kleine Spende hilft uns, das Projekt zu pflegen und neue Funktionen hinzuzufügen.",
     donateKofi: "Ko-fi",
     donatePatreon: "Patreon"
   },
   providers: {
-    gamepower: "Gamepower-Webseite",
-    gamepowerSub: "Hauptdatenquelle für Werbegeschenke",
+    gamepower: "Gamepower-Website",
+    gamepowerSub: "Hauptquelle für Giveaways",
     cheapshark: "CheapShark API",
     cheapsharkSub: "API für Videospiel-Angebote"
   },
   report: {
     title: "Fehler melden.",
-    subtitle: "Haben Sie Probleme mit der App? Wählen Sie eine Vorlage aus, um einen Bericht einzureichen. (Berichte werden zur Überprüfung an unser GitHub-Repository übermittelt)",
-    sectionTitle: "Wählen Sie eine Fehlerkategorie",
+    subtitle: "Fehler oder Probleme melden",
+    sectionTitle: "Fehlerkategorie auswählen",
     categories: {
       ui: "UI/UX-Fehler",
-      api: "API- / Datenfehler",
+      api: "API-/Datenfehler",
       crash: "Leistung / Absturz",
-      feature: "Funktionsanfrage"
+      feature: "Funktionswunsch"
     },
     githubCard: {
       title: "Direkt über GitHub Issues einreichen",
-      description: "Durch Klicken auf die Schaltfläche unten wird Ihre Auswahl mit den lokalen Geräteparametern gebündelt und die GitHub Issue-Tracking-Seite geöffnet.",
-      buttonText: "Kategorie {{category}} melden"
+      description: "Durch Klicken auf die Schaltfläche unten wird Ihre Auswahl mit den Gerätedaten gebündelt und die GitHub-Problemverfolgung geöffnet.",
+      buttonText: "{{category}} melden"
     },
     attributionCard: {
-      title: "Drittanbieter-API-Offenlegungen",
-      description: "Alle in der Benutzeroberfläche sichtbaren Datenindizes werden direkt von externen Netzwerken über die öffentlichen Architekturen von Gamepower und CheapShark abgerufen. Die Nutzung dieser Indizes entspricht direkt deren nativen Verteilungsregeln. Frapp manipuliert keine einzelnen Angebote, ändert keine Preisstrukturen und verwaltet keine Verteilungszeitpläne. Infolgedessen können wir die ununterbrochene Verfügbarkeit, Genauigkeit oder fortlaufende Unterstützung externer Knoten oder Schlüssel nicht garantieren."
+      title: "Drittanbieter-API-Hinweis",
+      description: "Alle in der Benutzeroberfläche angezeigten Daten werden direkt aus externen Netzwerken über die offenen Schnittstellen von Gamepower und CheapShark abgerufen. Frapp manipuliert keine Angebote oder Preise."
     },
     footerVersion: "Frapp Version v1.1.4",
     alerts: {
       errorTitle: "Fehler",
-      errorMessage: "Weiterleitung zu GitHub nicht möglich. Überprüfen Sie die Browser-Routing-Berechtigungen."
+      errorMessage: "Weiterleitung zu GitHub fehlgeschlagen. Bitte Browser-Berechtigungen prüfen."
     },
     github: {
-      bodyDescription: "Diese Aktion entfernt alle angehefteten Werbegeschenke dauerhaft aus Ihrer gespeicherten Liste. Sie müssen sie manuell neu suchen und hinzufügen.",
-      step1: "Öffnen Sie die App",
-      step2: "Navigieren Sie zu...",
-      step3: "Beobachten Sie..."
+      bodyDescription: "Diese Aktion entfernt alle gespeicherten Giveaways dauerhaft aus Ihrer Liste. Sie müssen diese manuell erneut suchen und hinzufügen.",
+      step1: "App öffnen",
+      step2: "Navigieren zu...",
+      step3: "Beobachten..."
     }
   },
   footer: {
@@ -86,31 +88,31 @@ export const de = {
   updateModal: {
     title: "Update verfügbar",
     subtitle: "{{version}} ist da!",
-    description: "Eine neuere Version der App ({{latest}}) ist verfügbar. Aktualisieren Sie Ihre aktuelle Version ({{current}}), um auf die neuesten Änderungen zuzugreifen!",
+    description: "Eine neue Version der App ({{latest}}) ist verfügbar. Aktualisieren Sie Ihre aktuelle Version ({{current}}), um die neuesten Funktionen zu nutzen!",
     later: "Abbrechen",
     updateNow: "Jetzt aktualisieren"
   },
   modals: {
     dismiss: "Alle löschen",
     ok: "OK",
-    testFailedTitle: "Testziel-Fehler",
-    testFailedMessage: "Die Bereitstellungs-Renderschleife konnte nicht ausgeführt werden. Bestätigen Sie die lokalen Berechtigungen.",
+    testFailedTitle: "Test-Fehler",
+    testFailedMessage: "Rendering-Schleife konnte nicht ausgeführt werden. Bitte lokale Berechtigungen prüfen.",
     upToDateTitle: "Auf dem neuesten Stand",
-    upToDateMessage: "Sie führen bereits unsere neueste Build-Version ({{version}}) aus. Keine Updates erforderlich.",
+    upToDateMessage: "Sie verwenden bereits die neueste Version ({{version}}). Keine Updates erforderlich.",
     upToDateAction: "Super",
-    checkFailedTitle: "Überprüfungsfehler",
-    checkFailedMessage: "Suchanfragen konnten derzeit nicht abgeschlossen werden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+    checkFailedTitle: "Überprüfung fehlgeschlagen",
+    checkFailedMessage: "Abfrage konnte nicht abgeschlossen werden. Bitte Internetverbindung prüfen und erneut versuchen.",
     failedAction: "Schließen",
-    socialsTitle: "Aktion teilen",
+    socialsTitle: "Promo teilen",
     languageTitle: "Sprache auswählen"
   },
   giveaways: {
-    title: "Werbegeschenke.",
+    title: "Giveaways.",
     summary: {
       prefix: "Wir haben ",
-      midActive: " aktive Spiel-Werbegeschenke gefunden seit ",
-      midWorth: ", mit einem Gesamtwert von ",
-      suffix: ". Fordern Sie diese an, bevor sie ablaufen!"
+      midActive: " aktive Spiel-Giveaways gefunden am ",
+      midWorth: ", im Gesamtwert von ",
+      suffix: ". Sichern Sie sich diese, bevor sie ablaufen!"
     },
     platforms: {
       all: "Alle",
@@ -130,12 +132,12 @@ export const de = {
     },
     error: {
       title: "Verbindung unterbrochen",
-      description: "Wir können derzeit keine Verbindung zu den Servern herstellen. Stellen Sie sicher, dass Ihr Gerät online ist, und versuchen Sie es erneut.",
-      retryButton: "Verbindung erneut versuchen"
+      description: "Keine Verbindung zum Server möglich. Stellen Sie sicher, dass Ihr Gerät online ist, und versuchen Sie es erneut.",
+      retryButton: "Erneut versuchen"
     },
     empty: {
-      title: "Keine Werbegeschenke gefunden",
-      description: "Für diese Plattform sind derzeit keine aktiven Werbegeschenke verfügbar.",
+      title: "Keine Giveaways gefunden",
+      description: "Für diese Plattform sind derzeit keine aktiven Giveaways verfügbar.",
       viewAllButton: "Alle Plattformen anzeigen"
     },
     tracking: {
@@ -143,8 +145,8 @@ export const de = {
       day_left: "Noch 1 Tag",
       ends_today: "Endet heute",
       expired: "Abgelaufen",
-      keys_left: "Verbleibende Schlüssel: {{count}}",
-      instructions_title: "Anleitung zum Anfordern:"
+      keys_left: "Verbleibende Keys: {{count}}",
+      instructions_title: "Anleitung zum Einlösen:"
     },
     pagination: {
       previous: "Zurück",
@@ -155,37 +157,37 @@ export const de = {
     summary: {
       prefix: "Sie haben ",
       midActive: " gespeicherte Spiele ",
-      midWorth: ", mit einem Gesamtwert von ",
-      suffix: ". Fordern Sie diese an, bevor sie ablaufen!"
+      midWorth: ", im Gesamtwert von ",
+      suffix: ". Sichern Sie sich diese, bevor sie ablaufen!"
     },
     empty: {
       viewAllButton: "App erkunden"
     },
     delete: {
       title: "Alle Spiele löschen?",
-      description: "Diese Aktion entfernt alle angehefteten Werbegeschenke dauerhaft aus Ihrer gespeicherten Liste. Sie müssen sie manuell neu suchen und hinzufügen.",
+      description: "Diese Aktion entfernt alle gespeicherten Giveaways dauerhaft aus Ihrer Liste.",
       confirmButton: "Alle löschen"
-    }
+    },
   },
   deals: {
-    title: "Spiele-Angebote.",
-    titleClaim: "Angebot einlösen.",
-    claim: "Angebot einlösen",
+    title: "Spiel-Angebote.",
+    titleClaim: "Angebot sichern.",
+    claim: "Angebot sichern",
     retailer: "Händler",
     store: "Shop",
-    free_uppercase: "KOSTENLOS",
-    share_message: "🔥 Angebotsalarm: {{title}} ist runter auf {{price}} (Ersparnis {{saved}}) auf {{platform}}!\nHier holen: {{url}}",
+    free_uppercase: "GRATIS",
+    share_message: "🔥 Deal-Alarm: {{title}} gibt es jetzt für {{price}} (Ersparnis {{saved}}) auf {{platform}}!\nHier holen: {{url}}",
     save_amount: "{{amount}}% RABATT",
     hot_deal: "Top-Angebot",
     rating: "{{percent}}",
     released: "Endet: ",
-    no_description: "Sichern Sie sich dieses außergewöhnliche Angebot, bevor der Aktionszeitraum abläuft oder sich die Preise ändern!",
+    no_description: "Sichern Sie sich dieses Angebot, bevor der Aktionszeitraum endet!",
     breakdown_title: "Details anzeigen",
-    breakdown_body: "Sparen Sie insgesamt {{saved}} gegenüber dem regulären Verkaufspreis von {{original}} (was einem Rabatt von {{percent}}% entspricht).",
+    breakdown_body: "Sparen Sie insgesamt {{saved}} gegenüber dem regulären Preis von {{original}} (das entspricht einem Rabatt von {{percent}}%).",
     summary: {
-      prefix: "Wir haben aktive Gaming-Shops durchsucht und ",
-      midActive: " riesige Rabatte gefunden seit ",
-      suffix: ". Tippen Sie auf einen Titel, um Ihren Schlüssel zu sichern!"
+      prefix: "Wir haben Shop-Angebote durchsucht und ",
+      midActive: " riesige Rabatte gefunden am ",
+      suffix: ". Tippen Sie auf einen Titel, um sich den Key zu sichern!"
     },
     stores: {
       all: "Alle Shops",
@@ -196,12 +198,12 @@ export const de = {
     },
     error: {
       title: "Verbindung unterbrochen",
-      description: "Wir können derzeit keine Verbindung zu den Servern herstellen. Stellen Sie sicher, dass Ihr Gerät online ist, und versuchen Sie es erneut.",
-      retryButton: "Verbindung erneut versuchen"
+      description: "Keine Verbindung zum Server möglich. Bitte stellen Sie sicher, dass Ihr Gerät online ist.",
+      retryButton: "Erneut versuchen"
     },
     empty: {
       title: "Keine Treffer gefunden",
-      description: "Keine Live-Angebote in dieser Shop-Kategorie gefunden.",
+      description: "Keine aktiven Angebote in dieser Kategorie gefunden.",
       resetButton: "Filter zurücksetzen"
     },
     pagination: {
@@ -225,16 +227,16 @@ export const de = {
   },
   onboarding: {
     welcome: "Willkommen bei Frapp",
-    legalTitle: "Rechtliche Vereinbarungen",
-    legalSubtitle: "Bitte überprüfen Sie die Datenschutzbedingungen, bevor Sie auf unsere globalen Datensynchronisations-Pipelines zugreifen.",
-    title: "Verfolgen Sie Videospiel-Werbegeschenke und erstklassige Spiele-Angebote.",
-    title2: "Holen Sie sich Werbegeschenke und Angebote",
-    description: "Frapp bietet sowohl Spiel-Werbegeschenke als auch riesige Rabatte auf Videospiele. Wir aggregieren die neuesten 100% kostenlos anforderbaren Belohnungen zusammen mit tiefen Händlerrabatten über verschiedene Shops hinweg.",
-    privacyHeader: "Datenschutz- & Datenkern-Framework",
-    privacyBody: "Frapp ist ein Open-Source-Datenaggregator, der Ihre unterschiedlichen Datenströme, API-Feeds und digitalen Berührungspunkte in einem einzigen Dashboard zusammenführt. Da wir vollständig als Lokales-First-Tool arbeiten, unterhalten wir keine zentrale Speicherung, erfassen keine physischen Kontostrukturen und verfolgen keine Benutzer-Telemetriedaten.",
-    consentLabel: "Ich akzeptiere die Nutzungsbedingungen & Datenschutzerklärung",
+    legalTitle: "Rechtliche Hinweise",
+    legalSubtitle: "Bitte lesen Sie die Datenschutzbedingungen, bevor Sie fortfahren.",
+    title: "Verfolgen Sie Gratis-Spiele und Top-Angebote.",
+    title2: "Giveaways und Angebote erhalten",
+    description: "Frapp aggregiert kostenlose Giveaways und riesige Rabatte auf verschiedenen Plattformen, damit Sie immer mehr für weniger Geld spielen.",
+    privacyHeader: "Datenschutz & Architektur",
+    privacyBody: "Frapp ist ein Open-Source-Datenaggregator, der als lokales Tool arbeitet. Wir speichern keine Daten auf zentralen Servern und verfolgen keine Nutzerdaten. Alle Daten verbleiben lokal auf Ihrem Gerät.",
+    consentLabel: "Ich akzeptiere die Nutzungsbedingungen und Datenschutzbestimmungen",
     btnStep1: "Weiter",
-    btnStep2: "Loslegen",
+    btnStep2: "Los geht's",
     versionLabel: "Frapp • v1.1.4"
   }
 } as const;

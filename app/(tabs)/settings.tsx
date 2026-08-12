@@ -5,7 +5,6 @@ import { APP_REPO_URL, APP_URLS } from '@/constants/app';
 import React, { useState, useEffect, useRef } from 'react';
 import { Linking, View, ScrollView, Pressable, Platform, Image, Modal } from 'react-native';
 import {
-  Setting,
   Moon,
   Sun1,
   Notification,
@@ -30,11 +29,12 @@ import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import i18nInstanceSource from '@/components/i18n';
-
+import { Alert } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 
 const NOTIFICATIONS_KEY = '@frapp_user_notifications_enabled';
+const LANGUAGE_KEY = '@frapp_user_language'
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
@@ -45,6 +45,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
   pt: 'Português',
   jp: '日本語',
   de: 'Deutsch',
+  hi: 'हिन्दी',
 };
 
 const CURRENT_VERSION = 'v1.1.4';
@@ -87,15 +88,25 @@ export default function SettingsScreen() {
   const shortLangCode = currentLanguageCode.split('-')[0];
   const activeLanguageName = LANGUAGE_NAMES[shortLangCode] || 'English';
 
-  const handleSelectLanguage = async (langCode: 'en' | 'fr' | 'es' | 'zh' | 'sw' | 'pt' | 'jp' | 'de') => {
+ const handleSelectLanguage = async (
+  langCode: 'en' | 'fr' | 'es' | 'zh' | 'sw' | 'hi' | 'pt' | 'jp' | 'de'
+) => {
+  try {
+    // 1. Save language preference to storage
+    await AsyncStorage.setItem(LANGUAGE_KEY, langCode);
+
+    // 2. Change active i18n language
     try {
       await i18n.changeLanguage(langCode);
     } catch (e) {
       await i18nInstanceSource.changeLanguage(langCode);
-    } finally {
-      setLanguageModalVisible(false);
     }
-  };
+  } catch (e) {
+    console.error('Failed to save language to AsyncStorage:', e);
+  } finally {
+    setLanguageModalVisible(false);
+  }
+};
 
   
 
@@ -125,21 +136,6 @@ export default function SettingsScreen() {
       if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
     };
   }, []);
-  useEffect(() => {
-    async function getInitialPermissionState() {
-      const settings = await notifee.getNotificationSettings();
-      const isGranted =
-        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
-      setNotificationsEnabled(isGranted);
-    }
-    getInitialPermissionState();
-
-    return () => {
-      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
-    };
-  }, []);
-
   const cleanVersion = (versionStr: string) => {
     return versionStr.replace(/[^0-9.]/g, '');
   };
@@ -253,6 +249,28 @@ export default function SettingsScreen() {
       setIsCheckingUpdate(false);
     }
   };
+
+
+  useEffect(() => {
+  async function restoreLanguagePreference() {
+    try {
+      const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+      if (savedLanguage) {
+        try {
+          await i18n.changeLanguage(savedLanguage);
+        } catch (e) {
+          await i18nInstanceSource.changeLanguage(savedLanguage);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load saved language from AsyncStorage:', e);
+    }
+  }
+
+  restoreLanguagePreference();
+}, []);
+
+
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
@@ -803,6 +821,8 @@ export default function SettingsScreen() {
                 )}
               </Pressable>
 
+              
+
               <Pressable
                 onPress={() => handleSelectLanguage('pt')}
                 style={{ backgroundColor: cardBgColor }}
@@ -810,6 +830,17 @@ export default function SettingsScreen() {
               >
                 <ThemedText className="font-montBold text-sm">Português</ThemedText>
                 {currentLanguageCode.startsWith('pt') && (
+                  <TickCircle size="20" color="#a855f7" variant="Bold" />
+                )}
+              </Pressable>
+              
+               <Pressable
+                onPress={() => handleSelectLanguage('hi')}
+                style={{ backgroundColor: cardBgColor }}
+                className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
+              >
+                <ThemedText className="font-montBold text-sm">हिन्दी</ThemedText>
+                {currentLanguageCode.startsWith('hi') && (
                   <TickCircle size="20" color="#a855f7" variant="Bold" />
                 )}
               </Pressable>

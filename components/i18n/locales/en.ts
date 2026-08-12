@@ -53,7 +53,7 @@ export const en = {
   },
   report: {
     title: "Report a Bug.",
-    subtitle: "Having Issues with the app, choose your template to submit a report. (Reports will be submitted to our GitHub repository for review )",
+    subtitle: "Report Bugs or Issues",
     sectionTitle: "Select a Bug Category",
     categories: {
       ui: "UI/UX Glitch",

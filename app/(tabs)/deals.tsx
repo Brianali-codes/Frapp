@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter, SearchNormal1, CloseCircle } from 'iconsax-react-nativejs';
+import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter, CloseCircle, SearchNormal } from 'iconsax-react-nativejs';
 import { useTranslation } from 'react-i18next';
 import i18nInstanceSource from '@/components/i18n';
 
@@ -396,7 +396,7 @@ export default function FreeScreen() {
               style={{ backgroundColor: showSearchBar ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
-              <SearchNormal1 size="18" color={showSearchBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
+              <SearchNormal size="18" color={showSearchBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
             </Pressable>
 
             {/* Layout Toggle Icon */}
@@ -435,12 +435,12 @@ export default function FreeScreen() {
               }}
               className="flex-row items-center px-3.5 h-12 rounded-2xl shadow-sm"
             >
-              <SearchNormal1 size="18" color={isDark ? '#a3a3b5' : '#71717a'} variant="Broken" />
+              <SearchNormal size="18" color={isDark ? '#a3a3b5' : '#71717a'} variant="Broken" />
               <TextInput
                 ref={searchInputRef}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder={t('deals.search.placeholder', 'Search game titles...')}
+                placeholder={t('deals.search.placeholder', 'Find out if your favorite game is on sale...')}
                 placeholderTextColor={isDark ? '#71717a' : '#a1a1aa'}
                 style={{ color: isDark ? '#ffffff' : '#1c1c1e' }}
                 className="flex-1 ml-2.5 mr-1 font-mont text-sm h-full"
@@ -491,7 +491,7 @@ export default function FreeScreen() {
           </View>
         )}
 
-        {/* --- CAROUSEL OR SKELETON LOADER SECTION --- */}
+        {/* --- CAROUSEL / SKELETON LOADER SECTION --- */}
         {isLoading ? (
           selectedPlatform === 'all' && !searchQuery && (
             <View className="w-full">

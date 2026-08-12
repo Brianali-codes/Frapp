@@ -10,6 +10,7 @@ import { sw } from './locales/sw';
 import { pt } from './locales/pt';
 import { jp } from './locales/jp';
 import { de } from './locales/de';
+import { hi } from './locales/hi';
 
 const getDeviceLanguage = (): string => {
   try {
@@ -42,6 +43,7 @@ i18n
       pt: { translation: pt },
       jp: { translation: jp },
       de: { translation: de },
+      hi: { translation: hi },
     },
     lng: getDeviceLanguage(),
     fallbackLng: 'en',
