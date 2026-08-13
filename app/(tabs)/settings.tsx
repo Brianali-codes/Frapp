@@ -23,6 +23,8 @@ import {
   Lock1,
   TickCircle,
   Warning2,
+  Star,
+  Star1,
 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
@@ -89,27 +91,58 @@ export default function SettingsScreen() {
   const shortLangCode = currentLanguageCode.split('-')[0];
   const activeLanguageName = LANGUAGE_NAMES[shortLangCode] || 'English';
 
- const handleSelectLanguage = async (
-  langCode: 'en' | 'fr' | 'es' | 'zh' | 'sw' | 'hi' | 'pt' | 'jp' | 'de'
-) => {
-  try {
-    // 1. Save language preference to storage
-    await AsyncStorage.setItem(LANGUAGE_KEY, langCode);
-
-    // 2. Change active i18n language
+  const handleSelectLanguage = async (
+    langCode: 'en' | 'fr' | 'es' | 'zh' | 'sw' | 'hi' | 'pt' | 'jp' | 'de'
+  ) => {
     try {
-      await i18n.changeLanguage(langCode);
-    } catch (e) {
-      await i18nInstanceSource.changeLanguage(langCode);
-    }
-  } catch (e) {
-    console.error('Failed to save language to AsyncStorage:', e);
-  } finally {
-    setLanguageModalVisible(false);
-  }
-};
+      // 1. Save language preference to storage
+      await AsyncStorage.setItem(LANGUAGE_KEY, langCode);
 
-  
+      // 2. Change active i18n language
+      try {
+        await i18n.changeLanguage(langCode);
+      } catch (e) {
+        await i18nInstanceSource.changeLanguage(langCode);
+      }
+    } catch (e) {
+      console.error('Failed to save language to AsyncStorage:', e);
+    } finally {
+      setLanguageModalVisible(false);
+    }
+  };
+
+  const [starCount, setStarCount] = useState<number | null>(null);
+
+useEffect(() => {
+  const fetchGithubStars = async () => {
+    try {
+      const response = await fetch('https://api.github.com/repos/brianali-codes/frapp', {
+        headers: {
+          'User-Agent': 'Frapp-App', // Recommended by GitHub API guidelines
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStarCount(data.stargazers_count);
+      } else {
+        console.warn('GitHub API response not OK:', response.status);
+      }
+    } catch (error) {
+      console.warn('Failed to fetch GitHub stars:', error);
+    }
+  };
+
+  fetchGithubStars();
+}, []);
+
+// Helper to format numbers cleanly (e.g. 1200 -> 1.2k stars)
+const formattedStars =
+  starCount !== null
+    ? starCount >= 1000
+      ? `${(starCount / 1000).toFixed(1)}k stars`
+      : `${starCount} stars`
+    : '★ star repo';
 
   useEffect(() => {
     async function syncNotificationState() {
@@ -142,38 +175,38 @@ export default function SettingsScreen() {
   };
 
   const handleNotificationToggle = async (newValue: boolean) => {
-  try {
-    if (newValue) {
-      const settings = await notifee.requestPermission();
-      const isGranted =
-        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+    try {
+      if (newValue) {
+        const settings = await notifee.requestPermission();
+        const isGranted =
+          settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+          settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
 
-      if (!isGranted) {
-        Alert.alert(
-          t('notifications.permissionDeniedTitle', 'Permissions Required'),
-          t('notifications.permissionDeniedMsg', 'Please enable notifications in system settings to receive giveaway alerts.'),
-          [
-            { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-            { text: t('common.settings', 'Open Settings'), onPress: () => Linking.openSettings() },
-          ]
-        );
-        setNotificationsEnabled(false);
+        if (!isGranted) {
+          Alert.alert(
+            t('notifications.permissionDeniedTitle', 'Permissions Required'),
+            t('notifications.permissionDeniedMsg', 'Please enable notifications in system settings to receive giveaway alerts.'),
+            [
+              { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+              { text: t('common.settings', 'Open Settings'), onPress: () => Linking.openSettings() },
+            ]
+          );
+          setNotificationsEnabled(false);
+          await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
+          return;
+        }
+
+        await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(true));
+        setNotificationsEnabled(true);
+      } else {
+        await notifee.cancelAllNotifications();
         await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
-        return;
+        setNotificationsEnabled(false);
       }
-
-      await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(true));
-      setNotificationsEnabled(true);
-    } else {
-      await notifee.cancelAllNotifications();
-      await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
-      setNotificationsEnabled(false);
+    } catch (error) {
+      console.error('Failed to toggle notifications:', error);
     }
-  } catch (error) {
-    console.error('Failed to toggle notifications:', error);
-  }
-};
+  };
 
   const triggerTestNotification = async () => {
     try {
@@ -253,23 +286,23 @@ export default function SettingsScreen() {
 
 
   useEffect(() => {
-  async function restoreLanguagePreference() {
-    try {
-      const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
-      if (savedLanguage) {
-        try {
-          await i18n.changeLanguage(savedLanguage);
-        } catch (e) {
-          await i18nInstanceSource.changeLanguage(savedLanguage);
+    async function restoreLanguagePreference() {
+      try {
+        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+        if (savedLanguage) {
+          try {
+            await i18n.changeLanguage(savedLanguage);
+          } catch (e) {
+            await i18nInstanceSource.changeLanguage(savedLanguage);
+          }
         }
+      } catch (e) {
+        console.error('Failed to load saved language from AsyncStorage:', e);
       }
-    } catch (e) {
-      console.error('Failed to load saved language from AsyncStorage:', e);
     }
-  }
 
-  restoreLanguagePreference();
-}, []);
+    restoreLanguagePreference();
+  }, []);
 
 
 
@@ -558,53 +591,130 @@ export default function SettingsScreen() {
           {t('sections.community', 'Community & Support.')}
         </ThemedText>
 
-        <View style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]} className="rounded-2xl p-5 mb-6">
-          <View className="flex-row items-center gap-2 mb-2">
-            <Heart size="18" color="#71717a" variant="Broken" />
-            <ThemedText className="font-montBlack text-sm tracking-tight">
-              {t('community.supportOpenSource', 'Support Open Source')}
-            </ThemedText>
-          </View>
-          <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
-            {t('community.supportOpenSourceSub', 'This layout is independently engineered and hosted for free. If you find value in discovering these listings, giving us a star on GitHub goes a long way!')}
-          </ThemedText>
-          <Button onPress={() => Linking.openURL(APP_REPO_URL)} text={t('community.starGithub', 'Star Us on GitHub')} type="primary" className="font-montBold" />
-        </View>
+        <View className="w-full mb-6">
+          {/* 1. GITHUB OPEN SOURCE CARD (REDESIGNED BADGE) */}
+          <Pressable
+            onPress={() => Linking.openURL(APP_REPO_URL)}
+            style={[
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+              Platform.select({
+                ios: {
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: isDark ? 2 : 4 },
+                  shadowOpacity: isDark ? 0.25 : 0.06,
+                  shadowRadius: 8,
+                },
+                android: { elevation: 2 },
+              }),
+            ]}
+            className="rounded-2xl p-4 mb-3 active:opacity-85"
+          >
+            {/* Top Badge Header Row */}
+            <View className="flex-row items-center justify-between mb-2.5">
+              {/* Live Status Pill */}
+              <View className="flex-row items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-600/10 dark:bg-purple-500/15 border border-purple-500/20">
+                <View className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                <ThemedText className="text-[10px] font-montBold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                  Open Source
+                </ThemedText>
+              </View>
 
-        {/* SECTION: KO-FI SUPPORT */}
-        <View
-          style={[{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }, Platform.select({ ios: { shadowColor: '#000000', shadowOffset: { width: 0, height: isDark ? 4 : 8 }, shadowOpacity: isDark ? 0.35 : 0.10, shadowRadius: isDark ? 10 : 16 }, android: { elevation: isDark ? 4 : 5 } })]}
-          className="rounded-2xl p-5 mb-6"
-        >
-          <View className="flex-row items-center gap-2 mb-2">
-            <Coffee size="18" color="#71717a" variant="Broken" />
-            <ThemedText className="font-montBlack text-sm tracking-tight">
-              {t('community.buyCoffee', 'Buy me a Coffee')}
-            </ThemedText>
-          </View>
-
-          <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
-            {t('community.buyCoffeeSub', 'Help keep the servers running and the coffee flowing! A small donation helps us maintain the project and add new features.')}
-          </ThemedText>
-
-          {/* Buttons container layout row */}
-          <View className="flex-row items-center gap-3 w-full">
-            <View className="flex-1">
-              <Button
-                onPress={() => Linking.openURL('https://ko-fi.com/brianalicodes')}
-                text={t('community.donateKofi', 'Donate on Ko-fi')}
-                type="primary"
-                className="font-montBold"
-              />
+              {/* Repository Handle */}
+              <ThemedText className="text-[11px] font-montBold text-zinc-400 dark:text-zinc-500">
+                github.com/frapp
+              </ThemedText>
             </View>
 
-            <View className="flex-1">
-              <Button
+            {/* Main Hook */}
+            <ThemedText className="font-montBlack text-base tracking-tight mb-1">
+              {t('community.supportOpenSource', '100% Free & Transparent')}
+            </ThemedText>
+
+            <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed font-mont mb-4">
+              {t('community.supportOpenSourceSub', 'No ads, no tracking. If Frapp helped you grab game deals, consider dropping a star on GitHub!')}
+            </ThemedText>
+
+            {/* Terminal-Style Action Strip */}
+            <View
+              style={{
+                backgroundColor: isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.04)',
+                borderColor: adaptiveBorderColor,
+              }}
+              className="flex-row items-center justify-between px-3.5 py-2.5 rounded-xl border"
+            >
+              <View className="flex-row items-center gap-2">
+                <Star1 size="16" color="#9333ea" variant="Bold" />
+                <ThemedText className="font-montBold text-xs text-zinc-700 dark:text-zinc-200">
+                  {formattedStars}
+                </ThemedText>
+              </View>
+
+              <View className="bg-purple-600 p-3 rounded-xl ">
+                <ThemedText className="font-montBlack text-xs text-white">
+                  {t('community.starGithub', 'Star Us')}
+                </ThemedText>
+              </View>
+            </View>
+          </Pressable>
+
+          {/* 2. KO-FI & PATREON SUPPORT CARD */}
+          <View
+            style={[
+              { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
+              Platform.select({
+                ios: {
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: isDark ? 2 : 4 },
+                  shadowOpacity: isDark ? 0.25 : 0.06,
+                  shadowRadius: 8,
+                },
+                android: { elevation: 2 },
+              }),
+            ]}
+            className="rounded-2xl p-4"
+          >
+            <View className="flex-row items-center gap-2 mb-1.5">
+              <Coffee size="18" color="#9333ea" variant="Broken" />
+              <ThemedText className="font-montBlack text-sm tracking-tight">
+                {t('community.buyCoffee', 'Buy me a Coffee')}
+              </ThemedText>
+            </View>
+
+            <ThemedText className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-4 font-mont">
+              {t('community.buyCoffeeSub', 'Help keep the servers running and the coffee flowing! A small donation helps us maintain the project and add new features.')}
+            </ThemedText>
+
+            {/* Responsive Equal Action Tiles */}
+            <View className="flex-row items-center gap-3 w-full">
+              {/* Ko-fi Button */}
+              <Pressable
+                onPress={() => Linking.openURL('https://ko-fi.com/brianalicodes')}
+                style={{
+                  borderColor: adaptiveBorderColor,
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+                }}
+                className="flex-1 flex-row items-center justify-center gap-2 py-3 px-2 rounded-xl border active:opacity-70"
+              >
+                <Coffee size="16" color={isDark ? '#e4e4e7' : '#27272a'} variant="Broken" />
+                <ThemedText className="font-montBold text-xs">
+                  {t('community.donateKofi', 'Ko-fi')}
+                </ThemedText>
+              </Pressable>
+
+              {/* Patreon Button */}
+              <Pressable
                 onPress={() => Linking.openURL('https://www.patreon.com/c/brianali_codes')}
-                text={t('community.donatePatreon', 'Patreon')}
-                type="primary"
-                className="font-montBold"
-              />
+                style={{
+                  borderColor: adaptiveBorderColor,
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+                }}
+                className="flex-1 flex-row items-center justify-center gap-2 py-3 px-2 rounded-xl border active:opacity-70"
+              >
+                <Heart size="16" color={isDark ? '#e4e4e7' : '#27272a'} variant="Broken" />
+                <ThemedText className="font-montBold text-xs">
+                  {t('community.donatePatreon', 'Patreon')}
+                </ThemedText>
+              </Pressable>
             </View>
           </View>
         </View>
@@ -822,7 +932,7 @@ export default function SettingsScreen() {
                 )}
               </Pressable>
 
-              
+
 
               <Pressable
                 onPress={() => handleSelectLanguage('pt')}
@@ -834,8 +944,8 @@ export default function SettingsScreen() {
                   <TickCircle size="20" color="#a855f7" variant="Bold" />
                 )}
               </Pressable>
-              
-               <Pressable
+
+              <Pressable
                 onPress={() => handleSelectLanguage('hi')}
                 style={{ backgroundColor: cardBgColor }}
                 className="flex-row items-center justify-between p-4 rounded-xl active:opacity-70"
