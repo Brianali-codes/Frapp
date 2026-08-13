@@ -36,6 +36,7 @@ import { useCustomTheme } from '@/context/ThemeContext';
 const NOTIFICATIONS_KEY = '@frapp_user_notifications_enabled';
 const LANGUAGE_KEY = '@frapp_user_language'
 
+
 const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
   es: 'Español',

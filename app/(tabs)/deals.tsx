@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter, CloseCircle, SearchNormal } from 'iconsax-react-nativejs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import i18nInstanceSource from '@/components/i18n';
 
@@ -13,6 +14,8 @@ import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { FreeGiveaway } from '@/types';
+
+const LAYOUT_STORAGE_KEY = '@deals_layout_variant';
 
 const PLATFORMS = [
   { id: 'all', key: 'deals.stores.all', label: 'All Stores' },
@@ -57,13 +60,13 @@ function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { is
   return (
     <View
       style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
-      className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-85"
+      className="rounded-2xl p-4 mb-5 min-h-[64px] justify-center animate-pulse opacity-85"
     >
       <View className="flex-row items-center flex-wrap gap-y-1.5">
-        <View className="w-44 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-8 h-3 rounded mx-1" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
-        <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-16 h-3 rounded mx-1" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
+        <View className="w-44 h-3 rounded mr-1" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-8 h-3 rounded mr-1" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
+        <View className="w-28 h-3 rounded mr-1" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-16 h-3 rounded mr-1" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
         <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
       </View>
     </View>
@@ -94,11 +97,11 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
           </View>
         </View>
 
-        <View className="p-4 space-y-3">
-          <View>
+        <View className="p-4">
+          <View className="mb-3">
             <View className="w-2/3 h-4 rounded mb-2.5" style={{ backgroundColor: shimmerBg }} />
-            <View className="space-y-1.5">
-              <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+            <View>
+              <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
               <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
             </View>
           </View>
@@ -107,20 +110,20 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
             style={{ borderTopWidth: 1, borderColor: borderLine }}
             className="flex-row items-center justify-between pt-2.5 mt-0.5"
           >
-            <View className="flex-row items-center gap-1">
-              <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+            <View className="flex-row items-center">
+              <View className="w-28 h-3 rounded mr-1" style={{ backgroundColor: shimmerBg }} />
               <View className="w-3.5 h-3.5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
             </View>
 
-            <View className="flex-row items-center gap-1.5">
-              <View className="w-8 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+            <View className="flex-row items-center">
+              <View className="w-8 h-3 rounded mr-1.5" style={{ backgroundColor: shimmerBg }} />
               <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
             </View>
           </View>
         </View>
       </View>
 
-      <View className="flex-row items-center justify-center gap-1.5 mt-1.5">
+      <View className="flex-row items-center justify-center mt-1.5">
         {[0, 1, 2, 3, 4].map((_, dotIndex) => (
           <View
             key={dotIndex}
@@ -131,6 +134,7 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
                 ? '#9333ea'
                 : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'),
               borderRadius: 999,
+              marginHorizontal: 3,
             }}
           />
         ))}
@@ -145,10 +149,10 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
 function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string; variant: 'normal' | 'compact' }) {
   const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
   const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-  const mockItems = [1, 2, 3, 4];
+  const mockItems = [1, 2, 3, 4, 5];
 
   return (
-    <View className="w-full space-y-4">
+    <View className="w-full">
       {mockItems.map((item) => (
         <View
           key={item}
@@ -163,10 +167,10 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
             <View>
               <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full" />
 
-              <View className="p-4 space-y-3">
-                <View className="w-3/4 h-4 rounded" style={{ backgroundColor: shimmerBg }} />
-                <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                <View className="w-1/2 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+              <View className="p-4">
+                <View className="w-3/4 h-4 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-full h-3 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-1/2 h-3 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
 
                 <View
                   style={{ borderTopWidth: 1, borderColor: borderLine }}
@@ -184,9 +188,9 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
                 className="rounded-xl shrink-0 mr-3"
               />
 
-              <View className="flex-1 justify-between h-20 py-0.5">
-                <View className="space-y-2">
-                  <View className="w-5/6 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
+              <View className="flex-1 justify-between h-[84px] py-0.5">
+                <View>
+                  <View className="w-5/6 h-3.5 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
                   <View className="w-1/2 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
                 </View>
 
@@ -230,6 +234,22 @@ export default function FreeScreen() {
   const isDark = themeMode === 'dark';
   const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
   const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
+
+  // Load saved layout preference from AsyncStorage
+  useEffect(() => {
+    const loadSavedLayout = async () => {
+      try {
+        const savedLayout = await AsyncStorage.getItem(LAYOUT_STORAGE_KEY);
+        if (savedLayout === 'normal' || savedLayout === 'compact') {
+          setLayoutVariant(savedLayout);
+        }
+      } catch (error) {
+        console.error('Failed to load deals layout variant:', error);
+      }
+    };
+
+    loadSavedLayout();
+  }, []);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -333,9 +353,16 @@ export default function FreeScreen() {
     safeScrollToTop();
   };
 
-  const handleLayoutVariantToggle = () => {
+  const handleLayoutVariantToggle = async () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal');
+    const nextVariant: 'compact' | 'normal' = layoutVariant === 'normal' ? 'compact' : 'normal';
+    setLayoutVariant(nextVariant);
+
+    try {
+      await AsyncStorage.setItem(LAYOUT_STORAGE_KEY, nextVariant);
+    } catch (error) {
+      console.error('Failed to save deals layout variant:', error);
+    }
   };
 
   const handleFilterBarToggle = () => {

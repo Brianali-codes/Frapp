@@ -1,14 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Setting, Moon, Sun1, WifiSquare, Filter, RowVertical, Element3 } from 'iconsax-react-nativejs';
+import { Moon, Sun1, WifiSquare, Filter, RowVertical, Element3 } from 'iconsax-react-nativejs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import GiveawayItem from '@/components/custom/GiveawayItem';
 import HighestWorthCarousel from '@/components/custom/HighestWorthCarousel';
 import Button from '@/components/custom/Button';
 import { ThemedText } from '@/components/ThemedText';
 
-// Import translation hooks and explicit context instance
 import { useTranslation } from 'react-i18next';
 import i18nInstanceSource from '@/components/i18n';
 
@@ -16,6 +15,8 @@ import { API_ENDPOINTS } from '@/constants/api';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { Giveaway } from '@/types';
+
+const LAYOUT_STORAGE_KEY = '@giveaways_layout_variant';
 
 const PLATFORMS = [
   { id: 'all', labelKey: 'giveaways.platforms.all', labelDefault: 'All' },
@@ -69,15 +70,15 @@ function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { is
   return (
     <View
       style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
-      className="rounded-2xl p-4 mb-5 h-16 justify-center animate-pulse opacity-85"
+      className="rounded-2xl p-4 mb-5 justify-center opacity-80"
     >
-      <View className="flex-row items-center flex-wrap gap-y-1.5">
-        <View className="w-24 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-8 h-3 rounded mx-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-40 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-16 h-3 rounded mx-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-12 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-10 h-3 rounded mx-1" style={{ backgroundColor: shimmerBg }} />
+      <View className="flex-row items-center flex-wrap">
+        <View className="w-24 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-8 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-36 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-16 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-12 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-10 h-3 rounded mb-1" style={{ backgroundColor: shimmerBg }} />
       </View>
     </View>
   );
@@ -91,7 +92,7 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
   const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
 
   return (
-    <View className="w-full mb-6 animate-pulse opacity-85">
+    <View className="w-full mb-6 opacity-80">
       <View
         style={{
           borderWidth: 1,
@@ -100,51 +101,40 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
         }}
         className="rounded-2xl overflow-hidden w-full mb-2"
       >
-        {/* Banner Graphic Frame Placeholder */}
         <View style={{ height: 160, backgroundColor: shimmerBg }} className="w-full relative justify-between p-3">
           <View className="flex-row justify-between items-center w-full">
-            {/* Worth / Value Badge */}
             <View className="w-28 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
-
-            {/* Promo Tag Badge */}
             <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.25)' : 'rgba(147,51,234,0.15)' }} />
           </View>
         </View>
 
-        {/* Informational Details matching Carousel structure */}
-        <View className="p-4 space-y-3">
-          <View>
-            {/* Title segment */}
-            <View className="w-2/3 h-4 rounded mb-2.5" style={{ backgroundColor: shimmerBg }} />
-            {/* Description block */}
-            <View className="space-y-1.5">
-              <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="p-4">
+          <View className="mb-3">
+            <View className="w-2/3 h-4 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
+            <View>
+              <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
               <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
             </View>
           </View>
 
-          {/* Separation Border & Call-To-Action Mock placeholders */}
           <View
             style={{ borderTopWidth: 1, borderColor: borderLine }}
-            className="flex-row items-center justify-between pt-2.5 mt-0.5"
+            className="flex-row items-center justify-between pt-3 mt-1"
           >
-            {/* Platform / Store link component */}
-            <View className="flex-row items-center gap-1">
-              <View className="w-28 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-3.5 h-3.5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
+            <View className="flex-row items-center">
+              <View className="w-28 h-3 rounded mr-1.5" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-4 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
             </View>
 
-            {/* Value tags */}
-            <View className="flex-row items-center gap-1.5">
-              <View className="w-8 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+            <View className="flex-row items-center">
+              <View className="w-8 h-3 rounded mr-2" style={{ backgroundColor: shimmerBg }} />
               <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
             </View>
           </View>
         </View>
       </View>
 
-      {/* Interactive Dot pagination controller mockups */}
-      <View className="flex-row items-center justify-center gap-1.5 mt-1.5">
+      <View className="flex-row items-center justify-center mt-2">
         {[0, 1, 2, 3, 4].map((_, dotIndex) => (
           <View
             key={dotIndex}
@@ -155,6 +145,7 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
                 ? '#9333ea'
                 : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'),
               borderRadius: 999,
+              marginHorizontal: 3
             }}
           />
         ))}
@@ -172,7 +163,7 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
   const mockItems = [1, 2, 3, 4, 5];
 
   return (
-    <View className="w-full space-y-4">
+    <View className="w-full">
       {mockItems.map((item) => (
         <View
           key={item}
@@ -181,21 +172,16 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
             borderColor: adaptiveBorderColor,
             backgroundColor: cardBgColor,
           }}
-          className="rounded-2xl overflow-hidden w-full mb-4 animate-pulse opacity-85"
+          className="rounded-2xl overflow-hidden w-full mb-4 opacity-80"
         >
           {variant === 'normal' ? (
-            /* --- NORMAL/LARGE DISPLAY VARIANT --- */
             <View>
-              {/* Full Width Image Space Frame */}
               <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full" />
+              <View className="p-4">
+                <View className="w-3/4 h-4 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-1/2 h-3 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
 
-              {/* Content text stack details */}
-              <View className="p-4 space-y-3">
-                <View className="w-3/4 h-4 rounded" style={{ backgroundColor: shimmerBg }} />
-                <View className="w-full h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                <View className="w-1/2 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-
-                {/* Horizontal footer action area separation mock */}
                 <View
                   style={{ borderTopWidth: 1, borderColor: borderLine }}
                   className="flex-row items-center justify-between pt-3 mt-1"
@@ -206,27 +192,21 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
               </View>
             </View>
           ) : (
-            /* --- COMPACT LIST STYLE VARIANT --- */
             <View className="p-3 flex-row items-center">
-              {/* Left Square Thumbnail Image frame */}
               <View
                 style={{ width: 84, height: 84, backgroundColor: shimmerBg }}
                 className="rounded-xl shrink-0 mr-3"
               />
 
-              {/* Right Side Info Stack details */}
               <View className="flex-1 justify-between h-20 py-0.5">
-                <View className="space-y-2">
-                  {/* Card Main Title */}
-                  <View className="w-5/6 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
-                  {/* Subtitle text / Info properties */}
+                <View>
+                  <View className="w-5/6 h-3.5 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
                   <View className="w-1/2 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
                 </View>
 
-                {/* Bottom row platform info or utility tags */}
                 <View className="flex-row items-center justify-between">
                   <View className="w-16 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-12 h-4.5 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
+                  <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
                 </View>
               </View>
             </View>
@@ -238,35 +218,43 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
 }
 
 export default function GiveawayScreen() {
-  const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-
-  // Initialize the translation hook tied directly to your explicit source
   const { t } = useTranslation(undefined, { i18n: i18nInstanceSource });
-
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
   const [prices, setPrices] = useState(0);
   const [worth, setWorth] = useState(0);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
-
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('compact');
-
+  
   const backgroundColor = useThemeColor({}, 'background');
   const { themeMode, toggleTheme } = useCustomTheme();
-
   const isDark = themeMode === 'dark';
   const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
   const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentPagedGiveaways = giveaways.slice(startIndex, endIndex);
+
+  // Load persisted layout preference on mount
+  useEffect(() => {
+    const loadSavedLayout = async () => {
+      try {
+        const savedLayout = await AsyncStorage.getItem(LAYOUT_STORAGE_KEY);
+        if (savedLayout === 'normal' || savedLayout === 'compact') {
+          setLayoutVariant(savedLayout);
+        }
+      } catch (error) {
+        console.error('Failed to load layout variant:', error);
+      }
+    };
+
+    loadSavedLayout();
+  }, []);
 
   const checkWorth = async () => {
     try {
@@ -323,9 +311,16 @@ export default function GiveawayScreen() {
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  const handleLayoutVariantToggle = () => {
+  const handleLayoutVariantToggle = async () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal');
+    const nextVariant: 'normal' | 'compact' = layoutVariant === 'normal' ? 'compact' : 'normal';
+    setLayoutVariant(nextVariant);
+
+    try {
+      await AsyncStorage.setItem(LAYOUT_STORAGE_KEY, nextVariant);
+    } catch (error) {
+      console.error('Failed to save layout variant:', error);
+    }
   };
 
   const handleFilterBarToggle = () => {
@@ -337,7 +332,6 @@ export default function GiveawayScreen() {
   const day = now.getDate();
   const year = now.getFullYear();
 
-  // Array mapping for localized months
   const monthKeys = [
     'january', 'february', 'march', 'april', 'may', 'june',
     'july', 'august', 'september', 'october', 'november', 'december'
@@ -360,7 +354,6 @@ export default function GiveawayScreen() {
       >
         {/* --- PREMIUM BRAND HEADER ROW --- */}
         <View className="flex-row items-center justify-between w-full mb-6">
-
           <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
             <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
               <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -369,7 +362,6 @@ export default function GiveawayScreen() {
               {t('giveaways.title', 'Giveaways.')}
             </ThemedText>
           </Pressable>
-
 
           {/* Symmetrical Header Action Controls Group */}
           <View className="flex-row items-center gap-2">
@@ -400,8 +392,6 @@ export default function GiveawayScreen() {
                 variant="Broken"
               />
             </Pressable>
-
-
 
             <Pressable
               onPress={toggleTheme}
@@ -463,13 +453,11 @@ export default function GiveawayScreen() {
         {isLoading ? (
           selectedPlatform === 'all' && (
             <View className="w-full">
-              {/* High Fidelity Worth Summary Skeleton */}
               <WorthSummarySkeleton
                 isDark={isDark}
                 cardBgColor={cardBgColor}
                 adaptiveBorderColor={adaptiveBorderColor}
               />
-              {/* High Fidelity Carousel Skeleton */}
               <CarouselSkeleton
                 isDark={isDark}
                 cardBgColor={cardBgColor}
@@ -535,7 +523,6 @@ export default function GiveawayScreen() {
             />
           </View>
         ) : isLoading ? (
-          /* High Fidelity List Card Skeletons mirroring regular data structure styles */
           <CardListSkeleton
             variant={layoutVariant}
             cardBgColor={cardBgColor}
@@ -585,7 +572,6 @@ export default function GiveawayScreen() {
         {!isLoading && !hasError && giveaways.length > 0 && (
           <View className="mt-4 w-full mb-24">
             {currentPage === 1 ? (
-              // Page 1: Single Full-Width Button
               endIndex < giveaways.length && (
                 <PaginationButton
                   text={t('giveaways.pagination.next', 'Next Page')}
@@ -594,7 +580,6 @@ export default function GiveawayScreen() {
                 />
               )
             ) : (
-              // Page 2+: Split Flex Row (50/50 Layout)
               <View className="flex-row items-center gap-3 w-full">
                 <View className="flex-1">
                   <PaginationButton
