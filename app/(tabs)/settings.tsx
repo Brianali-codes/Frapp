@@ -51,7 +51,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
   hi: 'हिन्दी',
 };
 
-const CURRENT_VERSION = 'v1.1.4';
+const CURRENT_VERSION = 'v1.1.5';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -111,22 +111,22 @@ export default function SettingsScreen() {
     }
   };
 
-  const [starCount, setStarCount] = useState<number | null>(null);
+  const [starCount, setStarCount] = useState<string | null>(null);
 
 useEffect(() => {
   const fetchGithubStars = async () => {
     try {
-      const response = await fetch('https://api.github.com/repos/brianali-codes/frapp', {
-        headers: {
-          'User-Agent': 'Frapp-App', // Recommended by GitHub API guidelines
-        },
-      });
+      // Shields.io proxies & caches GitHub star counts, bypassing rate limits
+      const response = await fetch(
+        'https://img.shields.io/github/stars/brianali-codes/frapp.json'
+      );
 
       if (response.ok) {
         const data = await response.json();
-        setStarCount(data.stargazers_count);
-      } else {
-        console.warn('GitHub API response not OK:', response.status);
+        // data.value returns formatted strings like "21" or "1.2k"
+        if (data?.value) {
+          setStarCount(data.value);
+        }
       }
     } catch (error) {
       console.warn('Failed to fetch GitHub stars:', error);
@@ -136,13 +136,8 @@ useEffect(() => {
   fetchGithubStars();
 }, []);
 
-// Helper to format numbers cleanly (e.g. 1200 -> 1.2k stars)
-const formattedStars =
-  starCount !== null
-    ? starCount >= 1000
-      ? `${(starCount / 1000).toFixed(1)}k stars`
-      : `${starCount} stars`
-    : '★ star repo';
+// Formatted display text
+const formattedStars = starCount ? `${starCount} stars` : '★ star repo';
 
   useEffect(() => {
     async function syncNotificationState() {
@@ -592,7 +587,6 @@ const formattedStars =
         </ThemedText>
 
         <View className="w-full mb-6">
-          {/* 1. GITHUB OPEN SOURCE CARD (REDESIGNED BADGE) */}
           <Pressable
             onPress={() => Linking.openURL(APP_REPO_URL)}
             style={[
@@ -609,21 +603,6 @@ const formattedStars =
             ]}
             className="rounded-2xl p-4 mb-3 active:opacity-85"
           >
-            {/* Top Badge Header Row */}
-            <View className="flex-row items-center justify-between mb-2.5">
-              {/* Live Status Pill */}
-              <View className="flex-row items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-600/10 dark:bg-purple-500/15 border border-purple-500/20">
-                <View className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                <ThemedText className="text-[10px] font-montBold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-                  Open Source
-                </ThemedText>
-              </View>
-
-              {/* Repository Handle */}
-              <ThemedText className="text-[11px] font-montBold text-zinc-400 dark:text-zinc-500">
-                github.com/frapp
-              </ThemedText>
-            </View>
 
             {/* Main Hook */}
             <ThemedText className="font-montBlack text-base tracking-tight mb-1">
@@ -634,24 +613,31 @@ const formattedStars =
               {t('community.supportOpenSourceSub', 'No ads, no tracking. If Frapp helped you grab game deals, consider dropping a star on GitHub!')}
             </ThemedText>
 
-            {/* Terminal-Style Action Strip */}
+          
             <View
-              style={{
-                backgroundColor: isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.04)',
-                borderColor: adaptiveBorderColor,
+             style={{
+                  borderColor: adaptiveBorderColor,
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
               }}
               className="flex-row items-center justify-between px-3.5 py-2.5 rounded-xl border"
             >
-              <View className="flex-row items-center gap-2">
-                <Star1 size="16" color="#9333ea" variant="Bold" />
-                <ThemedText className="font-montBold text-xs text-zinc-700 dark:text-zinc-200">
-                  {formattedStars}
+             
+
+              <View 
+              style={{
+                  borderColor: adaptiveBorderColor,
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+              }}
+              className="bg-purple-600 p-3 rounded-lg ">
+                <ThemedText className="font-montBlack text-xs text-white">
+                  {t('community.starGithub', 'Star Us')}
                 </ThemedText>
               </View>
 
-              <View className="bg-purple-600 p-3 rounded-xl ">
-                <ThemedText className="font-montBlack text-xs text-white">
-                  {t('community.starGithub', 'Star Us')}
+               <View className="flex-row items-center gap-2">
+                <Star1 size="16" color="#9333ea" variant="Bold" />
+                <ThemedText className="font-montBold text-xs text-zinc-700 dark:text-zinc-200">
+                  {formattedStars}
                 </ThemedText>
               </View>
             </View>
@@ -674,7 +660,6 @@ const formattedStars =
             className="rounded-2xl p-4"
           >
             <View className="flex-row items-center gap-2 mb-1.5">
-              <Coffee size="18" color="#9333ea" variant="Broken" />
               <ThemedText className="font-montBlack text-sm tracking-tight">
                 {t('community.buyCoffee', 'Buy me a Coffee')}
               </ThemedText>

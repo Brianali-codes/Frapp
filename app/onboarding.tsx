@@ -194,7 +194,7 @@ export default function OnboardingScreen() {
         </Pressable>
 
         <ThemedText className="text-zinc-400 dark:text-zinc-600 text-xs text-center font-mont tracking-widest mt-5">
-          {t('onboarding.versionLabel', { defaultValue: 'Frapp • v1.1.4' })}
+          {t('onboarding.versionLabel', { defaultValue: 'Frapp • v1.1.5' })}
         </ThemedText>
       </View>
 

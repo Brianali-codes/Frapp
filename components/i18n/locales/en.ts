@@ -70,7 +70,7 @@ export const en = {
       title: "Third-Party API Disclosures",
       description: "All data indexes visible throughout the interface are fetched directly from external networks via the Gamepower and CheapShark open public architectures. Use of these indexes complies directly with their native distribution rules. Frapp does not manipulate individual item listings, alter pricing structures, or manage distribution timelines. Consequently, we cannot guarantee the uninterrupted availability, accuracy, or ongoing support of external nodes or keys distributed through those respective platforms."
     },
-    footerVersion: "Frapp Version v1.1.4",
+    footerVersion: "Frapp Version v1.1.5",
     alerts: {
       errorTitle: "Error",
       errorMessage: "Could not redirect to GitHub. Verify browser routing permissions."
@@ -240,6 +240,6 @@ export const en = {
     consentLabel: "I accept the Terms of Service & Privacy Statement",
     btnStep1: "Continue",
     btnStep2: "Get Started",
-    versionLabel: "Frapp • v1.1.4"
+    versionLabel: "Frapp • v1.1.5"
   }
 } as const;

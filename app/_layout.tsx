@@ -24,7 +24,7 @@ import {
   Montserrat_900Black,
 } from '@expo-google-fonts/montserrat';
 
-const CURRENT_VERSION = 'v1.1.4';
+const CURRENT_VERSION = 'v1.1.5';
 
 SplashScreen.preventAutoHideAsync();
 

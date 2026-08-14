@@ -70,7 +70,7 @@ export const sw = {
       title: "Taarifa za API za Watu wa Tatu",
       description: "Data zote zinazoonyeshwa zinatoka kwenye mitandao ya nje kupitia Gamepower na CheapShark. Frapp haibadilishi bei wala haipangi nyakati za utoaji."
     },
-    footerVersion: "Toleo la Frapp v1.1.4",
+    footerVersion: "Toleo la Frapp v1.1.5",
     alerts: {
       errorTitle: "Hitilafu",
       errorMessage: "Kushindwa kuelekeza kwenye GitHub. Hakikisha vibali vya kivinjari vyako."
@@ -237,6 +237,6 @@ export const sw = {
     consentLabel: "Ninakubali Masharti ya Huduma na Sera ya Faragha",
     btnStep1: "Endelea",
     btnStep2: "Anza Sasa",
-    versionLabel: "Frapp • v1.1.4"
+    versionLabel: "Frapp • v1.1.5"
   }
 } as const;

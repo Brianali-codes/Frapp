@@ -70,7 +70,7 @@ export const jp = {
       title: "サードパーティAPIに関する注記",
       description: "表示されるデータはGamepowerおよびCheapSharkの公開APIから取得されています。Frappが価格や配信スケジュールを直接操作することはありません。"
     },
-    footerVersion: "Frapp バージョン v1.1.4",
+    footerVersion: "Frapp バージョン v1.1.5",
     alerts: {
       errorTitle: "エラー",
       errorMessage: "GitHubに移動できませんでした。ブラウザのアクセス許可を確認してください。"
@@ -237,6 +237,6 @@ export const jp = {
     consentLabel: "利用規約およびプライバシーポリシーに同意します",
     btnStep1: "次へ",
     btnStep2: "はじめる",
-    versionLabel: "Frapp • v1.1.4"
+    versionLabel: "Frapp • v1.1.5"
   }
 } as const;

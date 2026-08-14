@@ -70,7 +70,7 @@ export const zh = {
       title: "第三方 API 说明",
       description: "应用内展示的所有数据均直接通过 Gamepower 和 CheapShark 的公开 API 接口获取。Frapp 不会干预商品列表、价格或分发时间。"
     },
-    footerVersion: "Frapp 版本 v1.1.4",
+    footerVersion: "Frapp 版本 v1.1.5",
     alerts: {
       errorTitle: "错误",
       errorMessage: "无法跳转至 GitHub，请检查浏览器权限设置。"
@@ -237,6 +237,6 @@ export const zh = {
     consentLabel: "我同意服务条款与隐私声明",
     btnStep1: "继续",
     btnStep2: "立即体验",
-    versionLabel: "Frapp • v1.1.4"
+    versionLabel: "Frapp • v1.1.5"
   }
 } as const;
