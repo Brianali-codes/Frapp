@@ -103,7 +103,7 @@ export const en = {
     checkFailedTitle: "Verification Failure",
     checkFailedMessage: "Could not complete lookup queries at this moment. Check your Internet Connection and Try Again.",
     failedAction: "Close",
-    socialsTitle: "Share Promo",
+    socialsTitle: "Share ",
     languageTitle: "Select Language"
   },
 

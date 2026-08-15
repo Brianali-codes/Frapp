@@ -1,6 +1,7 @@
 import notifee, {
   AndroidImportance,
   AndroidNotificationSetting,
+  AndroidStyle,
   AuthorizationStatus,
   TriggerType,
   RepeatFrequency,
@@ -8,42 +9,43 @@ import notifee, {
 import { Alert, Platform } from 'react-native';
 
 const CHANNEL_ID = 'giveaway_alerts';
-
-const NOTIFICATION_IDS = {
-  MORNING: 'morning-giveaway',
-  LUNCH: 'lunch-giveaway',
-  EVENING: 'evening-giveaway',
-};
+const API_URL = 'https://www.gamerpower.com/api/giveaways';
 
 /**
- * Calculates the next trigger timestamp (e.g. 9:00 AM)
+ * Generates N random trigger timestamps spread across active hours (e.g., 9 AM to 10 PM)
  */
-const getNextTriggerTime = (hours: number): number => {
+const generateRandomTimestamps = (count: number = 3, startHour: number = 9, endHour: number = 22): number[] => {
+  const timestamps: number[] = [];
   const now = new Date();
-  const targetTime = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    hours,
-    0,
-    0
-  );
 
-  if (now >= targetTime) {
-    targetTime.setDate(targetTime.getDate() + 1);
+  for (let i = 0; i < count; i++) {
+    const randomHour = Math.floor(Math.random() * (endHour - startHour)) + startHour;
+    const randomMinute = Math.floor(Math.random() * 60);
+
+    const target = new Date(now);
+    target.setHours(randomHour, randomMinute, 0, 0);
+
+    // If the random time for today has already passed, schedule it for tomorrow
+    if (now >= target) {
+      target.setDate(target.getDate() + 1);
+    }
+
+    timestamps.push(target.getTime());
   }
-  return targetTime.getTime();
+
+  // Sort timestamps chronologically
+  return timestamps.sort((a, b) => a - b);
 };
 
 /**
- * Schedules the 3 daily recurring alarms directly into the OS Alarm Manager
+ * Fetches giveaways and schedules notifications at completely randomized daily times
  */
-export const scheduleAllGiveawayTimers = async () => {
+export const scheduleAllGiveawayTimers = async (alertCount: number = 3) => {
   try {
     // 1. Ensure notification channel exists
     await notifee.createChannel({
       id: CHANNEL_ID,
-      name: 'Daily Giveaway Reminders',
+      name: 'Random Giveaway Drops',
       importance: AndroidImportance.HIGH,
       vibration: true,
     });
@@ -52,45 +54,58 @@ export const scheduleAllGiveawayTimers = async () => {
     let canUseAlarmManager = true;
     if (Platform.OS === 'android') {
       const settings = await notifee.getNotificationSettings();
-      // If alarm permission is disabled or not supported on device, fall back safely
       if (settings.android.alarm === AndroidNotificationSetting.DISABLED) {
         canUseAlarmManager = false;
       }
     }
 
-    const schedules = [
-      {
-        id: NOTIFICATION_IDS.MORNING,
-        hour: 9,
-        title: 'Morning Giveaway Drop!',
-        body: 'New free giveaway keys are live right now! Tap to claim.',
-      },
-      {
-        id: NOTIFICATION_IDS.LUNCH,
-        hour: 13,
-        title: 'Lunch Break Giveaway!',
-        body: 'Check out the midday free loot drop before keys run out!',
-      },
-      {
-        id: NOTIFICATION_IDS.EVENING,
-        hour: 20,
-        title: 'Evening Gaming Hours Drop!',
-        body: "Tonight's featured giveaway is live! Tap to enter.",
-      },
-    ];
+    // 3. Cancel previous triggers to avoid duplicates
+    await notifee.cancelAllNotifications();
 
-    // 3. Schedule each alarm
-    for (const item of schedules) {
-      await notifee.cancelNotification(item.id);
+    // 4. Fetch latest giveaways from API
+    let giveaways: any[] = [];
+    try {
+      const res = await fetch(API_URL);
+      if (res.ok) {
+        giveaways = await res.json();
+      }
+    } catch (err) {
+      console.warn('Network request failed, falling back to cached triggers:', err);
+    }
+
+    // Shuffle giveaways so each notification gets a unique game
+    const shuffledGiveaways = [...giveaways].sort(() => 0.5 - Math.random());
+
+    // 5. Generate random trigger timestamps (e.g. 3 random times between 9 AM and 10 PM)
+    const randomTimestamps = generateRandomTimestamps(alertCount, 9, 22);
+
+    // 6. Schedule notifications
+    for (let i = 0; i < randomTimestamps.length; i++) {
+      const timestamp = randomTimestamps[i];
+      const giveaway = shuffledGiveaways[i] || null;
+      const notificationId = `giveaway-random-${i}`;
+
+      const title = giveaway?.title ? `🎁 Free: ${giveaway.title}` : '🎁 New Giveaway Drop!';
+      const body = giveaway?.worth && giveaway.worth !== 'N/A'
+        ? `Worth ${giveaway.worth} • Free on ${giveaway.platforms || 'PC'}`
+        : giveaway?.description || 'Tap to claim before stock runs out!';
+
+      const imageUrl = giveaway?.image || giveaway?.thumbnail;
 
       await notifee.createTriggerNotification(
         {
-          id: item.id,
-          title: item.title,
-          body: item.body,
+          id: notificationId,
+          title,
+          body,
           android: {
             channelId: CHANNEL_ID,
             importance: AndroidImportance.HIGH,
+            ...(imageUrl && {
+              style: {
+                type: AndroidStyle.BIGPICTURE,
+                picture: imageUrl,
+              },
+            }),
             pressAction: {
               id: 'default',
               launchActivity: 'default',
@@ -98,16 +113,22 @@ export const scheduleAllGiveawayTimers = async () => {
           },
           ios: {
             sound: 'default',
+            ...(imageUrl && {
+              attachments: [{ url: imageUrl }],
+            }),
             foregroundPresentationOptions: {
               alert: true,
               badge: true,
               sound: true,
             },
           },
+          data: {
+            openUrl: giveaway?.open_giveaway_url || '',
+          },
         },
         {
           type: TriggerType.TIMESTAMP,
-          timestamp: getNextTriggerTime(item.hour),
+          timestamp,
           repeatFrequency: RepeatFrequency.DAILY,
           ...(canUseAlarmManager && {
             alarmManager: {
@@ -118,12 +139,12 @@ export const scheduleAllGiveawayTimers = async () => {
       );
     }
   } catch (error) {
-    console.error('Failed to schedule triggers:', error);
+    console.error('Failed to schedule random giveaway notifications:', error);
   }
 };
 
 /**
- * Call this in RootLayout on mount. Prompts permission and sets timers automatically!
+ * Initialize on app launch
  */
 export const initNotifications = async () => {
   try {
@@ -137,7 +158,7 @@ export const initNotifications = async () => {
     } else {
       Alert.alert(
         'Notifications Disabled',
-        'Enable notifications in your device settings to get daily giveaway reminders.'
+        'Enable notifications in your device settings to receive giveaway alerts.'
       );
     }
   } catch (error) {

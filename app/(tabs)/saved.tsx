@@ -1,8 +1,9 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { ScrollView, View, Pressable, Platform, LayoutAnimation,UIManager, Modal } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router'; // 1. Added useFocusEffect
+import { ScrollView, View, Pressable, Platform, LayoutAnimation, UIManager, Modal } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import notifee, { TriggerType, AndroidImportance } from '@notifee/react-native';
 import { 
   Setting, 
   Moon, 
@@ -45,6 +46,89 @@ export default function SavedItemsScreen() {
   const modalOverlayColor = isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)';
   const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
 
+  // Helper to safely extract and parse end dates
+  const parseEndDate = (giveaway: FreeGiveaway): Date | null => {
+    const rawDate = giveaway.end_date || (giveaway as any).until || (giveaway as any).endDate;
+    if (!rawDate || rawDate === 'N/A') return null;
+    const parsed = new Date(rawDate);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  };
+
+  // Check and schedule 1-day reminders using Notifee
+  const scheduleExpirationReminders = async (giveaways: FreeGiveaway[]) => {
+    try {
+      // 1. Request notification permissions
+      await notifee.requestPermission();
+
+      // 2. Create high-priority notification channel for Android
+      const channelId = await notifee.createChannel({
+        id: 'giveaway_reminders',
+        name: 'Giveaway Reminders',
+        importance: AndroidImportance.HIGH,
+      });
+
+      const trackedRaw = await AsyncStorage.getItem('scheduled_reminder_ids');
+      const trackedIds: Record<string | number, boolean> = trackedRaw ? JSON.parse(trackedRaw) : {};
+
+      const now = Date.now();
+      const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+      for (const item of giveaways) {
+        const endDate = parseEndDate(item);
+        if (!endDate) continue;
+
+        const expiryTimeMs = endDate.getTime();
+        const timeRemaining = expiryTimeMs - now;
+
+        // Skip if already expired or already scheduled
+        if (timeRemaining <= 0 || trackedIds[item.id]) continue;
+
+        const gameTitle = item.title || (item as any).name || 'Your saved game';
+        const notificationId = `giveaway_${item.id}`;
+        const reminderTriggerTime = expiryTimeMs - ONE_DAY_MS;
+
+        // Case A: Expiry is > 24 hours away -> Schedule trigger for 24h before expiry
+        if (timeRemaining > ONE_DAY_MS) {
+          await notifee.createTriggerNotification(
+            {
+              id: notificationId,
+              title: '⏰ 1 Day Left to Redeem!',
+              body: `Don't miss out! "${gameTitle}" giveaway expires tomorrow.`,
+              android: {
+                channelId,
+                pressAction: { id: 'default' },
+              },
+              data: { giveawayId: String(item.id) },
+            },
+            {
+              type: TriggerType.TIMESTAMP,
+              timestamp: reminderTriggerTime,
+            }
+          );
+          trackedIds[item.id] = true;
+        } 
+        // Case B: Expiry is within 24 hours RIGHT NOW -> Display immediately
+        else if (timeRemaining <= ONE_DAY_MS && timeRemaining > 0) {
+          await notifee.displayNotification({
+            id: notificationId,
+            title: '⏰ Less than 24 Hours Left!',
+            body: `Hurry! "${gameTitle}" expires soon. Redeem it before it's gone!`,
+            android: {
+              channelId,
+              pressAction: { id: 'default' },
+            },
+            data: { giveawayId: String(item.id) },
+          });
+          trackedIds[item.id] = true;
+        }
+      }
+
+      await AsyncStorage.setItem('scheduled_reminder_ids', JSON.stringify(trackedIds));
+    } catch (error) {
+      console.error('Failed to schedule Notifee reminders:', error);
+    }
+  };
+
   // Load Saved giveaways from local storage
   const loadSavedItems = async () => {
     try {
@@ -52,6 +136,7 @@ export default function SavedItemsScreen() {
       if (stored) {
         const parsed: FreeGiveaway[] = JSON.parse(stored);
         setSavedGiveaways(parsed);
+        scheduleExpirationReminders(parsed);
       } else {
         setSavedGiveaways([]);
       }
@@ -62,14 +147,13 @@ export default function SavedItemsScreen() {
     }
   };
 
-  // 2. Automatically re-loads items EVERY TIME the screen gains tab focus
   useFocusEffect(
     useCallback(() => {
       loadSavedItems();
     }, [])
   );
 
-  // Calculate the total worth of saved games
+  // Calculate total worth
   const totalWorthSaved = savedGiveaways.reduce((accum, current) => {
     const valueStr = current.worth || current.normalPrice || '0';
     const parsedNum = parseFloat(valueStr.replace(/[^0-9.]/g, ''));
@@ -81,11 +165,37 @@ export default function SavedItemsScreen() {
     setLayoutVariant(prev => prev === 'normal' ? 'compact' : 'normal');
   };
 
+  // Remove Notifee notification when un-saving single item
+  const handleToggleSave = async (giveawayId: string | number) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setSavedGiveaways(prev => prev.filter(item => item.id !== giveawayId));
+
+    try {
+      const notificationId = `giveaway_${giveawayId}`;
+      await notifee.cancelNotification(notificationId);
+
+      const trackedRaw = await AsyncStorage.getItem('scheduled_reminder_ids');
+      if (trackedRaw) {
+        const trackedIds: Record<string | number, boolean> = JSON.parse(trackedRaw);
+        if (trackedIds[giveawayId]) {
+          delete trackedIds[giveawayId];
+          await AsyncStorage.setItem('scheduled_reminder_ids', JSON.stringify(trackedIds));
+        }
+      }
+    } catch (error) {
+      console.error('Error cancelling Notifee notification:', error);
+    }
+  };
+
+  // Clear all Notifee notifications when wiping list
   const clearAllSaved = async () => {
     setShowClearConfirm(false);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     try {
       await AsyncStorage.removeItem('saved_giveaways');
+      await AsyncStorage.removeItem('scheduled_reminder_ids');
+      await notifee.cancelAllNotifications();
+      await notifee.cancelTriggerNotifications();
       setSavedGiveaways([]);
     } catch (error) {
       console.error('Error wiping saved list:', error);
@@ -116,7 +226,6 @@ export default function SavedItemsScreen() {
             </ThemedText>
           </View>
 
-          {/* Symmetrical Header Action Controls Group */}
           <View className="flex-row items-center gap-2">
             {savedGiveaways.length > 0 && (
               <Pressable
@@ -139,7 +248,6 @@ export default function SavedItemsScreen() {
                 <RowVertical size="18" color="#9333ea" variant="Broken" />
               )}
             </Pressable>
-
 
             <Pressable
               onPress={toggleTheme}
@@ -219,11 +327,7 @@ export default function SavedItemsScreen() {
                 variant={layoutVariant}
                 ctaText={t('deals.claim', { defaultValue: 'Claim Now' })}
                 isSaved={true}
-                // 3. Instant UI feedback when toggled off directly in this screen
-                onToggleSave={() => {
-                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                  setSavedGiveaways(prev => prev.filter(item => item.id !== giveaway.id));
-                }}
+                onToggleSave={() => handleToggleSave(giveaway.id)}
               />
             ))}
           </View>

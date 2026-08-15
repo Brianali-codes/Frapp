@@ -34,6 +34,7 @@ import i18nInstanceSource from '@/components/i18n';
 import { Alert } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useCustomTheme } from '@/context/ThemeContext';
+import { scheduleAllGiveawayTimers } from '@/lib/notifications';
 
 const NOTIFICATIONS_KEY = '@frapp_user_notifications_enabled';
 const LANGUAGE_KEY = '@frapp_user_language'
@@ -170,38 +171,43 @@ const formattedStars = starCount ? `${starCount} stars` : '★ star repo';
   };
 
   const handleNotificationToggle = async (newValue: boolean) => {
-    try {
-      if (newValue) {
-        const settings = await notifee.requestPermission();
-        const isGranted =
-          settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-          settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+  try {
+    if (newValue) {
+      const settings = await notifee.requestPermission();
+      const isGranted =
+        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
 
-        if (!isGranted) {
-          Alert.alert(
-            t('notifications.permissionDeniedTitle', 'Permissions Required'),
-            t('notifications.permissionDeniedMsg', 'Please enable notifications in system settings to receive giveaway alerts.'),
-            [
-              { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-              { text: t('common.settings', 'Open Settings'), onPress: () => Linking.openSettings() },
-            ]
-          );
-          setNotificationsEnabled(false);
-          await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
-          return;
-        }
-
-        await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(true));
-        setNotificationsEnabled(true);
-      } else {
-        await notifee.cancelAllNotifications();
-        await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
+      if (!isGranted) {
+        Alert.alert(
+          t('notifications.permissionDeniedTitle', 'Permissions Required'),
+          t('notifications.permissionDeniedMsg', 'Please enable notifications in system settings to receive giveaway alerts.'),
+          [
+            { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+            { text: t('common.settings', 'Open Settings'), onPress: () => Linking.openSettings() },
+          ]
+        );
         setNotificationsEnabled(false);
+        await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
+        return;
       }
-    } catch (error) {
-      console.error('Failed to toggle notifications:', error);
+
+      // 1. Save preference & update state
+      await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(true));
+      setNotificationsEnabled(true);
+
+      // 2. RE-SCHEDULE NOTIFICATIONS IMMEDIATELY
+      await scheduleAllGiveawayTimers();
+    } else {
+      // Cancel all pending notification triggers
+      await notifee.cancelAllNotifications();
+      await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(false));
+      setNotificationsEnabled(false);
     }
-  };
+  } catch (error) {
+    console.error('Failed to toggle notifications:', error);
+  }
+};
 
   const triggerTestNotification = async () => {
     try {

@@ -9,13 +9,13 @@ import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
 import "../global.css";
-import { initNotifications} from '@/lib/notifications';
+import { initNotifications, scheduleAllGiveawayTimers } from '@/lib/notifications';
 import { useAssets } from 'expo-asset';
 import { ThemedText } from '@/components/ThemedText';
 import Button from '@/components/custom/Button';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CloseCircle } from 'iconsax-react-nativejs';
 import { useTranslation } from 'react-i18next';
-
 import {
   useFonts,
   Montserrat_400Regular,
@@ -24,6 +24,7 @@ import {
   Montserrat_900Black,
 } from '@expo-google-fonts/montserrat';
 
+const NOTIFICATIONS_KEY = '@app_notifications_enabled';
 const CURRENT_VERSION = 'v1.1.5';
 
 SplashScreen.preventAutoHideAsync();
@@ -55,6 +56,24 @@ function RootLayoutContent() {
     'Mont-ExtraBold': Montserrat_800ExtraBold,
     'Mont-Black': Montserrat_900Black,
   });
+
+  // Sync scheduled giveaway notifications on app launch
+  useEffect(() => {
+    const syncNotificationsOnLaunch = async () => {
+      try {
+        const savedSetting = await AsyncStorage.getItem(NOTIFICATIONS_KEY);
+        const isEnabled = savedSetting !== null ? JSON.parse(savedSetting) : true;
+
+        if (isEnabled) {
+          await scheduleAllGiveawayTimers();
+        }
+      } catch (error) {
+        console.error('Failed to sync notifications on launch:', error);
+      }
+    };
+
+    syncNotificationsOnLaunch();
+  }, []);
 
   useEffect(() => {
     async function checkFirstLaunch() {
@@ -113,7 +132,7 @@ function RootLayoutContent() {
     return unsubscribe;
   }, [rootNavigationRef]);
 
- useEffect(() => {
+  useEffect(() => {
     const isAppReady = !isCheckingStorage && (fontsLoaded || fontError) && (assets || assetsError);
 
     if (isAppReady && isNavigationReady) {
@@ -127,6 +146,7 @@ function RootLayoutContent() {
       }
     }
   }, [isCheckingStorage, fontsLoaded, fontError, assets, assetsError, isNavigationReady, targetRoute]);
+
   if (isCheckingStorage || !fontsLoaded || !assets) {
     return (
       <View className="flex-1 items-center justify-center bg-zinc-950">
