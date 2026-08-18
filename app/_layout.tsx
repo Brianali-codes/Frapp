@@ -25,12 +25,13 @@ import {
 } from '@expo-google-fonts/montserrat';
 
 const NOTIFICATIONS_KEY = '@app_notifications_enabled';
+const LANGUAGE_KEY = '@frapp_user_language';
 const CURRENT_VERSION = 'v1.1.5';
 
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutContent() {
-  const { t } = useTranslation(); 
+  const { t, i18n } = useTranslation(); 
   const { themeMode } = useCustomTheme();
   const router = useRouter();
   const rootNavigationRef = useNavigationContainerRef();
@@ -56,6 +57,22 @@ function RootLayoutContent() {
     'Mont-ExtraBold': Montserrat_800ExtraBold,
     'Mont-Black': Montserrat_900Black,
   });
+
+  // Restore saved language preference on app launch
+  useEffect(() => {
+    async function restoreLanguage() {
+      try {
+        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+        if (savedLanguage) {
+          await i18n.changeLanguage(savedLanguage);
+        }
+      } catch (e) {
+        console.error('Failed to load saved language on launch:', e);
+      }
+    }
+
+    restoreLanguage();
+  }, [i18n]);
 
   // Sync scheduled giveaway notifications on app launch
   useEffect(() => {

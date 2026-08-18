@@ -285,28 +285,6 @@ const formattedStars = starCount ? `${starCount} stars` : '★ star repo';
     }
   };
 
-
-  useEffect(() => {
-    async function restoreLanguagePreference() {
-      try {
-        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
-        if (savedLanguage) {
-          try {
-            await i18n.changeLanguage(savedLanguage);
-          } catch (e) {
-            await i18nInstanceSource.changeLanguage(savedLanguage);
-          }
-        }
-      } catch (e) {
-        console.error('Failed to load saved language from AsyncStorage:', e);
-      }
-    }
-
-    restoreLanguagePreference();
-  }, []);
-
-
-
   return (
     <View style={{ flex: 1, backgroundColor }}>
       <ScrollView
