@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter, CloseCircle, SearchNormal } from 'iconsax-react-nativejs';
+import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter, CloseCircle, SearchNormal, Shop, Flash } from 'iconsax-react-nativejs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import i18nInstanceSource from '@/components/i18n';
@@ -18,11 +18,28 @@ import { FreeGiveaway } from '@/types';
 const LAYOUT_STORAGE_KEY = '@deals_layout_variant';
 
 const PLATFORMS = [
-  { id: 'all', key: 'deals.stores.all', label: 'All Stores' },
-  { id: '1', key: 'deals.stores.steam', label: 'Steam' },
-  { id: '11', key: 'deals.stores.epic', label: 'Epic Games' },
-  { id: '7', key: 'deals.stores.gog', label: 'GOG' },
-  { id: '3', key: 'deals.stores.amazon', label: 'Amazon' },
+  { id: 'all', key: 'deals.stores.all', label: 'All Stores', iconUri: null },
+  { id: '1', key: 'deals.stores.steam', label: 'Steam', iconUri: 'https://www.cheapshark.com/img/stores/icons/0.png' },
+  { id: '2', key: 'deals.stores.gamersgate', label: 'GamersGate', iconUri: 'https://www.cheapshark.com/img/stores/icons/1.png' },
+  { id: '3', key: 'deals.stores.gmg', label: 'GreenManGaming', iconUri: 'https://www.cheapshark.com/img/stores/icons/2.png' },
+  { id: '7', key: 'deals.stores.gog', label: 'GOG', iconUri: 'https://www.cheapshark.com/img/stores/icons/6.png' },
+  { id: '8', key: 'deals.stores.humble', label: 'Humble Store', iconUri: 'https://www.cheapshark.com/img/stores/icons/7.png' },
+  { id: '11', key: 'deals.stores.macgamestore', label: 'MacGamestore', iconUri: 'https://www.cheapshark.com/img/stores/icons/10.png' },
+  { id: '13', key: 'deals.stores.ubisoft', label: 'Ubisoft Store', iconUri: 'https://www.cheapshark.com/img/stores/icons/12.png' },
+  { id: '15', key: 'deals.stores.fanatical', label: 'Fanatical', iconUri: 'https://www.cheapshark.com/img/stores/icons/14.png' },
+  { id: '21', key: 'deals.stores.wingamestore', label: 'WinGameStore', iconUri: 'https://www.cheapshark.com/img/stores/icons/20.png' },
+  { id: '23', key: 'deals.stores.gamebillet', label: 'GameBillet', iconUri: 'https://www.cheapshark.com/img/stores/icons/22.png' },
+  { id: '24', key: 'deals.stores.voidu', label: 'Voidu', iconUri: 'https://www.cheapshark.com/img/stores/icons/23.png' },
+  { id: '25', key: 'deals.stores.epic', label: 'Epic Games Store', iconUri: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  { id: '27', key: 'deals.stores.gamesplanet', label: 'Gamesplanet', iconUri: 'https://www.cheapshark.com/img/stores/icons/26.png' },
+  { id: '28', key: 'deals.stores.gamesload', label: 'Gamesload', iconUri: 'https://www.cheapshark.com/img/stores/icons/27.png' },
+  { id: '29', key: 'deals.stores.2game', label: '2Game', iconUri: 'https://www.cheapshark.com/img/stores/icons/28.png' },
+  { id: '30', key: 'deals.stores.indiegala', label: 'IndieGala', iconUri: 'https://www.cheapshark.com/img/stores/icons/29.png' },
+  { id: '31', key: 'deals.stores.blizzard', label: 'Blizzard Shop', iconUri: 'https://www.cheapshark.com/img/stores/icons/30.png' },
+  { id: '32', key: 'deals.stores.allyouplay', label: 'AllYouPlay', iconUri: 'https://www.cheapshark.com/img/stores/icons/31.png' },
+  { id: '33', key: 'deals.stores.dlgamer', label: 'DLGamer', iconUri: 'https://www.cheapshark.com/img/stores/icons/32.png' },
+  { id: '34', key: 'deals.stores.noctre', label: 'Noctre', iconUri: 'https://www.cheapshark.com/img/stores/icons/33.png' },
+  { id: '35', key: 'deals.stores.dreamgame', label: 'DreamGame', iconUri: 'https://www.cheapshark.com/img/stores/icons/34.png' },
 ];
 
 interface PaginationButtonProps {
@@ -221,6 +238,7 @@ export default function FreeScreen() {
 
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
+  const [isAAA, setIsAAA] = useState(false);
 
   // Search States
   const [showSearchBar, setShowSearchBar] = useState(false);
@@ -257,7 +275,7 @@ export default function FreeScreen() {
     return giveaways.slice(startIndex, endIndex);
   }, [giveaways, startIndex, endIndex]);
 
-  const fetchData = async (storeId: string = 'all', query: string = '') => {
+  const fetchData = async (storeId: string = 'all', query: string = '', aaaOnly: boolean = false) => {
     setIsLoading(true);
     setHasError(false);
     try {
@@ -267,6 +285,9 @@ export default function FreeScreen() {
       }
       if (query.trim()) {
         url += `&title=${encodeURIComponent(query.trim())}`;
+      }
+      if (aaaOnly) {
+        url += `&AAA=1`;
       }
 
       const response = await fetch(url, {
@@ -290,17 +311,29 @@ export default function FreeScreen() {
           thumbnail: deal.thumb || '',
           image: deal.thumb || '',
           description: percentSavings > 0
-            ? `Save ${percentSavings}% off! Now $${deal.salePrice} down from $${deal.normalPrice}.`
-            : `Available now for $${deal.salePrice}.`,
-          short_description: `Score this offer on Store #${deal.storeID}. Deal Rating: ${deal.dealRating || 'N/A'}/10`,
+            ? t('deals.save_description', {
+                defaultValue: 'Save {{savings}}% off! Now ${{sale}} down from ${{normal}}.',
+                savings: percentSavings,
+                sale: deal.salePrice,
+                normal: deal.normalPrice
+              })
+            : t('deals.available_description', {
+                defaultValue: 'Available now for ${{sale}}.',
+                sale: deal.salePrice
+              }),
+          short_description: t('deals.short_description', {
+            defaultValue: 'Score this offer on Store #{{store}}. Deal Rating: {{rating}}/10',
+            store: deal.storeID,
+            rating: deal.dealRating || 'N/A'
+          }),
           open_giveaway_url: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
           open_giveaway: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
           game_url: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
-          worth: currentSalePrice === 0 ? 'FREE' : `$${deal.salePrice}`,
-          end_date: 'Limited Time Offer',
+          worth: currentSalePrice === 0 ? t('deals.free_uppercase', 'FREE') : `$${deal.salePrice}`,
+          end_date: t('deals.limited_time', 'Limited Time Offer'),
           platform: deal.storeID || storeId,
-          genre: 'Video Game Deal',
-          publisher: 'Retail Distribution',
+          genre: t('deals.genre', 'Video Game Deal'),
+          publisher: t('deals.publisher', 'Retail Distribution'),
           release_date: deal.releaseDate && deal.releaseDate > 0 ? new Date(deal.releaseDate * 1000).toISOString() : '',
           margin: '0',
           dealID: deal.dealID,
@@ -320,15 +353,15 @@ export default function FreeScreen() {
     }
   };
 
-  // Debounced search / platform update trigger
+  // Debounced search / platform / AAA update trigger
   useEffect(() => {
     const handler = setTimeout(() => {
       setCurrentPage(1);
-      fetchData(selectedPlatform, searchQuery);
+      fetchData(selectedPlatform, searchQuery, isAAA);
     }, 400);
 
     return () => clearTimeout(handler);
-  }, [selectedPlatform, searchQuery]);
+  }, [selectedPlatform, searchQuery, isAAA]);
 
   const safeScrollToTop = () => {
     setTimeout(() => {
@@ -438,10 +471,10 @@ export default function FreeScreen() {
             {/* Filter Bar Toggle Icon */}
             <Pressable
               onPress={handleFilterBarToggle}
-              style={{ backgroundColor: showFilterBar ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
+              style={{ backgroundColor: showFilterBar || isAAA ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
-              <Filter size="18" color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
+              <Filter size="18" color={showFilterBar || isAAA ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
             </Pressable>
 
             {/* Theme Toggle Icon */}
@@ -484,7 +517,7 @@ export default function FreeScreen() {
           </View>
         )}
 
-        {/* --- UNCLIPPED HORIZONTAL SCROLLFILTER SECTION --- */}
+        {/* --- ENHANCED FILTER BAR WITH LOGOS AND AAA TOGGLE --- */}
         {showFilterBar && (
           <View className="w-full mb-5">
             <ScrollView
@@ -494,6 +527,33 @@ export default function FreeScreen() {
               style={{ height: 50 }}
               contentContainerStyle={{ alignItems: 'center', gap: 8, paddingHorizontal: 16 }}
             >
+              {/* AAA Blockbusters Filter Toggle */}
+              <Pressable
+                onPress={() => {
+                  setCurrentPage(1);
+                  setIsAAA(prev => !prev);
+                }}
+                style={{
+                  backgroundColor: isAAA ? '#f59e0b' : (isDark ? '#27272a' : '#f4f4f5'),
+                  borderWidth: 1,
+                  borderColor: isAAA ? '#f59e0b' : (isDark ? '#3c3c3a' : '#e4e4e7'),
+                  height: 36,
+                }}
+                className="px-3.5 rounded-full flex-row items-center gap-1.5 shadow-sm"
+              >
+                <Flash size="14" color={isAAA ? '#ffffff' : '#f59e0b'} variant={isAAA ? 'Bold' : 'Outline'} />
+                <ThemedText
+                  style={{ color: isAAA ? '#ffffff' : (isDark ? '#f59e0b' : '#d97706') }}
+                  className={`text-xs ${isAAA ? 'font-montBlack' : 'font-montBold'}`}
+                >
+                  {t('deals.filters.aaa', 'AAA Deals')}
+                </ThemedText>
+              </Pressable>
+
+              {/* Visual Divider */}
+              <View className="h-5 w-[1px] bg-zinc-300 dark:bg-zinc-700 mx-0.5" />
+
+              {/* Store Category Chips */}
               {PLATFORMS.map((platform) => {
                 const isSelected = selectedPlatform === platform.id;
                 return (
@@ -506,9 +566,25 @@ export default function FreeScreen() {
                       borderColor: isSelected ? '#9333ea' : (isDark ? '#3c3c3a' : '#e4e4e7'),
                       height: 36,
                     }}
-                    className="px-4 rounded-full items-center justify-center shadow-sm"
+                    className="px-3.5 rounded-full flex-row items-center gap-1.5 shadow-sm"
                   >
-                    <ThemedText style={{ color: isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a') }} className={`text-xs ${isSelected ? 'font-montBlack' : 'font-montBold'}`}>
+                    {platform.iconUri ? (
+                      <Image
+                        source={{ uri: platform.iconUri }}
+                        className="w-4 h-4 rounded-sm"
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Shop
+                        size="14"
+                        color={isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a')}
+                        variant="Bold"
+                      />
+                    )}
+                    <ThemedText
+                      style={{ color: isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a') }}
+                      className={`text-xs ${isSelected ? 'font-montBlack' : 'font-montBold'}`}
+                    >
                       {t(platform.key, platform.label)}
                     </ThemedText>
                   </Pressable>
@@ -520,7 +596,7 @@ export default function FreeScreen() {
 
         {/* --- CAROUSEL / SKELETON LOADER SECTION --- */}
         {isLoading ? (
-          selectedPlatform === 'all' && !searchQuery && (
+          selectedPlatform === 'all' && !searchQuery && !isAAA && (
             <View className="w-full">
               <WorthSummarySkeleton
                 isDark={isDark}
@@ -535,7 +611,7 @@ export default function FreeScreen() {
             </View>
           )
         ) : (
-          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && !searchQuery && (
+          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && !searchQuery && !isAAA && (
             <>
               {/* --- SUMMARY SECTION CONTAINER --- */}
               <View
@@ -583,7 +659,7 @@ export default function FreeScreen() {
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
               {t('deals.error.description', "We can't sync up with the servers right now. Make sure your device is online and let's try that again.")}
             </ThemedText>
-            <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform, searchQuery)} className="w-full" text={t('deals.error.retryButton', 'Retry Connection')} />
+            <Button type="primary" loading={isLoading} onPress={() => fetchData(selectedPlatform, searchQuery, isAAA)} className="w-full" text={t('deals.error.retryButton', 'Retry Connection')} />
           </View>
         ) : isLoading ? (
           <CardListSkeleton
@@ -616,6 +692,7 @@ export default function FreeScreen() {
               type="primary"
               onPress={() => {
                 setSearchQuery('');
+                setIsAAA(false);
                 handlePlatformChange('all');
               }}
               className="w-full"

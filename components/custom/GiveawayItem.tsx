@@ -29,10 +29,126 @@ import {
   Gift,
   InfoCircle,
   TimerStart,
-  Heart          
+  Heart,
+  Star1
 } from 'iconsax-react-nativejs';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Sparkle Burst Particle Constants
+const SPARKLE_COUNT = 6;
+const SPARKLE_PARTICLES = Array.from({ length: SPARKLE_COUNT }).map((_, i) => {
+  const angle = (i * 2 * Math.PI) / SPARKLE_COUNT;
+  return {
+    x: Math.cos(angle) * 24,
+    y: Math.sin(angle) * 24,
+  };
+});
+
+interface FavoriteButtonProps {
+  isSaved: boolean;
+  onToggle: () => void;
+  containerStyle?: any;
+  className?: string;
+  iconSize?: string;
+  inactiveColor?: string;
+  hitSlop?: number | { top?: number; bottom?: number; left?: number; right?: number };
+}
+
+function FavoriteButton({
+  isSaved,
+  onToggle,
+  containerStyle,
+  className,
+  iconSize = '18',
+  inactiveColor,
+  hitSlop
+}: FavoriteButtonProps) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const sparkleAnim = useRef(new Animated.Value(0)).current;
+
+  const handlePress = () => {
+    if (!isSaved) {
+      sparkleAnim.setValue(0);
+      scaleAnim.setValue(0.75);
+
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 3,
+          tension: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(sparkleAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.sequence([
+        Animated.timing(scaleAnim, { toValue: 0.8, duration: 90, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, friction: 4, useNativeDriver: true }),
+      ]).start();
+    }
+
+    onToggle();
+  };
+
+  return (
+    <View className="relative items-center justify-center">
+      {/* Sparkle Particles Burst */}
+      {SPARKLE_PARTICLES.map((sparkle, idx) => {
+        const sparkleScale = sparkleAnim.interpolate({
+          inputRange: [0, 0.4, 1],
+          outputRange: [0, 1.2, 0],
+        });
+        const sparkleOpacity = sparkleAnim.interpolate({
+          inputRange: [0, 0.7, 1],
+          outputRange: [1, 1, 0],
+        });
+        const translateX = sparkleAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, sparkle.x],
+        });
+        const translateY = sparkleAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, sparkle.y],
+        });
+
+        return (
+          <Animated.View
+            key={idx}
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              transform: [{ translateX }, { translateY }, { scale: sparkleScale }],
+              opacity: sparkleOpacity,
+              zIndex: 10,
+            }}
+          >
+            <Star1 size="10" color="#22c55e" variant="Bold" />
+          </Animated.View>
+        );
+      })}
+
+      <Pressable
+        onPress={handlePress}
+        hitSlop={hitSlop}
+        style={containerStyle}
+        className={className}
+      >
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <Heart
+            size={iconSize}
+            color={isSaved ? '#22c55e' : inactiveColor}
+            variant={isSaved ? 'Bold' : 'Outline'}
+          />
+        </Animated.View>
+      </Pressable>
+    </View>
+  );
+}
 
 interface GiveawayItemProps {
   giveaway: FreeGiveaway;
@@ -55,6 +171,18 @@ export default function GiveawayItem({
   const [localIsSaved, setLocalIsSaved] = useState(isSaved);
   const translateY = useRef(new Animated.Value(0)).current;
 
+  // Touch claim animation scale state
+  const claimScale = useRef(new Animated.Value(1)).current;
+
+  // Live countdown state
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    isExpired: boolean;
+  } | null>(null);
+
   const activeCtaText = ctaText || t('deals.claim');
 
   // Reset drag position whenever modal visibility changes
@@ -64,33 +192,41 @@ export default function GiveawayItem({
     }
   }, [modalVisible]);
 
-  const getDaysRemainingText = (endDateString: string | undefined): { label: string; isDays: boolean } | null => {
-    if (!endDateString || endDateString === 'N/A') return null;
+  // Real-time tick timer calculating remaining duration down to seconds
+  useEffect(() => {
+    if (!giveaway.end_date || giveaway.end_date === 'N/A') {
+      setTimeLeft(null);
+      return;
+    }
 
-    const parsedDate = Date.parse(endDateString);
+    const parsedDate = Date.parse(giveaway.end_date);
     if (isNaN(parsedDate)) {
-      return { label: `${t('modals.dismiss')}: ${endDateString}`, isDays: false };
+      setTimeLeft(null);
+      return;
     }
 
-    const targetDate = new Date(parsedDate);
-    const today = new Date();
-    
-    today.setHours(0, 0, 0, 0);
-    targetDate.setHours(0, 0, 0, 0);
+    const updateCountdown = () => {
+      const now = Date.now();
+      const diff = parsedDate - now;
 
-    const diffTime = targetDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true });
+        return;
+      }
 
-    if (diffDays < 0) {
-      return { label: 'Expired', isDays: true };
-    } else if (diffDays === 0) {
-      return { label: 'Ends Today', isDays: true };
-    } else if (diffDays === 1) {
-      return { label: '1 Day Left', isDays: true };
-    } else {
-      return { label: `${diffDays} Days Left`, isDays: true };
-    }
-  };
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      setTimeLeft({ days, hours, minutes, seconds, isExpired: false });
+    };
+
+    updateCountdown();
+    const timerInterval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(timerInterval);
+  }, [giveaway.end_date]);
 
   useEffect(() => {
     const checkSavedStatus = async () => {
@@ -133,26 +269,23 @@ export default function GiveawayItem({
     }
   };
 
-  const isDark = themeMode === 'dark';
-  const isCompact = variant === 'compact';
-  const isMinimal = variant === 'minimal';
+  const handleClaimPressIn = () => {
+    Animated.spring(claimScale, {
+      toValue: 0.93,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
 
-  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
-  const minimalBgColor = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
-
-  const adaptiveBorderColor = isDark
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.05)';
-
-  const iconBtnBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
-  const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
-  const iconColor = isDark ? '#a78bfa' : '#7c3aed';
-
-  const worthValue = giveaway.worth || 'N/A';
-  const hasWorth = worthValue !== 'N/A' && worthValue !== '0' && worthValue !== '$0.00';
-  const imageUri = giveaway.thumbnail || giveaway.image;
-
-  const daysRemainingInfo = getDaysRemainingText(giveaway.end_date);
+  const handleClaimPressOut = () => {
+    Animated.spring(claimScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 25,
+      bounciness: 8,
+    }).start();
+  };
 
   const handleOpenClaimSite = async () => {
     const targetUrl = giveaway.open_giveaway_url || giveaway.open_giveaway || giveaway.game_url;
@@ -190,6 +323,27 @@ export default function GiveawayItem({
       console.error('Error sharing giveaway:', error);
     }
   };
+
+  const isDark = themeMode === 'dark';
+  const isCompact = variant === 'compact';
+  const isMinimal = variant === 'minimal';
+
+  const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
+  const minimalBgColor = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
+
+  const adaptiveBorderColor = isDark
+    ? 'rgba(255, 255, 255, 0.08)'
+    : 'rgba(0, 0, 0, 0.05)';
+
+  const iconBtnBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
+  const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+  const iconColor = isDark ? '#a78bfa' : '#7c3aed';
+
+  const worthValue = giveaway.worth || 'N/A';
+  const hasWorth = worthValue !== 'N/A' && worthValue !== '0' && worthValue !== '$0.00';
+  const imageUri = giveaway.thumbnail || giveaway.image;
+
+  const padZero = (n: number) => String(n).padStart(2, '0');
 
   const panResponder = useRef(
     PanResponder.create({
@@ -269,16 +423,27 @@ export default function GiveawayItem({
                 </View>
                 
                 <View className="flex-row items-center gap-1.5">
-                  <Pressable onPress={handleToggle} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
-                    {localIsSaved ? (
-                      <Heart size="13" color="#22c55e" variant="Bold" />
-                    ) : (
-                      <Heart size="13" color={iconColor} variant="Outline" />
-                    )}
-                  </Pressable>
-                  <Pressable onPress={handleOpenClaimSite} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
-                    <ExportSquare size="13" color={iconColor} variant="Outline" />
-                  </Pressable>
+                  <FavoriteButton
+                    isSaved={localIsSaved}
+                    onToggle={handleToggle}
+                    containerStyle={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
+                    className="p-1.5 rounded-lg border active:opacity-60"
+                    iconSize="13"
+                    inactiveColor={iconColor}
+                    hitSlop={8}
+                  />
+                  <Animated.View style={{ transform: [{ scale: claimScale }] }}>
+                    <Pressable 
+                      onPressIn={handleClaimPressIn}
+                      onPressOut={handleClaimPressOut}
+                      onPress={handleOpenClaimSite} 
+                      hitSlop={8} 
+                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                      className="p-1.5 rounded-lg border"
+                    >
+                      <ExportSquare size="13" color={iconColor} variant="Outline" />
+                    </Pressable>
+                  </Animated.View>
                   <Pressable onPress={handleShare} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
                     <ShareIcon size="13" color={iconColor} variant="Outline" />
                   </Pressable>
@@ -339,16 +504,27 @@ export default function GiveawayItem({
                 </View>
                 
                 <View className="flex-row items-center gap-1.5">
-                  <Pressable onPress={handleToggle} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
-                    {localIsSaved ? (
-                      <Heart size="15" color="#22c55e" variant="Bold" />
-                    ) : (
-                      <Heart size="15" color={iconColor} variant="Outline" />
-                    )}
-                  </Pressable>
-                  <Pressable onPress={handleOpenClaimSite} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
-                    <ExportSquare size="15" color={iconColor} variant="Outline" />
-                  </Pressable>
+                  <FavoriteButton
+                    isSaved={localIsSaved}
+                    onToggle={handleToggle}
+                    containerStyle={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
+                    className="p-1.5 rounded-lg border active:opacity-60"
+                    iconSize="15"
+                    inactiveColor={iconColor}
+                    hitSlop={10}
+                  />
+                  <Animated.View style={{ transform: [{ scale: claimScale }] }}>
+                    <Pressable 
+                      onPressIn={handleClaimPressIn}
+                      onPressOut={handleClaimPressOut}
+                      onPress={handleOpenClaimSite} 
+                      hitSlop={10} 
+                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                      className="p-1.5 rounded-lg border"
+                    >
+                      <ExportSquare size="15" color={iconColor} variant="Outline" />
+                    </Pressable>
+                  </Animated.View>
                   <Pressable onPress={handleShare} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
                     <ShareIcon size="15" color={iconColor} variant="Outline" />
                   </Pressable>
@@ -398,12 +574,19 @@ export default function GiveawayItem({
                 style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} 
                 className="flex-row items-center justify-between pt-2.5 mt-0.5"
               >
-                <View className="flex-row items-center gap-1">
-                  <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
-                    {activeCtaText}
-                  </ThemedText>
-                  <ArrowCircleRight size="14" color="#9333ea" variant="Bold" />
-                </View>
+                <Animated.View style={{ transform: [{ scale: claimScale }] }}>
+                  <Pressable 
+                    onPressIn={handleClaimPressIn}
+                    onPressOut={handleClaimPressOut}
+                    onPress={handleOpenClaimSite}
+                    className="flex-row items-center gap-1"
+                  >
+                    <ThemedText style={{ color: '#9333ea' }} className="text-[10px] font-montBlack uppercase tracking-widest">
+                      {activeCtaText}
+                    </ThemedText>
+                    <ArrowCircleRight size="14" color="#9333ea" variant="Bold" />
+                  </Pressable>
+                </Animated.View>
 
                 <View className="flex-row items-center gap-3">
                   <View className="flex-row items-center gap-1.5">
@@ -418,17 +601,28 @@ export default function GiveawayItem({
                   </View>
 
                   <View className="flex-row items-center gap-1.5">
-                    <Pressable onPress={handleToggle} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
-                      {localIsSaved ? (
-                        <Heart size="15" color="#22c55e" variant="Bold" />
-                      ) : (
-                        <Heart size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
-                      )}
-                    </Pressable>
+                    <FavoriteButton
+                      isSaved={localIsSaved}
+                      onToggle={handleToggle}
+                      containerStyle={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
+                      className="p-2 rounded-xl border active:opacity-60"
+                      iconSize="15"
+                      inactiveColor={isDark ? '#a78bfa' : '#9333ea'}
+                      hitSlop={10}
+                    />
 
-                    <Pressable onPress={handleOpenClaimSite} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
-                      <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
-                    </Pressable>
+                    <Animated.View style={{ transform: [{ scale: claimScale }] }}>
+                      <Pressable 
+                        onPressIn={handleClaimPressIn}
+                        onPressOut={handleClaimPressOut}
+                        onPress={handleOpenClaimSite} 
+                        hitSlop={10} 
+                        style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                        className="p-2 rounded-xl border"
+                      >
+                        <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+                      </Pressable>
+                    </Animated.View>
 
                     <Pressable onPress={handleShare} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
                        <ShareIcon size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
@@ -535,15 +729,20 @@ export default function GiveawayItem({
                     </View>
                   )}
                   
-                  {daysRemainingInfo && (
+                  {timeLeft ? (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
-                      {daysRemainingInfo.isDays ? (
-                        <TimerStart size="12" color="#e11d48" variant="Outline" />
-                      ) : (
-                        <CalendarTick size="12" color={iconColor} variant="Outline" />
-                      )}
-                      <ThemedText className={`text-[10px] font-montBold ${daysRemainingInfo.isDays ? 'text-rose-500 dark:text-rose-400' : 'opacity-85'}`}>
-                        {daysRemainingInfo.label}
+                      <TimerStart size="12" color={timeLeft.isExpired ? '#f43f5e' : '#e11d48'} variant="Outline" />
+                      <ThemedText className={`text-[10px] font-montBold ${timeLeft.isExpired ? 'text-rose-500' : 'text-rose-500 dark:text-rose-400'}`}>
+                        {timeLeft.isExpired
+                          ? 'Expired'
+                          : `${timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}${padZero(timeLeft.hours)}h ${padZero(timeLeft.minutes)}m ${padZero(timeLeft.seconds)}s left`}
+                      </ThemedText>
+                    </View>
+                  ) : (
+                    <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                      <CalendarTick size="12" color={iconColor} variant="Outline" />
+                      <ThemedText className="text-[10px] font-montBold opacity-85">
+                        {giveaway.end_date && giveaway.end_date !== 'N/A' ? giveaway.end_date : 'Limited Time'}
                       </ThemedText>
                     </View>
                   )}
@@ -593,17 +792,14 @@ export default function GiveawayItem({
                 className="flex-row items-center gap-3 px-5 pt-3.5"
               >
                 <View className="flex-row items-center gap-3">
-                  <Pressable
-                    onPress={handleToggle}
-                    style={{ backgroundColor: cardBgColor }}
+                  <FavoriteButton
+                    isSaved={localIsSaved}
+                    onToggle={handleToggle}
+                    containerStyle={{ backgroundColor: cardBgColor }}
                     className="w-11 h-11 rounded-2xl flex-row items-center justify-center active:opacity-75"
-                  >
-                    {localIsSaved ? (
-                      <Heart size="18" color="#22c55e" variant="Bold" />
-                    ) : (
-                      <Heart size="18" color={isDark ? "#a78bfa" : "#7c3aed"} variant="Outline" />
-                    )}
-                  </Pressable>
+                    iconSize="18"
+                    inactiveColor={isDark ? '#a78bfa' : '#7c3aed'}
+                  />
 
                   <Pressable
                     onPress={handleShare}
@@ -615,16 +811,20 @@ export default function GiveawayItem({
                   </Pressable>
                 </View>
 
-                <Pressable
-                  onPress={handleOpenClaimSite}
-                  style={{ backgroundColor: '#9333ea' }}
-                  className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-2 active:opacity-85 shadow-lg shadow-purple-500/20"
-                >
-                  <Gift size="16" color="#ffffff" variant="Broken" />
-                  <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                    {activeCtaText}
-                  </ThemedText>
-                </Pressable>
+                <Animated.View style={{ flex: 1, transform: [{ scale: claimScale }] }}>
+                  <Pressable
+                    onPressIn={handleClaimPressIn}
+                    onPressOut={handleClaimPressOut}
+                    onPress={handleOpenClaimSite}
+                    style={{ backgroundColor: '#9333ea' }}
+                    className="w-full h-11 rounded-full flex-row items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
+                  >
+                    <Gift size="16" color="#ffffff" variant="Broken" />
+                    <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
+                      {activeCtaText}
+                    </ThemedText>
+                  </Pressable>
+                </Animated.View>
               </View>
             </View>
           </Animated.View>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Image,
   Linking,
@@ -11,7 +11,8 @@ import {
   ScrollView,
   Dimensions,
   PanResponder,
-  Animated
+  Animated,
+  ActivityIndicator
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -24,23 +25,181 @@ import {
   ArrowCircleRight,
   ExportSquare,
   Share as ShareIcon,
-  Star,
+  Star1,
   CalendarTick,
   Game,
   Gift,
-  Heart
+  Heart,
+  Shop,
+  TrendDown
 } from 'iconsax-react-nativejs';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Animated Favorite Button Component with Sparkle Burst
+const SPARKLE_COUNT = 6;
+const SPARKLE_PARTICLES = Array.from({ length: SPARKLE_COUNT }).map((_, i) => {
+  const angle = (i * 2 * Math.PI) / SPARKLE_COUNT;
+  return {
+    x: Math.cos(angle) * 24,
+    y: Math.sin(angle) * 24,
+  };
+});
+
+interface FavoriteButtonProps {
+  isSaved: boolean;
+  onToggle: () => void;
+  containerStyle?: any;
+  className?: string;
+  iconSize?: string;
+  inactiveColor?: string;
+  hitSlop?: number | { top?: number; bottom?: number; left?: number; right?: number };
+}
+
+function FavoriteButton({
+  isSaved,
+  onToggle,
+  containerStyle,
+  className,
+  iconSize = '18',
+  inactiveColor,
+  hitSlop
+}: FavoriteButtonProps) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const sparkleAnim = useRef(new Animated.Value(0)).current;
+
+  const handlePress = () => {
+    if (!isSaved) {
+      sparkleAnim.setValue(0);
+      scaleAnim.setValue(0.75);
+
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 3,
+          tension: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(sparkleAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.sequence([
+        Animated.timing(scaleAnim, { toValue: 0.8, duration: 90, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, friction: 4, useNativeDriver: true }),
+      ]).start();
+    }
+
+    onToggle();
+  };
+
+  return (
+    <View className="relative items-center justify-center">
+      {/* Sparkle Particles Burst */}
+      {SPARKLE_PARTICLES.map((sparkle, idx) => {
+        const sparkleScale = sparkleAnim.interpolate({
+          inputRange: [0, 0.4, 1],
+          outputRange: [0, 1.2, 0],
+        });
+        const sparkleOpacity = sparkleAnim.interpolate({
+          inputRange: [0, 0.7, 1],
+          outputRange: [1, 1, 0],
+        });
+        const translateX = sparkleAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, sparkle.x],
+        });
+        const translateY = sparkleAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, sparkle.y],
+        });
+
+        return (
+          <Animated.View
+            key={idx}
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              transform: [{ translateX }, { translateY }, { scale: sparkleScale }],
+              opacity: sparkleOpacity,
+              zIndex: 10,
+            }}
+          >
+            <Star1 size="10" color="#22c55e" variant="Bold" />
+          </Animated.View>
+        );
+      })}
+
+      <Pressable
+        onPress={handlePress}
+        hitSlop={hitSlop}
+        style={containerStyle}
+        className={className}
+      >
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <Heart
+            size={iconSize}
+            color={isSaved ? '#22c55e' : inactiveColor}
+            variant={isSaved ? 'Bold' : 'Outline'}
+          />
+        </Animated.View>
+      </Pressable>
+    </View>
+  );
+}
+
+interface CheapSharkStore {
+  storeID: string;
+  storeName: string;
+  isActive: number;
+  images: {
+    banner: string;
+    logo: string;
+    icon: string;
+  };
+}
+
+interface StoreMeta {
+  name: string;
+  icon: string;
+}
+
+interface StoreDealComparison {
+  storeID: string;
+  price: string;
+  retailPrice: string;
+  savings: string;
+  dealID: string;
+}
+
+interface CheapestPriceEver {
+  price: string;
+  date?: number;
+}
+
+interface ExtendedDealData {
+  metacriticScore?: string;
+  steamRatingPercent?: string;
+  steamRatingText?: string;
+  steamRatingCount?: string;
+  otherStores?: StoreDealComparison[];
+  cheapestPriceEver?: CheapestPriceEver;
+}
 
 interface DealItemProps {
   giveaway: FreeGiveaway;
   variant?: 'normal' | 'compact' | 'minimal';
   ctaText?: string;
-  // External props if parent controls state (Optional overrides)
   isSaved?: boolean;
   onToggleSave?: () => void;
 }
+
+// Global in-memory cache to prevent redundant fetches across deal cards
+let storeMetadataCache: Record<string, StoreMeta> | null = null;
+let isStoreFetchPending = false;
 
 export default function DealItem({ 
   giveaway, 
@@ -54,12 +213,16 @@ export default function DealItem({
   const [modalVisible, setModalVisible] = useState(false);
   const [internalIsSaved, setInternalIsSaved] = useState(false);
   
-  // Use controlled state if provided by parent, otherwise fall back to internal
-  const isSaved = externalIsSaved !== undefined ? externalIsSaved : internalIsSaved;
+  // Dynamic Store Map state
+  const [storeMap, setStoreMap] = useState<Record<string, StoreMeta>>(storeMetadataCache || {});
 
+  // Extended CheapShark metrics state
+  const [extendedData, setExtendedData] = useState<ExtendedDealData | null>(null);
+  const [loadingExtended, setLoadingExtended] = useState(false);
+
+  const isSaved = externalIsSaved !== undefined ? externalIsSaved : internalIsSaved;
   const translateY = useRef(new Animated.Value(0)).current;
 
-  // Resolve localized CTA text fallback chain
   const resolvedCtaText = ctaText || t('deals.claim', 'Claim');
 
   const isDark = themeMode === 'dark';
@@ -77,9 +240,56 @@ export default function DealItem({
   const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const iconColor = isDark ? '#a78bfa' : '#7c3aed';
 
-  // --- PERSISTENCE LOGIC (AsyncStorage Sync) ---
+  // 1. Dynamic Store Metadata Lookup & Storage Sync
+  useEffect(() => {
+    let isMounted = true;
 
-  // 1. On Mount: Check if this item is saved (only if parent doesn't handle state)
+    const loadStoreMetadata = async () => {
+      if (storeMetadataCache) {
+        if (isMounted) setStoreMap(storeMetadataCache);
+        return;
+      }
+
+      try {
+        const storedMap = await AsyncStorage.getItem('cheapshark_stores_map');
+        if (storedMap) {
+          const parsed = JSON.parse(storedMap);
+          storeMetadataCache = parsed;
+          if (isMounted) setStoreMap(parsed);
+          return;
+        }
+
+        if (!isStoreFetchPending) {
+          isStoreFetchPending = true;
+          const res = await fetch('https://www.cheapshark.com/api/1.0/stores');
+          if (res.ok) {
+            const rawStores: CheapSharkStore[] = await res.json();
+            const compiledMap: Record<string, StoreMeta> = {};
+
+            rawStores.forEach((s) => {
+              compiledMap[s.storeID] = {
+                name: s.storeName,
+                icon: `https://www.cheapshark.com${s.images.icon}`
+              };
+            });
+
+            storeMetadataCache = compiledMap;
+            await AsyncStorage.setItem('cheapshark_stores_map', JSON.stringify(compiledMap));
+            if (isMounted) setStoreMap(parsed);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to synchronize CheapShark store dictionary:', error);
+      } finally {
+        isStoreFetchPending = false;
+      }
+    };
+
+    loadStoreMetadata();
+    return () => { isMounted = false; };
+  }, []);
+
+  // 2. Saved State Sync
   useEffect(() => {
     if (externalIsSaved !== undefined) return;
 
@@ -100,7 +310,57 @@ export default function DealItem({
     return () => { isMounted = false; };
   }, [giveaway.id, externalIsSaved]);
 
-  // 2. Toggle Handler
+  // 3. Fetch CheapShark Ratings, Lowest Price Ever & Live Multi-Store Comparisons
+  useEffect(() => {
+    if (!modalVisible) return;
+
+    let isMounted = true;
+    const fetchCheapSharkExtendedMetrics = async () => {
+      const dealId = giveaway.id || (giveaway as any).dealID;
+      if (!dealId) return;
+
+      setLoadingExtended(true);
+      try {
+        const dealRes = await fetch(`https://www.cheapshark.com/api/1.0/deals?id=${dealId}`);
+        if (!dealRes.ok) throw new Error('Failed to fetch deal metrics');
+        const dealData = await dealRes.json();
+
+        const gameID = dealData.gameInfo?.gameID;
+        let comparisons: StoreDealComparison[] = [];
+        let cheapestEver: CheapestPriceEver | undefined = undefined;
+
+        if (gameID) {
+          const gameRes = await fetch(`https://www.cheapshark.com/api/1.0/games?id=${gameID}`);
+          if (gameRes.ok) {
+            const gameData = await gameRes.json();
+            if (Array.isArray(gameData.deals)) {
+              comparisons = gameData.deals;
+            }
+            cheapestEver = gameData.cheapestPriceEver;
+          }
+        }
+
+        if (isMounted) {
+          setExtendedData({
+            metacriticScore: dealData.gameInfo?.metacriticScore !== '0' ? dealData.gameInfo?.metacriticScore : undefined,
+            steamRatingPercent: dealData.gameInfo?.steamRatingPercent !== '0' ? dealData.gameInfo?.steamRatingPercent : undefined,
+            steamRatingText: dealData.gameInfo?.steamRatingText || undefined,
+            steamRatingCount: dealData.gameInfo?.steamRatingCount || undefined,
+            otherStores: comparisons,
+            cheapestPriceEver: cheapestEver
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching extended CheapShark payload:', error);
+      } finally {
+        if (isMounted) setLoadingExtended(false);
+      }
+    };
+
+    fetchCheapSharkExtendedMetrics();
+    return () => { isMounted = false; };
+  }, [modalVisible, giveaway.id]);
+
   const handleToggleSave = async () => {
     if (externalOnToggleSave) {
       externalOnToggleSave();
@@ -125,23 +385,11 @@ export default function DealItem({
     }
   };
 
-  // --- HELPERS & MATH SAFEGUARDS ---
-
-  const normalizeStorePlatform = (storeId?: string | number) => {
-    if (!storeId) return t('deals.retailer', 'Retailer');
-    switch (storeId.toString()) {
-      case '1': return 'Steam';
-      case '2': return 'GamersGate';
-      case '3': return 'GreenManGaming';
-      case '7': return 'GOG';
-      case '11': 
-      case '25': return 'Epic Games';
-      case '34': return 'Amazon';
-      default: return `${t('deals.store', 'Store')} #${storeId}`;
-    }
-  };
-
-  const displayPlatform = normalizeStorePlatform(giveaway.storeID || giveaway.platform);
+  const currentStoreId = giveaway.storeID || giveaway.platform;
+  const storeMetaInfo = storeMap[currentStoreId?.toString() || ''];
+  
+  const displayPlatform = storeMetaInfo?.name || t('deals.store', 'Digital Store');
+  const currentStoreIcon = storeMetaInfo?.icon || null;
 
   const salePriceNum = Number.isNaN(parseFloat(giveaway.salePrice || '0')) ? 0 : parseFloat(giveaway.salePrice || '0');
   const normalPriceNum = Number.isNaN(parseFloat(giveaway.normalPrice || '0')) ? 0 : parseFloat(giveaway.normalPrice || '0');
@@ -150,8 +398,17 @@ export default function DealItem({
   const totalCashSaved = Math.max(0, normalPriceNum - salePriceNum).toFixed(2);
   const hasValidPrice = giveaway.normalPrice && normalPriceNum > salePriceNum && parseFloat(totalCashSaved) > 0;
 
-  const handleOpenClaimSite = async () => {
-    const targetUrl = giveaway.open_giveaway_url || giveaway.game_url;
+  // Lowest Price Ever Logic
+  const lowestPriceEverVal = extendedData?.cheapestPriceEver?.price
+    ? parseFloat(extendedData.cheapestPriceEver.price)
+    : null;
+  const isAllTimeLow = lowestPriceEverVal !== null && salePriceNum <= lowestPriceEverVal;
+  const lowestPriceEverDate = extendedData?.cheapestPriceEver?.date
+    ? new Date(extendedData.cheapestPriceEver.date * 1000).toLocaleDateString()
+    : null;
+
+  const handleOpenClaimSite = async (customUrl?: string) => {
+    const targetUrl = customUrl || giveaway.open_giveaway_url || giveaway.game_url;
     if (!targetUrl) return;
     try {
       await WebBrowser.openBrowserAsync(targetUrl, {
@@ -190,7 +447,6 @@ export default function DealItem({
     }
   };
 
-  // Static PanResponder initialization
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -222,11 +478,13 @@ export default function DealItem({
     })
   ).current;
 
+  const activeSteamPercent = extendedData?.steamRatingPercent || giveaway.steamRatingPercent;
+  const activeSteamText = extendedData?.steamRatingText;
+  const activeMetacritic = extendedData?.metacriticScore;
+
   return (
     <>
-      {/* =========================================================================
-          MINIMAL VARIANT
-          ========================================================================= */}
+      {/* MINIMAL VARIANT */}
       {isMinimal && (
         <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
           <ThemedView
@@ -272,7 +530,7 @@ export default function DealItem({
                 </View>
 
                 <View className="flex-row items-center gap-2">
-                  <Pressable onPress={handleOpenClaimSite} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
+                  <Pressable onPress={() => handleOpenClaimSite()} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
                     <ExportSquare size="13" color={iconColor} variant="Outline" />
                   </Pressable>
                   <Pressable onPress={handleShare} hitSlop={8} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
@@ -285,9 +543,7 @@ export default function DealItem({
         </Pressable>
       )}
 
-      {/* =========================================================================
-          COMPACT VARIANT (With Save Button)
-          ========================================================================= */}
+      {/* COMPACT VARIANT */}
       {isCompact && (
         <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
           <ThemedView
@@ -304,6 +560,15 @@ export default function DealItem({
             <View className="relative w-28 h-28 rounded-xl overflow-hidden bg-zinc-800">
               <Image source={{ uri: giveaway.thumbnail || giveaway.image }} className="w-full h-full" resizeMode="cover" />
               <View className="absolute inset-0 bg-black/10" />
+
+              {/* Store Logo Overlay (Top Left) */}
+              <View className="absolute top-1.5 left-1.5 bg-black/70 p-1 rounded-lg border border-white/10 flex-row items-center justify-center">
+                {currentStoreIcon ? (
+                  <Image source={{ uri: currentStoreIcon }} className="w-3.5 h-3.5 rounded-sm" resizeMode="contain" />
+                ) : (
+                  <Shop size="12" color="#c084fc" variant="Bold" />
+                )}
+              </View>
 
               {hasValidPrice && (
                 <View className="absolute bottom-1.5 left-1.5 bg-purple-600 px-1.5 py-0.5 rounded shadow-sm">
@@ -336,12 +601,17 @@ export default function DealItem({
                   </ThemedText>
                 </View>
 
-                {/* Compact Mode Actions */}
                 <View className="flex-row items-center gap-2">
-                  <Pressable onPress={handleToggleSave} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
-                    <Heart size="15" color={isSaved ? '#22c55e' : iconColor} variant={isSaved ? 'Bold' : 'Outline'} />
-                  </Pressable>
-                  <Pressable onPress={handleOpenClaimSite} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
+                  <FavoriteButton
+                    isSaved={isSaved}
+                    onToggle={handleToggleSave}
+                    containerStyle={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
+                    className="p-1.5 rounded-lg border active:opacity-60"
+                    iconSize="15"
+                    inactiveColor={iconColor}
+                    hitSlop={10}
+                  />
+                  <Pressable onPress={() => handleOpenClaimSite()} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
                     <ExportSquare size="15" color={iconColor} variant="Outline" />
                   </Pressable>
                   <Pressable onPress={handleShare} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-1.5 rounded-lg border active:opacity-60">
@@ -354,9 +624,7 @@ export default function DealItem({
         </Pressable>
       )}
 
-      {/* =========================================================================
-          NORMAL VARIANT (With Save Button)
-          ========================================================================= */}
+      {/* NORMAL VARIANT */}
       {!isMinimal && !isCompact && (
         <Pressable onPress={() => setModalVisible(true)} className="active:opacity-95">
           <ThemedView
@@ -374,13 +642,26 @@ export default function DealItem({
               <Image source={{ uri: giveaway.image || giveaway.thumbnail }} className="w-full h-full" resizeMode="cover" />
               <View className="absolute inset-0 bg-black/10" />
 
+              {/* Savings Badge (Top Left) */}
               {hasValidPrice && (
-                <View className="absolute top-3 right-3 bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
+                <View className="absolute top-3 left-3 bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
                   <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
                     {t('deals.save_amount', { defaultValue: 'SAVE ${{amount}}', amount: totalCashSaved })}
                   </Text>
                 </View>
               )}
+
+              {/* Store Logo & Name Overlay (Bottom Left) */}
+              <View className="absolute bottom-3 left-3 bg-black/75 px-2 py-1 rounded-lg border border-white/10 flex-row items-center gap-1.5">
+                {currentStoreIcon ? (
+                  <Image source={{ uri: currentStoreIcon }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
+                ) : (
+                  <Shop size="14" color="#c084fc" variant="Bold" />
+                )}
+                <Text className="text-[9px] font-montBlack text-purple-300 uppercase tracking-wider">
+                  {displayPlatform}
+                </Text>
+              </View>
             </View>
 
             <View className="p-4">
@@ -415,13 +696,19 @@ export default function DealItem({
                   </View>
 
                   <View className="flex-row items-center gap-2">
-                    <Pressable onPress={handleOpenClaimSite} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
+                    <Pressable onPress={() => handleOpenClaimSite()} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
                       <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
                     </Pressable>
 
-                    <Pressable onPress={handleToggleSave} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
-                      <Heart size="15" color={isSaved ? '#22c55e' : (isDark ? '#a78bfa' : '#9333ea')} variant={isSaved ? 'Bold' : 'Outline'} />
-                    </Pressable>
+                    <FavoriteButton
+                      isSaved={isSaved}
+                      onToggle={handleToggleSave}
+                      containerStyle={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
+                      className="p-2 rounded-xl border active:opacity-60"
+                      iconSize="15"
+                      inactiveColor={isDark ? '#a78bfa' : '#9333ea'}
+                      hitSlop={10}
+                    />
 
                     <Pressable onPress={handleShare} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
                       <ShareIcon size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
@@ -434,9 +721,7 @@ export default function DealItem({
         </Pressable>
       )}
 
-      {/* =========================================================================
-          DETAIL MODAL
-          ========================================================================= */}
+      {/* DETAIL MODAL WITH CHEAPSHARK ENHANCEMENTS */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -484,8 +769,14 @@ export default function DealItem({
                 />
               </View>
 
-              <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-0.5 rounded border border-purple-500/30">
-                <Text className="text-[9px] font-montBlack text-purple-400 tracking-wider uppercase">
+              {/* Dynamic Store Logo Badge Overlay */}
+              <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-1 rounded-lg border border-purple-500/30 flex-row items-center gap-2">
+                {currentStoreIcon ? (
+                  <Image source={{ uri: currentStoreIcon }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
+                ) : (
+                  <Shop size="14" color="#c084fc" variant="Bold" />
+                )}
+                <Text className="text-[10px] font-montBlack text-purple-400 tracking-wider uppercase">
                   {displayPlatform}
                 </Text>
               </View>
@@ -520,15 +811,31 @@ export default function DealItem({
                   {giveaway.title}
                 </ThemedText>
 
+                {/* Status & Trust Badges Row */}
                 <View className="flex-row flex-wrap gap-2 mb-4">
-                  {giveaway.steamRatingPercent && (
+                  {/* Community Trust: Steam Rating */}
+                  {activeSteamPercent && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
-                      <Star size="12" color="#eab308" variant="Bold" />
+                      <Star1 size="14" color="#eab308" variant="Outline" />
                       <ThemedText className="text-[10px] font-montBold opacity-85">
-                        {t('deals.rating', { defaultValue: '{{percent}}% Rating', percent: giveaway.steamRatingPercent })}
+                        {t('deals.steam_rating', {
+                          defaultValue: '{{percent}}% Steam Rating {{text}}',
+                          percent: activeSteamPercent,
+                          text: activeSteamText ? `(${activeSteamText})` : ''
+                        })}
                       </ThemedText>
                     </View>
                   )}
+
+                  {/* Community Trust: Metacritic Score */}
+                  {activeMetacritic && (
+                    <View className="bg-amber-500/20 border border-amber-500/30 px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                      <ThemedText className="text-[10px] font-montBlack text-amber-500">
+                        {t('deals.metacritic_score', { defaultValue: 'Metacritic: {{score}}', score: activeMetacritic })}
+                      </ThemedText>
+                    </View>
+                  )}
+
                   {giveaway.release_date && giveaway.release_date !== '0' && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                       <CalendarTick size="12" color={iconColor} variant="Outline" />
@@ -537,6 +844,7 @@ export default function DealItem({
                       </ThemedText>
                     </View>
                   )}
+
                   {giveaway.publisher && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                       <Game size="12" color={iconColor} variant="Outline" />
@@ -548,11 +856,11 @@ export default function DealItem({
                 </View>
 
                 <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
-                  {giveaway.description || giveaway.short_description || t('deals.no_description', 'No additional description provided. Grab this deal before it expires or store pricing shifts back!')}
+                  {giveaway.description || giveaway.short_description || t('deals.no_description', 'No additional description provided.')}
                 </ThemedText>
 
                 {hasValidPrice && giveaway.savings && (
-                  <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
+                  <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-4">
                     <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
                       {t('deals.breakdown_title', 'Deal Breakdown:')}
                     </ThemedText>
@@ -566,6 +874,104 @@ export default function DealItem({
                     </ThemedText>
                   </View>
                 )}
+
+                {/* HISTORICAL LOWEST PRICE EVER SECTION */}
+                {lowestPriceEverVal !== null && (
+                  <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-4 flex-row items-center justify-between border border-emerald-500/20">
+                    <View className="flex-1 pr-2">
+                      <View className="flex-row items-center gap-1.5 mb-1">
+                        <TrendDown size="16" color="#10b981" variant="Outline" />
+                        <ThemedText className="font-montBold text-[11px] text-emerald-500">
+                          {t('deals.lowest_price_ever', 'Lowest Price Ever')}
+                        </ThemedText>
+                        {isAllTimeLow && (
+                          <View className="bg-emerald-500/20 px-1.5 py-0.2 rounded">
+                            <Text className="text-[8px] font-montBlack text-emerald-400 uppercase">
+                              {t('deals.all_time_low', 'All-Time Low!')}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
+                        {lowestPriceEverDate
+                          ? t('deals.lowest_price_record', {
+                              defaultValue: 'Historical low of ${{price}} reached on {{date}}',
+                              price: lowestPriceEverVal.toFixed(2),
+                              date: lowestPriceEverDate
+                            })
+                          : t('deals.lowest_price_nodate', {
+                              defaultValue: 'Historical low recorded at ${{price}}',
+                              price: lowestPriceEverVal.toFixed(2)
+                            })}
+                      </ThemedText>
+                    </View>
+                    <ThemedText className="font-montBlack text-sm text-emerald-500">
+                      ${lowestPriceEverVal.toFixed(2)}
+                    </ThemedText>
+                  </View>
+                )}
+
+                {/* LIVE MULTI-STORE PRICE COMPARISON SECTION */}
+                <View className="mb-4">
+                  <View className="flex-row items-center justify-between mb-2">
+                    <ThemedText className="font-montBlack text-xs uppercase tracking-wider text-purple-500">
+                      {t('deals.live_store_comparisons', 'Live Store Comparisons')}
+                    </ThemedText>
+                    {loadingExtended && <ActivityIndicator size="small" color="#9333ea" />}
+                  </View>
+
+                  {extendedData?.otherStores && extendedData.otherStores.length > 0 ? (
+                    <View style={{ backgroundColor: cardBgColor }} className="rounded-2xl p-2.5 space-y-2 border border-white/5">
+                      {extendedData.otherStores.map((comp) => {
+                        const compStoreInfo = storeMap[comp.storeID];
+                        const compStoreName = compStoreInfo?.name || t('deals.store', 'Digital Store');
+                        const compIcon = compStoreInfo?.icon || null;
+                        const compPriceNum = parseFloat(comp.price || '0');
+                        const isCheapestStore = compPriceNum <= salePriceNum;
+
+                        return (
+                          <View key={comp.dealID} className="flex-row items-center justify-between py-1.5 px-2 rounded-xl bg-black/10">
+                            <View className="flex-row items-center gap-2">
+                              {compIcon ? (
+                                <Image source={{ uri: compIcon }} className="w-4 h-4 rounded" resizeMode="contain" />
+                              ) : (
+                                <Shop size="14" color={iconColor} variant="Outline" />
+                              )}
+                              <ThemedText className="font-montBold text-[11px]">
+                                {compStoreName}
+                              </ThemedText>
+                              {isCheapestStore && (
+                                <View className="bg-emerald-500/20 px-1.5 py-0.2 rounded">
+                                  <Text className="text-[8px] font-montBlack text-emerald-400 uppercase">
+                                    {t('deals.best_price', 'Best Price')}
+                                  </Text>
+                                </View>
+                              )}
+                            </View>
+
+                            <View className="flex-row items-center gap-2">
+                              <Text className="text-[11px] font-montBlack text-emerald-500">
+                                ${compPriceNum.toFixed(2)}
+                              </Text>
+                              <Pressable
+                                onPress={() => handleOpenClaimSite(`https://www.cheapshark.com/redirect?dealID=${comp.dealID}`)}
+                                className="bg-purple-600/20 px-2 py-1 rounded-lg border border-purple-500/30 active:opacity-60"
+                              >
+                                <Text className="text-[9px] font-montBold text-purple-400">
+                                  {t('deals.view', 'View')}
+                                </Text>
+                              </Pressable>
+                            </View>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  ) : !loadingExtended ? (
+                    <ThemedText className="text-[11px] font-mont opacity-50 italic">
+                      {t('deals.no_competing_offers', 'No competing store offers currently registered for this title.')}
+                    </ThemedText>
+                  ) : null}
+                </View>
               </ScrollView>
 
               <View
@@ -578,17 +984,14 @@ export default function DealItem({
                 className="flex-row items-center gap-3 px-5 pt-3.5"
               >
                 <View className="flex-row items-center gap-3">
-                  <Pressable
-                    onPress={handleToggleSave}
-                    style={{ backgroundColor: cardBgColor }}
+                  <FavoriteButton
+                    isSaved={isSaved}
+                    onToggle={handleToggleSave}
+                    containerStyle={{ backgroundColor: cardBgColor }}
                     className="w-11 h-11 rounded-2xl flex-row items-center justify-center active:opacity-75"
-                  >
-                    <Heart 
-                      size="18" 
-                      color={isSaved ? "#22c55e" : (isDark ? "#a78bfa" : "#7c3aed")} 
-                      variant={isSaved ? "Bold" : "Outline"} 
-                    />
-                  </Pressable>
+                    iconSize="18"
+                    inactiveColor={isDark ? '#a78bfa' : '#7c3aed'}
+                  />
 
                   <Pressable
                     onPress={handleShare}
@@ -601,7 +1004,7 @@ export default function DealItem({
                 </View>
 
                 <Pressable
-                  onPress={handleOpenClaimSite}
+                  onPress={() => handleOpenClaimSite()}
                   style={{ backgroundColor: '#9333ea' }}
                   className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-2 active:opacity-85 shadow-lg shadow-purple-500/20"
                 >

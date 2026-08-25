@@ -1,6 +1,21 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation } from 'react-native';
-import { Moon, Sun1, WifiSquare, Filter, RowVertical, Element3 } from 'iconsax-react-nativejs';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation, TextInput } from 'react-native';
+import { 
+  Moon, 
+  Sun1, 
+  WifiSquare, 
+  Filter, 
+  RowVertical, 
+  Element3, 
+  SearchNormal, 
+  CloseCircle, 
+  Shop, 
+  Game, 
+  Gift, 
+  Flash, 
+  ArchiveAdd,
+  TrendUp 
+} from 'iconsax-react-nativejs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import GiveawayItem from '@/components/custom/GiveawayItem';
@@ -19,20 +34,28 @@ import { Giveaway } from '@/types';
 const LAYOUT_STORAGE_KEY = '@giveaways_layout_variant';
 
 const PLATFORMS = [
-  { id: 'all', labelKey: 'giveaways.platforms.all', labelDefault: 'All' },
-  { id: 'pc', labelKey: 'giveaways.platforms.pc', labelDefault: 'PC' },
-  { id: 'steam', labelKey: 'giveaways.platforms.steam', labelDefault: 'Steam' },
-  { id: 'epic-games-store', labelKey: 'giveaways.platforms.epic', labelDefault: 'Epic' },
-  { id: 'gog', labelKey: 'giveaways.platforms.gog', labelDefault: 'GOG' },
-  { id: 'ps4', labelKey: 'giveaways.platforms.ps4', labelDefault: 'PS4' },
-  { id: 'ps5', labelKey: 'giveaways.platforms.ps5', labelDefault: 'PS5' },
-  { id: 'xbox-series-xs', labelKey: 'giveaways.platforms.xboxSeries', labelDefault: 'Xbox Series' },
-  { id: 'xbox-one', labelKey: 'giveaways.platforms.xboxOne', labelDefault: 'Xbox One' },
-  { id: 'switch', labelKey: 'giveaways.platforms.switch', labelDefault: 'Switch' },
-  { id: 'android', labelKey: 'giveaways.platforms.android', labelDefault: 'Android' },
-  { id: 'ios', labelKey: 'giveaways.platforms.ios', labelDefault: 'iOS' },
-  { id: 'drm-free', labelKey: 'giveaways.platforms.drmFree', labelDefault: 'DRM-Free' },
-  { id: 'itchio', labelKey: 'giveaways.platforms.itchio', labelDefault: 'itch.io' },
+  { id: 'all', labelKey: 'giveaways.platforms.all', labelDefault: 'All', iconUri: null },
+  { id: 'pc', labelKey: 'giveaways.platforms.pc', labelDefault: 'PC', iconUri: 'https://www.svgrepo.com/show/382713/windows-applications.svg' },
+  { id: 'steam', labelKey: 'giveaways.platforms.steam', labelDefault: 'Steam', iconUri: 'https://www.svgrepo.com/show/452107/steam.svg' },
+  { id: 'epic-games-store', labelKey: 'giveaways.platforms.epic', labelDefault: 'Epic', iconUri: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  { id: 'gog', labelKey: 'giveaways.platforms.gog', labelDefault: 'GOG', iconUri: 'https://www.cheapshark.com/img/stores/icons/6.png' },
+  { id: 'ps4', labelKey: 'giveaways.platforms.ps4', labelDefault: 'PS4', iconUri: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  { id: 'ps5', labelKey: 'giveaways.platforms.ps5', labelDefault: 'PS5', iconUri: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  { id: 'xbox-series-xs', labelKey: 'giveaways.platforms.xboxSeries', labelDefault: 'Xbox Series', iconUri: 'https://www.svgrepo.com/show/303368/xbox-9-logo.svg' },
+  { id: 'xbox-one', labelKey: 'giveaways.platforms.xboxOne', labelDefault: 'Xbox One', iconUri: 'https://www.svgrepo.com/show/452137/xbox.svg' },
+  { id: 'switch', labelKey: 'giveaways.platforms.switch', labelDefault: 'Switch', iconUri: 'https://www.svgrepo.com/show/388137/nintendo-switch.svg' },
+  { id: 'android', labelKey: 'giveaways.platforms.android', labelDefault: 'Android', iconUri: 'https://www.svgrepo.com/show/475427/android.svg' },
+  { id: 'ios', labelKey: 'giveaways.platforms.ios', labelDefault: 'iOS', iconUri: 'https://www.svgrepo.com/show/494331/apple-round.svg' },
+  { id: 'drm-free', labelKey: 'giveaways.platforms.drmFree', labelDefault: 'DRM-Free', iconUri: 'https://www.svgrepo.com/show/477064/unlock.svg' },
+  { id: 'itchio', labelKey: 'giveaways.platforms.itchio', labelDefault: 'itch.io', iconUri: 'https://www.svgrepo.com/show/452232/itch-io.svg' },
+];
+
+
+const GIVEAWAY_TYPES = [
+  { id: 'all', labelKey: 'giveaways.types.all', labelDefault: 'All Types', icon: ArchiveAdd },
+  { id: 'game', labelKey: 'giveaways.types.game', labelDefault: 'Full Games', icon: Game },
+  { id: 'loot', labelKey: 'giveaways.types.loot', labelDefault: 'DLC & Loot', icon: Gift },
+  { id: 'beta', labelKey: 'giveaways.types.beta', labelDefault: 'Beta Access', icon: Flash },
 ];
 
 interface PaginationButtonProps {
@@ -61,9 +84,6 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
   );
 }
 
-// =========================================================================
-// HIGH FIDELITY WORTH SUMMARY SKELETON
-// =========================================================================
 function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
   const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
 
@@ -84,9 +104,6 @@ function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { is
   );
 }
 
-// =========================================================================
-// HIGH FIDELITY HIGHEST WORTH CAROUSEL SKELETON
-// =========================================================================
 function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
   const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
   const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
@@ -154,9 +171,6 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
   );
 }
 
-// =========================================================================
-// HIGH FIDELITY CARD LIST SKELETON
-// =========================================================================
 function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string; variant: 'normal' | 'compact' }) {
   const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
   const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
@@ -219,7 +233,9 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
 
 export default function GiveawayScreen() {
   const scrollRef = useRef<ScrollView>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const { t } = useTranslation(undefined, { i18n: i18nInstanceSource });
+
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
@@ -227,8 +243,15 @@ export default function GiveawayScreen() {
   const itemsPerPage = 10;
   const [prices, setPrices] = useState(0);
   const [worth, setWorth] = useState(0);
+
+  // Filters & Search
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('date');
   const [showFilterBar, setShowFilterBar] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('compact');
   
   const backgroundColor = useThemeColor({}, 'background');
@@ -236,11 +259,19 @@ export default function GiveawayScreen() {
   const isDark = themeMode === 'dark';
   const cardBgColor = isDark ? '#2c2c35' : '#f1f2f6';
   const adaptiveBorderColor = isDark ? '#3a3a45' : '#e4e4e7';
+
+  // Client-side search filtering
+  const filteredGiveaways = useMemo(() => {
+    if (!searchQuery.trim()) return giveaways;
+    return giveaways.filter(item => 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase().trim())
+    );
+  }, [giveaways, searchQuery]);
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentPagedGiveaways = giveaways.slice(startIndex, endIndex);
+  const currentPagedGiveaways = filteredGiveaways.slice(startIndex, endIndex);
 
-  // Load persisted layout preference on mount
   useEffect(() => {
     const loadSavedLayout = async () => {
       try {
@@ -264,17 +295,21 @@ export default function GiveawayScreen() {
       setPrices(worthRes.active_giveaways_number);
       setWorth(worthRes.worth_estimation_usd);
     } catch (error) {
-      console.error("Couldn't fetch prices:", error);
+      console.error("Couldn't fetch worth estimation:", error);
     }
   };
 
-  const fetchData = async (platform: string = 'all') => {
+  const fetchData = async (platform: string = 'all', type: string = 'all', sort: string = 'date') => {
     setIsLoading(true);
     setHasError(false);
     try {
-      const url = platform === 'all'
-        ? API_ENDPOINTS.Giveaways
-        : `${API_ENDPOINTS.Giveaways}?platform=${platform}`;
+      let queryParams: string[] = [];
+      if (platform !== 'all') queryParams.push(`platform=${platform}`);
+      if (type !== 'all') queryParams.push(`type=${type}`);
+      if (sort !== 'date') queryParams.push(`sort-by=${sort}`);
+
+      const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+      const url = `${API_ENDPOINTS.Giveaways}${queryString}`;
 
       const response = await fetch(url);
       if (!response.ok) throw new Error('Server returned invalid status payload');
@@ -283,7 +318,7 @@ export default function GiveawayScreen() {
       setGiveaways(Array.isArray(finalData) ? finalData : []);
       await checkWorth();
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching giveaways:', error);
       setHasError(true);
     } finally {
       setIsLoading(false);
@@ -291,12 +326,22 @@ export default function GiveawayScreen() {
   };
 
   useEffect(() => {
-    fetchData(selectedPlatform);
-  }, [selectedPlatform]);
+    const handler = setTimeout(() => {
+      setCurrentPage(1);
+      fetchData(selectedPlatform, selectedType, sortBy);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [selectedPlatform, selectedType, sortBy]);
 
   const handlePlatformChange = (platformId: string) => {
     setCurrentPage(1);
     setSelectedPlatform(platformId);
+  };
+
+  const handleTypeChange = (typeId: string) => {
+    setCurrentPage(1);
+    setSelectedType(typeId);
   };
 
   const handleNextPage = () => {
@@ -328,18 +373,23 @@ export default function GiveawayScreen() {
     setShowFilterBar(prev => !prev);
   };
 
+  const handleSearchBarToggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const nextState = !showSearchBar;
+    setShowSearchBar(nextState);
+    if (!nextState) {
+      setSearchQuery('');
+    } else {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  };
+
   const now = new Date();
   const day = now.getDate();
   const year = now.getFullYear();
 
-  const monthKeys = [
-    'january', 'february', 'march', 'april', 'may', 'june',
-    'july', 'august', 'september', 'october', 'november', 'december'
-  ];
-  const monthDefaults = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
+  const monthKeys = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+  const monthDefaults = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const currentMonthIndex = now.getMonth();
   const localizedMonth = t(`months.${monthKeys[currentMonthIndex]}`, monthDefaults[currentMonthIndex]);
 
@@ -352,8 +402,8 @@ export default function GiveawayScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* --- PREMIUM BRAND HEADER ROW --- */}
-        <View className="flex-row items-center justify-between w-full mb-6">
+        {/* --- BRAND HEADER ROW --- */}
+        <View className="flex-row items-center justify-between w-full mb-4">
           <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
             <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
               <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -363,8 +413,15 @@ export default function GiveawayScreen() {
             </ThemedText>
           </Pressable>
 
-          {/* Symmetrical Header Action Controls Group */}
           <View className="flex-row items-center gap-2">
+            <Pressable
+              onPress={handleSearchBarToggle}
+              style={{ backgroundColor: showSearchBar ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
+              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
+            >
+              <SearchNormal size="18" color={showSearchBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
+            </Pressable>
+
             <Pressable
               onPress={handleLayoutVariantToggle}
               style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
@@ -379,51 +436,99 @@ export default function GiveawayScreen() {
 
             <Pressable
               onPress={handleFilterBarToggle}
-              style={{
-                backgroundColor: showFilterBar
-                  ? '#9333ea'
-                  : (isDark ? '#27272a' : '#f4f4f5')
-              }}
+              style={{ backgroundColor: showFilterBar || selectedType !== 'all' ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5') }}
               className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
             >
-              <Filter
-                size="18"
-                color={showFilterBar ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')}
-                variant="Broken"
-              />
+              <Filter size="18" color={showFilterBar || selectedType !== 'all' ? '#ffffff' : (isDark ? '#f4f4f5' : '#3f3f46')} variant="Broken" />
             </Pressable>
 
-            <Pressable
-              onPress={toggleTheme}
-              style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
-              className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0"
-            >
-              {isDark ? (
-                <Sun1 size="18" color="#f4f4f5" variant="Broken" />
-              ) : (
-                <Moon size="18" color="#3f3f46" variant="Broken" />
-              )}
+            <Pressable onPress={toggleTheme} style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }} className="w-9 h-9 rounded-full items-center justify-center active:opacity-70 shadow-sm shrink-0">
+              {isDark ? <Sun1 size="18" color="#f4f4f5" variant="Broken" /> : <Moon size="18" color="#3f3f46" variant="Broken" />}
             </Pressable>
           </View>
         </View>
 
-        {/* --- UNCLIPPED HORIZONTAL SCROLLFILTER SECTION --- */}
+        {/* --- SEARCH INPUT BAR --- */}
+        {showSearchBar && (
+          <View className="w-full mb-4">
+            <View
+              style={{
+                backgroundColor: cardBgColor,
+                borderWidth: 1,
+                borderColor: adaptiveBorderColor,
+              }}
+              className="flex-row items-center px-3.5 h-12 rounded-2xl shadow-sm"
+            >
+              <SearchNormal size="18" color={isDark ? '#a3a3b5' : '#71717a'} variant="Broken" />
+              <TextInput
+                ref={searchInputRef}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={t('giveaways.search.placeholder', 'Search active giveaways...')}
+                placeholderTextColor={isDark ? '#71717a' : '#a1a1aa'}
+                style={{ color: isDark ? '#ffffff' : '#1c1c1e' }}
+                className="flex-1 ml-2.5 mr-1 font-mont text-sm h-full"
+                returnKeyType="search"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={() => setSearchQuery('')} className="p-1 active:opacity-60">
+                  <CloseCircle size="18" color={isDark ? '#a3a3b5' : '#71717a'} variant="Bold" />
+                </Pressable>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* --- DYNAMIC FILTER BAR (TYPES + PLATFORMS) --- */}
         {showFilterBar && (
-          <View className="w-full mb-5">
+          <View className="w-full mb-5 space-y-2">
+            {/* Giveaway Type Chips */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               className="-mx-4 py-1"
-              style={{ height: 50 }}
-              contentContainerStyle={{
-                alignItems: 'center',
-                gap: 8,
-                paddingHorizontal: 16
-              }}
+              style={{ height: 44 }}
+              contentContainerStyle={{ alignItems: 'center', gap: 8, paddingHorizontal: 16 }}
+            >
+              {GIVEAWAY_TYPES.map((type) => {
+                const isSelected = selectedType === type.id;
+                const IconComponent = type.icon;
+                return (
+                  <Pressable
+                    key={type.id}
+                    onPress={() => handleTypeChange(type.id)}
+                    style={{
+                      backgroundColor: isSelected ? '#22c55e' : (isDark ? '#27272a' : '#f4f4f5'),
+                      borderWidth: 1,
+                      borderColor: isSelected ? '#22c55e' : (isDark ? '#3c3c3a' : '#e4e4e7'),
+                      height: 34,
+                    }}
+                    className="px-3 rounded-full flex-row items-center gap-1.5 shadow-sm"
+                  >
+                    <IconComponent size="13" color={isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a')} variant="Bold" />
+                    <ThemedText
+                      style={{ color: isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a') }}
+                      className={`text-xs ${isSelected ? 'font-montBlack' : 'font-montBold'}`}
+                    >
+                      {t(type.labelKey, type.labelDefault)}
+                    </ThemedText>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            {/* Platform Chips with Logos */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="-mx-4 py-1"
+              style={{ height: 44 }}
+              contentContainerStyle={{ alignItems: 'center', gap: 8, paddingHorizontal: 16 }}
             >
               {PLATFORMS.map((platform) => {
                 const isSelected = selectedPlatform === platform.id;
-                const localizedLabel = t(platform.labelKey, platform.labelDefault);
                 return (
                   <Pressable
                     key={platform.id}
@@ -432,15 +537,20 @@ export default function GiveawayScreen() {
                       backgroundColor: isSelected ? '#9333ea' : (isDark ? '#27272a' : '#f4f4f5'),
                       borderWidth: 1,
                       borderColor: isSelected ? '#9333ea' : (isDark ? '#3c3c3a' : '#e4e4e7'),
-                      height: 36,
+                      height: 34,
                     }}
-                    className="px-4 rounded-full items-center justify-center shadow-sm"
+                    className="px-3.5 rounded-full flex-row items-center gap-1.5 shadow-sm"
                   >
+                    {platform.iconUri ? (
+                      <Image source={{ uri: platform.iconUri }} className="w-3.5 h-3.5 rounded-sm" resizeMode="contain" />
+                    ) : (
+                      <Shop size="13" color={isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a')} variant="Bold" />
+                    )}
                     <ThemedText
                       style={{ color: isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a') }}
                       className={`text-xs ${isSelected ? 'font-montBlack' : 'font-montBold'}`}
                     >
-                      {localizedLabel}
+                      {t(platform.labelKey, platform.labelDefault)}
                     </ThemedText>
                   </Pressable>
                 );
@@ -451,22 +561,14 @@ export default function GiveawayScreen() {
 
         {/* --- CAROUSEL OR SKELETON LOADER SECTION --- */}
         {isLoading ? (
-          selectedPlatform === 'all' && (
+          selectedPlatform === 'all' && selectedType === 'all' && !searchQuery && (
             <View className="w-full">
-              <WorthSummarySkeleton
-                isDark={isDark}
-                cardBgColor={cardBgColor}
-                adaptiveBorderColor={adaptiveBorderColor}
-              />
-              <CarouselSkeleton
-                isDark={isDark}
-                cardBgColor={cardBgColor}
-                adaptiveBorderColor={adaptiveBorderColor}
-              />
+              <WorthSummarySkeleton isDark={isDark} cardBgColor={cardBgColor} adaptiveBorderColor={adaptiveBorderColor} />
+              <CarouselSkeleton isDark={isDark} cardBgColor={cardBgColor} adaptiveBorderColor={adaptiveBorderColor} />
             </View>
           )
         ) : (
-          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && (
+          !hasError && giveaways.length > 0 && selectedPlatform === 'all' && selectedType === 'all' && !searchQuery && (
             <>
               <View
                 style={[
@@ -517,7 +619,7 @@ export default function GiveawayScreen() {
             <Button
               type="primary"
               loading={isLoading}
-              onPress={() => fetchData(selectedPlatform)}
+              onPress={() => fetchData(selectedPlatform, selectedType, sortBy)}
               className="w-full"
               text={t('giveaways.error.retryButton', 'Retry Connection')}
             />
@@ -529,7 +631,7 @@ export default function GiveawayScreen() {
             adaptiveBorderColor={adaptiveBorderColor}
             isDark={isDark}
           />
-        ) : giveaways.length === 0 ? (
+        ) : filteredGiveaways.length === 0 ? (
           <View
             style={[
               { backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor },
@@ -547,13 +649,17 @@ export default function GiveawayScreen() {
               {t('giveaways.empty.title', 'No Giveaways Found')}
             </ThemedText>
             <ThemedText className="font-mont text-zinc-500 dark:text-zinc-400 text-sm text-center leading-relaxed mb-6 px-4">
-              {t('giveaways.empty.description', 'There are no active giveaways available for this platform right now.')}
+              {t('giveaways.empty.description', searchQuery ? `No giveaways matching "${searchQuery}" were found.` : 'There are no active giveaways available under this filter combination right now.')}
             </ThemedText>
             <Button
               type="primary"
-              onPress={() => handlePlatformChange('all')}
+              onPress={() => {
+                setSearchQuery('');
+                setSelectedType('all');
+                handlePlatformChange('all');
+              }}
               className="w-full"
-              text={t('giveaways.empty.viewAllButton', 'View All Platforms')}
+              text={t('giveaways.empty.viewAllButton', 'Reset Filters')}
             />
           </View>
         ) : (
@@ -569,10 +675,10 @@ export default function GiveawayScreen() {
         )}
 
         {/* --- BALANCED PAGINATION FOOTER TOOLBAR --- */}
-        {!isLoading && !hasError && giveaways.length > 0 && (
+        {!isLoading && !hasError && filteredGiveaways.length > itemsPerPage && (
           <View className="mt-4 w-full mb-24">
             {currentPage === 1 ? (
-              endIndex < giveaways.length && (
+              endIndex < filteredGiveaways.length && (
                 <PaginationButton
                   text={t('giveaways.pagination.next', 'Next Page')}
                   onPress={handleNextPage}
@@ -588,7 +694,7 @@ export default function GiveawayScreen() {
                     isDark={isDark}
                   />
                 </View>
-                {endIndex < giveaways.length && (
+                {endIndex < filteredGiveaways.length && (
                   <View className="flex-1">
                     <PaginationButton
                       text={t('giveaways.pagination.next', 'Next Page')}

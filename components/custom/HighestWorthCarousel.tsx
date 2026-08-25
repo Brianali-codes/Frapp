@@ -15,7 +15,8 @@ import {
   Image
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { useTranslation } from 'react-i18next'; // Integrated Translation Hook
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/ThemedText';
 import { API_ENDPOINTS } from '@/constants/api';
 import { Giveaway } from '@/types';
@@ -28,27 +29,157 @@ import {
   CalendarTick, 
   InfoCircle, 
   Game,
-  TimerStart 
+  TimerStart,
+  Heart,
+  Star1
 } from 'iconsax-react-nativejs';
 
 const CORE_BANNER_HEIGHT = 160; 
 const AUTOSCROLL_INTERVAL = 4000; 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// Sparkle Burst Particle Constants
+const SPARKLE_COUNT = 6;
+const SPARKLE_PARTICLES = Array.from({ length: SPARKLE_COUNT }).map((_, i) => {
+  const angle = (i * 2 * Math.PI) / SPARKLE_COUNT;
+  return {
+    x: Math.cos(angle) * 24,
+    y: Math.sin(angle) * 24,
+  };
+});
+
+interface FavoriteButtonProps {
+  isSaved: boolean;
+  onToggle: () => void;
+  containerStyle?: any;
+  className?: string;
+  iconSize?: string;
+  inactiveColor?: string;
+  hitSlop?: number | { top?: number; bottom?: number; left?: number; right?: number };
+}
+
+function FavoriteButton({
+  isSaved,
+  onToggle,
+  containerStyle,
+  className,
+  iconSize = '18',
+  inactiveColor,
+  hitSlop
+}: FavoriteButtonProps) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const sparkleAnim = useRef(new Animated.Value(0)).current;
+
+  const handlePress = () => {
+    if (!isSaved) {
+      sparkleAnim.setValue(0);
+      scaleAnim.setValue(0.75);
+
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 3,
+          tension: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(sparkleAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.sequence([
+        Animated.timing(scaleAnim, { toValue: 0.8, duration: 90, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, friction: 4, useNativeDriver: true }),
+      ]).start();
+    }
+
+    onToggle();
+  };
+
+  return (
+    <View className="relative items-center justify-center">
+      {/* Sparkle Particles Burst */}
+      {SPARKLE_PARTICLES.map((sparkle, idx) => {
+        const sparkleScale = sparkleAnim.interpolate({
+          inputRange: [0, 0.4, 1],
+          outputRange: [0, 1.2, 0],
+        });
+        const sparkleOpacity = sparkleAnim.interpolate({
+          inputRange: [0, 0.7, 1],
+          outputRange: [1, 1, 0],
+        });
+        const translateX = sparkleAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, sparkle.x],
+        });
+        const translateY = sparkleAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, sparkle.y],
+        });
+
+        return (
+          <Animated.View
+            key={idx}
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              transform: [{ translateX }, { translateY }, { scale: sparkleScale }],
+              opacity: sparkleOpacity,
+              zIndex: 10,
+            }}
+          >
+            <Star1 size="10" color="#22c55e" variant="Bold" />
+          </Animated.View>
+        );
+      })}
+
+      <Pressable
+        onPress={handlePress}
+        hitSlop={hitSlop}
+        style={containerStyle}
+        className={className}
+      >
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <Heart
+            size={iconSize}
+            color={isSaved ? '#22c55e' : inactiveColor}
+            variant={isSaved ? 'Bold' : 'Outline'}
+          />
+        </Animated.View>
+      </Pressable>
+    </View>
+  );
+}
+
 interface HighestWorthCarouselProps {
   onClaimPress?: (item: Giveaway) => void;
 }
 
 export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarouselProps) {
-  const { t } = useTranslation(); // Translation configuration hook injection
+  const { t } = useTranslation();
   const [items, setItems] = useState<Giveaway[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Giveaway | null>(null);
+  const [localIsSaved, setLocalIsSaved] = useState(false);
   
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const translateY = useRef(new Animated.Value(0)).current;
+
+  // Touch claim animation scale state
+  const claimScale = useRef(new Animated.Value(1)).current;
+
+  // Live countdown state
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    isExpired: boolean;
+  } | null>(null);
   
   const autoScrollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -59,34 +190,113 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
   const adaptiveBorderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
   const placeholderBg = isDark ? '#27272a' : '#e4e4e7';
   const iconColor = isDark ? '#a78bfa' : '#7c3aed';
+  const iconBtnBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
+  const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
 
-  // Helper to calculate relative days remaining localized properly
-  const getDaysRemainingText = (endDateString: string | undefined): { label: string; isDays: boolean } | null => {
-    if (!endDateString || endDateString === 'N/A') return null;
+  const padZero = (n: number) => String(n).padStart(2, '0');
 
-    const parsedDate = Date.parse(endDateString);
+  // Reset drag animation whenever modal visibility changes
+  useEffect(() => {
+    if (modalVisible) {
+      translateY.setValue(0);
+    }
+  }, [modalVisible]);
+
+  // Real-time tick timer calculating remaining duration down to seconds
+  useEffect(() => {
+    if (!selectedItem?.end_date || selectedItem.end_date === 'N/A') {
+      setTimeLeft(null);
+      return;
+    }
+
+    const parsedDate = Date.parse(selectedItem.end_date);
     if (isNaN(parsedDate)) {
-      return { label: `${t('deals.released', { date: '' })} ${endDateString}`, isDays: false };
+      setTimeLeft(null);
+      return;
     }
 
-    const targetDate = new Date(parsedDate);
-    const today = new Date();
-    
-    today.setHours(0, 0, 0, 0);
-    targetDate.setHours(0, 0, 0, 0);
+    const updateCountdown = () => {
+      const now = Date.now();
+      const diff = parsedDate - now;
 
-    const diffTime = targetDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true });
+        return;
+      }
 
-    if (diffDays < 0) {
-      return { label: t('giveaways.tracking.expired'), isDays: true };
-    } else if (diffDays === 0) {
-      return { label: t('giveaways.tracking.ends_today'), isDays: true };
-    } else if (diffDays === 1) {
-      return { label: t('giveaways.tracking.day_left'), isDays: true };
-    } else {
-      return { label: t('giveaways.tracking.days_left', { count: diffDays }), isDays: true };
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      setTimeLeft({ days, hours, minutes, seconds, isExpired: false });
+    };
+
+    updateCountdown();
+    const timerInterval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(timerInterval);
+  }, [selectedItem?.end_date]);
+
+  // Sync saved state from AsyncStorage whenever selectedItem changes
+  useEffect(() => {
+    if (!selectedItem) return;
+
+    const checkSavedStatus = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('saved_giveaways');
+        if (stored) {
+          const parsed: Giveaway[] = JSON.parse(stored);
+          const exists = parsed.some((item) => item.id === selectedItem.id);
+          setLocalIsSaved(exists);
+        } else {
+          setLocalIsSaved(false);
+        }
+      } catch (error) {
+        console.error('Failed to read saved list in carousel modal:', error);
+        setLocalIsSaved(false);
+      }
+    };
+
+    checkSavedStatus();
+  }, [selectedItem]);
+
+  const handleToggleSave = async (item: Giveaway) => {
+    const nextSavedState = !localIsSaved;
+    setLocalIsSaved(nextSavedState);
+
+    try {
+      const stored = await AsyncStorage.getItem('saved_giveaways');
+      let parsed: Giveaway[] = stored ? JSON.parse(stored) : [];
+
+      if (!nextSavedState) {
+        parsed = parsed.filter((entry) => entry.id !== item.id);
+      } else {
+        parsed.push(item);
+      }
+
+      await AsyncStorage.setItem('saved_giveaways', JSON.stringify(parsed));
+    } catch (error) {
+      console.error('Error modifying saved list in AsyncStorage:', error);
     }
+  };
+
+  const handleClaimPressIn = () => {
+    Animated.spring(claimScale, {
+      toValue: 0.93,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handleClaimPressOut = () => {
+    Animated.spring(claimScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 25,
+      bounciness: 8,
+    }).start();
   };
 
   useEffect(() => {
@@ -107,7 +317,6 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
     fetchTopWorth();
   }, []);
 
-  // Pause auto-scrolling when the modal is actively open
   useEffect(() => {
     if (items.length <= 1 || modalVisible) {
       if (autoScrollTimer.current) {
@@ -170,14 +379,13 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
     const targetUrl = item.open_giveaway_url || item.open_giveaway || item.game_url;
     if (!targetUrl) return;
     try {
-      const worthValue = item.worth || 'N/A';
-      const hasWorth = worthValue !== 'N/A' && worthValue !== '0' && worthValue !== '$0.00';
+      const worthVal = item.worth || 'N/A';
+      const plainSavedVal = worthVal.replace(/[^0-9.]/g, '');
       
-      // Leverages synchronized localization string matches for sharing operations
       const shareMessage = t('deals.share_message', {
         title: item.title,
         price: t('deals.free_uppercase'),
-        saved: hasWorth ? worthValue : t('deals.free_uppercase'),
+        saved: plainSavedVal || '0',
         platform: item.platform || 'PC',
         url: targetUrl
       });
@@ -191,13 +399,10 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
     }
   };
 
-  // PanResponder to handle vertical swipe down to dismiss details modal
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return gestureState.dy > 5;
-      },
+      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 5,
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dy > 0) {
           translateY.setValue(gestureState.dy);
@@ -249,7 +454,8 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
 
   const worthValue = currentItem.worth || 'N/A';
   const hasWorth = worthValue !== 'N/A' && worthValue !== '0' && worthValue !== '$0.00';
-  const daysRemainingInfo = selectedItem ? getDaysRemainingText(selectedItem.end_date) : null;
+  const selectedItemWorth = selectedItem?.worth || 'N/A';
+  const selectedItemHasWorth = selectedItemWorth !== 'N/A' && selectedItemWorth !== '0' && selectedItemWorth !== '$0.00';
 
   return (
     <View className="w-full mb-6">
@@ -269,7 +475,6 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
           <ImageBackground source={{ uri: currentItem.image }} className="w-full h-full" resizeMode="cover">
             <View className="absolute inset-0 bg-black/15" />
 
-            {/* Top Left Ranking Badge */}
             <View className="absolute top-3 left-3 bg-black/75 px-2.5 py-1 rounded-md border border-white/10">
               <View className="flex-row items-center gap-1">
                 <Flash size="10" color="#eab308" variant="Bold" />
@@ -279,7 +484,6 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
               </View>
             </View>
 
-            {/* Top Right Worth Metric Tag */}
             <View className="absolute top-3 right-3 bg-emerald-500 px-2.5 py-0.5 rounded-md shadow-sm">
               <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
                 {hasWorth ? t('deals.hot_deal') : t('deals.free_uppercase')}
@@ -330,9 +534,7 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
         })}
       </View>
 
-      {/* =========================================================================
-          70% HEIGHT INTERACTIVE DETAIL MODAL WITH SWIPE GESTURE
-          ========================================================================= */}
+      {/* 70% HEIGHT INTERACTIVE DETAIL MODAL */}
       <Modal
         visible={modalVisible && !!selectedItem}
         animationType="slide"
@@ -344,7 +546,6 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
       >
         {selectedItem && (
           <View className="flex-1 justify-end">
-            {/* Transparent Backdrop */}
             <Pressable 
               style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               onPress={() => {
@@ -353,7 +554,6 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
               }}
             />
 
-            {/* Sheet container */}
             <Animated.View 
               style={{ 
                 height: SCREEN_HEIGHT * 0.7, 
@@ -365,7 +565,6 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
               }}
               className="w-full flex-col shadow-2xl"
             >
-              {/* Swipe/Drag Area */}
               <View 
                 {...panResponder.panHandlers} 
                 className="w-full h-[35%] relative bg-zinc-950"
@@ -383,7 +582,6 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                 )}
                 <View className="absolute inset-0 bg-black/35" />
 
-                {/* Floating Modern Drag Handle */}
                 <View className="absolute top-3 inset-x-0 items-center">
                   <View 
                     style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }} 
@@ -391,7 +589,6 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                   />
                 </View>
 
-                {/* Floating Platform Badge */}
                 <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-0.5 rounded border border-purple-500/30">
                   <Text className="text-[9px] font-montBlack text-purple-400 tracking-wider uppercase">
                     {selectedItem.platform || 'Multi-platform'}
@@ -399,23 +596,21 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                 </View>
               </View>
 
-              {/* Scrollable Details */}
               <View className="flex-1">
                 <ScrollView 
                   className="flex-1 px-5 pt-4"
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={{ paddingBottom: 20 }}
                 >
-                  {/* Category & Price Breakdown Row */}
                   <View className="flex-row items-center justify-between mb-2">
                     <ThemedText className="font-mont text-xs tracking-wider uppercase opacity-60">
-                      {selectedItem.type || 'Loot Drop'}
+                      {selectedItem.type || 'Free Game Loot'}
                     </ThemedText>
                     
                     <View className="flex-row items-center gap-2">
-                      {selectedItem.worth && selectedItem.worth !== 'N/A' && (
+                      {selectedItemHasWorth && (
                         <Text className="text-[11px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
-                          {selectedItem.worth}
+                          {selectedItemWorth}
                         </Text>
                       )}
                       <View className="bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-lg">
@@ -426,15 +621,13 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                     </View>
                   </View>
 
-                  {/* Title */}
                   <ThemedText className="font-montBlack text-xl tracking-tight mb-3 leading-tight">
                     {selectedItem.title}
                   </ThemedText>
 
-                  {/* Status Badges & Time Limits */}
                   <View className="flex-row flex-wrap gap-2 mb-4">
                     {selectedItem.status && (
-                      <View style={{ backgroundColor: isDark ? '#2c2c35' : '#f1f2f6' }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                      <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                         <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         <ThemedText className="text-[10px] font-montBold opacity-85 uppercase tracking-wide">
                           {selectedItem.status}
@@ -442,21 +635,26 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                       </View>
                     )}
                     
-                    {daysRemainingInfo && (
-                      <View style={{ backgroundColor: isDark ? '#2c2c35' : '#f1f2f6' }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
-                        {daysRemainingInfo.isDays ? (
-                          <TimerStart size="12" color="#e11d48" variant="Outline" />
-                        ) : (
-                          <CalendarTick size="12" color={iconColor} variant="Outline" />
-                        )}
-                        <ThemedText className={`text-[10px] font-montBold ${daysRemainingInfo.isDays ? 'text-rose-500 dark:text-rose-400' : 'opacity-85'}`}>
-                          {daysRemainingInfo.label}
+                    {timeLeft ? (
+                      <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                        <TimerStart size="12" color={timeLeft.isExpired ? '#f43f5e' : '#e11d48'} variant="Outline" />
+                        <ThemedText className={`text-[10px] font-montBold ${timeLeft.isExpired ? 'text-rose-500' : 'text-rose-500 dark:text-rose-400'}`}>
+                          {timeLeft.isExpired
+                            ? 'Expired'
+                            : `${timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}${padZero(timeLeft.hours)}h ${padZero(timeLeft.minutes)}m ${padZero(timeLeft.seconds)}s left`}
+                        </ThemedText>
+                      </View>
+                    ) : (
+                      <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                        <CalendarTick size="12" color={iconColor} variant="Outline" />
+                        <ThemedText className="text-[10px] font-montBold opacity-85">
+                          {selectedItem.end_date && selectedItem.end_date !== 'N/A' ? selectedItem.end_date : 'Limited Time'}
                         </ThemedText>
                       </View>
                     )}
 
                     {selectedItem.keys_left && selectedItem.keys_left !== 'N/A' && (
-                      <View style={{ backgroundColor: isDark ? '#2c2c35' : '#f1f2f6' }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
+                      <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                         <InfoCircle size="12" color={iconColor} variant="Outline" />
                         <ThemedText className="text-[10px] font-montBold opacity-85">
                           Keys Left: {selectedItem.keys_left}
@@ -465,25 +663,32 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                     )}
                   </View>
 
-                  {/* Description text */}
                   <ThemedText className="font-mont text-[12px] leading-relaxed opacity-80 mb-4">
                     {selectedItem.description || t('deals.no_description')}
                   </ThemedText>
 
-                  {/* Redirection steps / Custom Instructions */}
-                  {selectedItem.instructions && (
-                    <View style={{ backgroundColor: isDark ? '#2c2c35' : '#f1f2f6' }} className="rounded-xl p-3 mb-2">
+                  {selectedItem.instructions ? (
+                    <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
                       <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
-                        {t('report.github.step1')}
+                        {t('giveaways.tracking.instructions_title')}
                       </ThemedText>
                       <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
                         {selectedItem.instructions}
                       </ThemedText>
                     </View>
+                  ) : selectedItemHasWorth && (
+                    <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-2">
+                      <ThemedText className="font-montBold text-[11px] mb-1 text-purple-500">
+                        {t('deals.breakdown_title')}
+                      </ThemedText>
+                      <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
+                        {t('deals.breakdown_body', { saved: selectedItemWorth, original: selectedItemWorth, percent: '100' })}
+                      </ThemedText>
+                    </View>
                   )}
                 </ScrollView>
 
-                {/* Floating Bottom Sticky Bar */}
+                {/* Bottom Sticky Action Bar */}
                 <View 
                   style={{ 
                     borderTopWidth: 1, 
@@ -493,27 +698,40 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                   }}
                   className="flex-row items-center gap-3 px-5 pt-3.5"
                 >
-                  <Pressable
-                    onPress={() => handleShare(selectedItem)}
-                    style={{ backgroundColor: isDark ? '#2c2c35' : '#f1f2f6' }}
-                    className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-2 active:opacity-75"
-                  >
-                    <ShareIcon size="16" color={isDark ? '#f4f4f5' : '#3f3f46'} variant="Broken" />
-                    <ThemedText className="font-montBold text-xs uppercase tracking-wider">
-                      {t('modals.socialsTitle')}
-                    </ThemedText>
-                  </Pressable>
+                  <View className="flex-row items-center gap-3">
+                    <FavoriteButton
+                      isSaved={localIsSaved}
+                      onToggle={() => handleToggleSave(selectedItem)}
+                      containerStyle={{ backgroundColor: cardBgColor }}
+                      className="w-11 h-11 rounded-2xl flex-row items-center justify-center active:opacity-75"
+                      iconSize="18"
+                      inactiveColor={isDark ? '#a78bfa' : '#7c3aed'}
+                    />
 
-                  <Pressable
-                    onPress={() => handleOpenClaimSite(selectedItem)}
-                    style={{ backgroundColor: '#9333ea' }}
-                    className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-2 active:opacity-85 shadow-lg shadow-purple-500/20"
-                  >
-                    <Gift size="16" color="#ffffff" variant="Broken" />
-                    <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
-                      {t('deals.claim')}
-                    </ThemedText>
-                  </Pressable>
+                    <Pressable
+                      onPress={() => handleShare(selectedItem)}
+                      hitSlop={10} 
+                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                      className="p-2.5 rounded-xl border active:opacity-60"
+                    >
+                      <ShareIcon size="16" color={isDark ? "#a78bfa" : "#7c3aed"} variant="Broken" />
+                    </Pressable>
+                  </View>
+
+                  <Animated.View style={{ flex: 1, transform: [{ scale: claimScale }] }}>
+                    <Pressable
+                      onPressIn={handleClaimPressIn}
+                      onPressOut={handleClaimPressOut}
+                      onPress={() => handleOpenClaimSite(selectedItem)}
+                      style={{ backgroundColor: '#9333ea' }}
+                      className="w-full h-11 rounded-full flex-row items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
+                    >
+                      <Gift size="16" color="#ffffff" variant="Broken" />
+                      <ThemedText className="text-white font-montBlack text-xs uppercase tracking-wider">
+                        {t('deals.claim')}
+                      </ThemedText>
+                    </Pressable>
+                  </Animated.View>
                 </View>
               </View>
             </Animated.View>
