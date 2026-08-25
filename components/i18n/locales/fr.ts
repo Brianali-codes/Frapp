@@ -70,7 +70,6 @@ export const fr = {
       title: "Mentions concernant les API tierces",
       description: "Toutes les données affichées proviennent directement de réseaux externes via les architectures publiques de Gamepower et CheapShark. Frapp ne modifie pas les prix ni la disponibilité."
     },
-    footerVersion: "Version de Frapp v1.1.5",
     alerts: {
       errorTitle: "Erreur",
       errorMessage: "Impossible de rediriger vers GitHub. Vérifiez les autorisations de votre navigateur."
@@ -237,6 +236,6 @@ export const fr = {
     consentLabel: "J'accepte les conditions d'utilisation et la politique de confidentialité",
     btnStep1: "Continuer",
     btnStep2: "Commencer",
-    versionLabel: "Frapp • v1.1.5"
+    versionLabel: "Frapp • v1.1.6"
   }
 } as const;

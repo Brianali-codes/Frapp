@@ -303,7 +303,7 @@ export default function ReportScreen() {
           className="w-12 h-0.5 rounded-full opacity-10 mb-3" 
         />
         <ThemedText className="text-center font-montBold text-xs uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-          {t('report.footerVersion', 'Frapp Build v1.1.5')}
+          {t('report.footerVersion', 'Frapp Build v1.1.6')}
         </ThemedText>
       </View>
     </ScrollView>

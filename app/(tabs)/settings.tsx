@@ -52,7 +52,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
   hi: 'हिन्दी',
 };
 
-const CURRENT_VERSION = 'v1.1.5';
+const CURRENT_VERSION = 'v1.1.6';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -726,13 +726,6 @@ const formattedStars = starCount ? `${starCount} stars` : '★ star repo';
             </View>
             <ArrowRight2 size="14" color="#a1a1aa" />
           </Pressable>
-        </View>
-
-        <View className="mt-8 mb-4 items-center justify-center">
-          <Divider style={{ backgroundColor: textColor }} className="w-12 h-0.5 rounded-full opacity-10 mb-3" />
-          <ThemedText className="text-center font-montBold text-[11px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-            {t('footer.build', 'Frapp Build {{version}}', { version: CURRENT_VERSION })}
-          </ThemedText>
         </View>
       </ScrollView>
 

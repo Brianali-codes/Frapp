@@ -26,7 +26,7 @@ import {
 
 const NOTIFICATIONS_KEY = '@app_notifications_enabled';
 const LANGUAGE_KEY = '@frapp_user_language';
-const CURRENT_VERSION = 'v1.1.5';
+const CURRENT_VERSION = 'v1.1.6';
 
 SplashScreen.preventAutoHideAsync();
 
