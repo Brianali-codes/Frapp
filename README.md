@@ -6,7 +6,7 @@
 <p align="center">
   <a href="https://github.com/brianali-codes/frapp"><img src="https://img.shields.io/github/downloads/brianali-codes/frapp/total.svg" alt="Github All Releases" /></a>
   <a href="https://choosealicense.com/licenses/mit/"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License" /></a>
-  <img src="https://img.shields.io/badge/Latest_version-v1.1.4-green" alt="Latest Version v1.1.4"/>
+  <img src="https://img.shields.io/badge/Latest_version-v1.1.5-green" alt="Latest Version v1.1.5"/>
 </p>
 <p align="center">
   <a href="#about">About</a> •
