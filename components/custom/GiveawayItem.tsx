@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Image, 
   Linking, 
   View, 
   Platform, 
@@ -13,6 +12,7 @@ import {
   PanResponder,
   Animated
 } from 'react-native';
+import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemedText } from '@/components/ThemedText';
@@ -30,7 +30,8 @@ import {
   InfoCircle,
   TimerStart,
   Heart,
-  Star1
+  Star1,
+  Shop
 } from 'iconsax-react-nativejs';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -44,6 +45,32 @@ const SPARKLE_PARTICLES = Array.from({ length: SPARKLE_COUNT }).map((_, i) => {
     y: Math.sin(angle) * 24,
   };
 });
+
+// GamerPower Native Platform Icon Dictionary
+const GAMERPOWER_PLATFORMS_MAP: Record<string, { name: string; icon: string }> = {
+  'steam': { name: 'Steam', icon: 'https://www.svgrepo.com/show/452107/steam.svg' },
+  'epic-games-store': { name: 'Epic Games', icon: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  'epic games': { name: 'Epic Games', icon: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  'epic': { name: 'Epic Games', icon: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  'gog': { name: 'GOG', icon: 'https://www.cheapshark.com/img/stores/icons/6.png' },
+  'ubisoft': { name: 'Ubisoft', icon: 'https://www.cheapshark.com/img/stores/icons/13.png' },
+  'uplay': { name: 'Ubisoft', icon: 'https://www.cheapshark.com/img/stores/icons/13.png' },
+  'origin': { name: 'EA Play', icon: 'https://www.cheapshark.com/img/stores/icons/7.png' },
+  'ea': { name: 'EA Play', icon: 'https://www.cheapshark.com/img/stores/icons/7.png' },
+  'itch.io': { name: 'itch.io', icon: 'https://www.svgrepo.com/show/452232/itch-io.svg' },
+  'itchio': { name: 'itch.io', icon: 'https://www.svgrepo.com/show/452232/itch-io.svg' },
+  'ps5': { name: 'PS5', icon: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  'ps4': { name: 'PS4', icon: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  'playstation': { name: 'PlayStation', icon: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  'xbox-series-xs': { name: 'Xbox Series', icon: 'https://www.svgrepo.com/show/303368/xbox-9-logo.svg' },
+  'xbox-one': { name: 'Xbox One', icon: 'https://www.svgrepo.com/show/452137/xbox.svg' },
+  'xbox': { name: 'Xbox', icon: 'https://www.svgrepo.com/show/452137/xbox.svg' },
+  'switch': { name: 'Switch', icon: 'https://www.svgrepo.com/show/388137/nintendo-switch.svg' },
+  'android': { name: 'Android', icon: 'https://www.svgrepo.com/show/475427/android.svg' },
+  'ios': { name: 'iOS', icon: 'https://www.svgrepo.com/show/494331/apple-round.svg' },
+  'drm-free': { name: 'DRM-Free', icon: 'https://www.svgrepo.com/show/477064/unlock.svg' },
+  'pc': { name: 'PC', icon: 'https://www.svgrepo.com/show/382713/windows-applications.svg' },
+};
 
 interface FavoriteButtonProps {
   isSaved: boolean;
@@ -97,7 +124,6 @@ function FavoriteButton({
 
   return (
     <View className="relative items-center justify-center">
-      {/* Sparkle Particles Burst */}
       {SPARKLE_PARTICLES.map((sparkle, idx) => {
         const sparkleScale = sparkleAnim.interpolate({
           inputRange: [0, 0.4, 1],
@@ -150,6 +176,22 @@ function FavoriteButton({
   );
 }
 
+interface CheapSharkStore {
+  storeID: string;
+  storeName: string;
+  isActive: number;
+  images: {
+    banner: string;
+    logo: string;
+    icon: string;
+  };
+}
+
+interface StoreMeta {
+  name: string;
+  icon: string;
+}
+
 interface GiveawayItemProps {
   giveaway: FreeGiveaway;
   variant?: 'normal' | 'compact' | 'minimal';
@@ -157,6 +199,30 @@ interface GiveawayItemProps {
   isSaved?: boolean;             
   onToggleSave?: () => void;     
 }
+
+let storeMetadataCache: Record<string, StoreMeta> | null = null;
+let isStoreFetchPending = false;
+
+const compileStoreDictionary = (rawStores: CheapSharkStore[]): Record<string, StoreMeta> => {
+  const compiledMap: Record<string, StoreMeta> = {};
+
+  rawStores.forEach((s) => {
+    const iconPath = s.images?.icon || '';
+    const fullIcon = iconPath.startsWith('http')
+      ? iconPath
+      : `https://www.cheapshark.com${iconPath}`;
+
+    const meta: StoreMeta = {
+      name: s.storeName,
+      icon: fullIcon
+    };
+
+    compiledMap[s.storeID] = meta;
+    compiledMap[s.storeName.toLowerCase()] = meta;
+  });
+
+  return compiledMap;
+};
 
 export default function GiveawayItem({ 
   giveaway, 
@@ -169,6 +235,7 @@ export default function GiveawayItem({
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [localIsSaved, setLocalIsSaved] = useState(isSaved);
+  const [storeMap, setStoreMap] = useState<Record<string, StoreMeta>>(storeMetadataCache || {});
   const translateY = useRef(new Animated.Value(0)).current;
 
   // Touch claim animation scale state
@@ -185,14 +252,58 @@ export default function GiveawayItem({
 
   const activeCtaText = ctaText || t('deals.claim');
 
-  // Reset drag position whenever modal visibility changes
   useEffect(() => {
     if (modalVisible) {
       translateY.setValue(0);
     }
   }, [modalVisible]);
 
-  // Real-time tick timer calculating remaining duration down to seconds
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadStoreMetadata = async () => {
+      if (storeMetadataCache) {
+        if (isMounted) setStoreMap(storeMetadataCache);
+        return;
+      }
+
+      try {
+        const storedMap = await AsyncStorage.getItem('cheapshark_stores_map_v5');
+        if (storedMap) {
+          const parsed = JSON.parse(storedMap);
+          storeMetadataCache = parsed;
+          if (isMounted) setStoreMap(parsed);
+          return;
+        }
+
+        if (!isStoreFetchPending) {
+          isStoreFetchPending = true;
+          const res = await fetch('https://www.cheapshark.com/api/1.0/stores', {
+            headers: { 
+              'Accept': 'application/json',
+              'User-Agent': 'GameDealsApp/1.0'
+            }
+          });
+          if (res.ok) {
+            const rawStores: CheapSharkStore[] = await res.json();
+            const compiled = compileStoreDictionary(rawStores);
+
+            storeMetadataCache = compiled;
+            await AsyncStorage.setItem('cheapshark_stores_map_v5', JSON.stringify(compiled));
+            if (isMounted) setStoreMap(compiled);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to synchronize CheapShark store dictionary:', error);
+      } finally {
+        isStoreFetchPending = false;
+      }
+    };
+
+    loadStoreMetadata();
+    return () => { isMounted = false; };
+  }, []);
+
   useEffect(() => {
     if (!giveaway.end_date || giveaway.end_date === 'N/A') {
       setTimeLeft(null);
@@ -314,7 +425,7 @@ export default function GiveawayItem({
           title: giveaway.title,
           price: t('deals.free_uppercase'),
           saved: plainSavedVal || '0',
-          platform: giveaway.platform || 'PC',
+          platform: displayPlatform,
           url: targetUrl
         }),
         title: giveaway.title,
@@ -323,6 +434,34 @@ export default function GiveawayItem({
       console.error('Error sharing giveaway:', error);
     }
   };
+
+  const getStoreMeta = (): StoreMeta | null => {
+    const rawTarget = (giveaway.platforms || giveaway.platform || giveaway.storeID || '').toString().trim().toLowerCase();
+    if (!rawTarget) return null;
+
+    // 1. Cross-check against GamerPower API platform mapping dictionary first
+    for (const key of Object.keys(GAMERPOWER_PLATFORMS_MAP)) {
+      if (rawTarget === key || rawTarget.includes(key)) {
+        return GAMERPOWER_PLATFORMS_MAP[key];
+      }
+    }
+
+    // 2. Fall back to CheapShark store dictionary
+    if (storeMap[rawTarget]) return storeMap[rawTarget];
+
+    for (const key of Object.keys(storeMap)) {
+      if (key.length > 2 && rawTarget.includes(key)) {
+        return storeMap[key];
+      }
+    }
+
+    return null;
+  };
+
+  const storeMetaInfo = getStoreMeta();
+  const displayPlatform = storeMetaInfo?.name || 
+    (giveaway.platforms || giveaway.platform ? (giveaway.platforms || giveaway.platform) : t('deals.store', 'Digital Store'));
+  const currentStoreIcon = storeMetaInfo?.icon || null;
 
   const isDark = themeMode === 'dark';
   const isCompact = variant === 'compact';
@@ -357,17 +496,17 @@ export default function GiveawayItem({
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dy > 100) {
           Animated.timing(translateY, {
-            toValue: SCREEN_HEIGHT * 0.7,
-            duration: 220,
+            toValue: SCREEN_HEIGHT,
+            duration: 200,
             useNativeDriver: true,
           }).start(() => {
             setModalVisible(false);
-            translateY.setValue(0);
           });
         } else {
           Animated.spring(translateY, {
             toValue: 0,
-            friction: 6,
+            friction: 7,
+            tension: 40,
             useNativeDriver: true,
           }).start();
         }
@@ -386,8 +525,17 @@ export default function GiveawayItem({
             style={{ backgroundColor: minimalBgColor, borderColor: adaptiveBorderColor }}
           >
             <View className="relative w-24 h-24 rounded-xl overflow-hidden bg-zinc-800">
-              <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
+              <Image source={{ uri: imageUri }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
               <View className="absolute inset-0 bg-black/10" />
+
+              {/* TOP LEFT STORE ICON BADGE */}
+              <View className="absolute top-1 left-1 bg-black/75 p-1 rounded-md border border-white/10 flex-row items-center justify-center z-10">
+                {currentStoreIcon ? (
+                  <Image source={{ uri: currentStoreIcon }} style={{ width: 12, height: 12 }} contentFit="contain" />
+                ) : (
+                  <Shop size="10" color="#c084fc" variant="Bold" />
+                )}
+              </View>
 
               {hasWorth && (
                 <View className="absolute bottom-1 left-1 bg-purple-600 px-1 py-0.5 rounded shadow-sm">
@@ -469,8 +617,17 @@ export default function GiveawayItem({
             ]}
           >
             <View className="relative w-28 h-28 rounded-xl overflow-hidden bg-zinc-800">
-              <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
+              <Image source={{ uri: imageUri }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
               <View className="absolute inset-0 bg-black/10" />
+
+              {/* TOP LEFT STORE ICON BADGE */}
+              <View className="absolute top-1.5 left-1.5 bg-black/75 p-1 rounded-lg border border-white/10 flex-row items-center justify-center z-10">
+                {currentStoreIcon ? (
+                  <Image source={{ uri: currentStoreIcon }} style={{ width: 14, height: 14 }} contentFit="contain" />
+                ) : (
+                  <Shop size="12" color="#c084fc" variant="Bold" />
+                )}
+              </View>
 
               {hasWorth && (
                 <View className="absolute bottom-1.5 left-1.5 bg-purple-600 px-1.5 py-0.5 rounded shadow-sm">
@@ -550,11 +707,24 @@ export default function GiveawayItem({
             ]}
           >
             <View className="relative w-full h-40 bg-zinc-900">
-              <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
+              <Image source={{ uri: imageUri }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
               <View className="absolute inset-0 bg-black/10" />
 
+              {/* TOP LEFT STORE ICON & PLATFORM BADGE */}
+              <View className="absolute top-3 left-3 bg-black/75 px-2 py-1 rounded-lg border border-white/10 flex-row items-center gap-1.5 z-10">
+                {currentStoreIcon ? (
+                  <Image source={{ uri: currentStoreIcon }} style={{ width: 16, height: 16 }} contentFit="contain" />
+                ) : (
+                  <Shop size="14" color="#c084fc" variant="Bold" />
+                )}
+                <Text className="text-[9px] font-montBlack text-purple-300 uppercase tracking-wider">
+                  {displayPlatform}
+                </Text>
+              </View>
+
+              {/* TOP RIGHT VALUE BADGE */}
               {hasWorth && (
-                <View className="absolute top-3 left-3 bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
+                <View className="absolute top-3 right-3 bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
                   <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
                     {worthValue} {t('deals.store').toUpperCase()}
                   </Text>
@@ -644,7 +814,7 @@ export default function GiveawayItem({
       >
         <View className="flex-1 justify-end">
           <Pressable 
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            style={{ ...Platform.select({ web: { cursor: 'default' } }), position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
             onPress={() => setModalVisible(false)}
           />
 
@@ -666,8 +836,8 @@ export default function GiveawayItem({
               {imageUri ? (
                 <Image
                   source={{ uri: imageUri }}
-                  className="w-full h-full"
-                  resizeMode="cover"
+                  style={{ width: '100%', height: '100%' }}
+                  contentFit="cover"
                 />
               ) : (
                 <View className="w-full h-full items-center justify-center bg-zinc-900">
@@ -683,9 +853,14 @@ export default function GiveawayItem({
                 />
               </View>
 
-              <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-0.5 rounded border border-purple-500/30">
-                <Text className="text-[9px] font-montBlack text-purple-400 tracking-wider uppercase">
-                  {giveaway.platform || 'Multi-platform'}
+              <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-1 rounded-lg border border-purple-500/30 flex-row items-center gap-2">
+                {currentStoreIcon ? (
+                  <Image source={{ uri: currentStoreIcon }} style={{ width: 16, height: 16 }} contentFit="contain" />
+                ) : (
+                  <Shop size="14" color="#c084fc" variant="Bold" />
+                )}
+                <Text className="text-[10px] font-montBlack text-purple-400 tracking-wider uppercase">
+                  {displayPlatform}
                 </Text>
               </View>
             </View>
@@ -720,15 +895,6 @@ export default function GiveawayItem({
                 </ThemedText>
 
                 <View className="flex-row flex-wrap gap-2 mb-4">
-                  {giveaway.status && (
-                    <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
-                      <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <ThemedText className="text-[10px] font-montBold opacity-85 uppercase tracking-wide">
-                        {giveaway.status}
-                      </ThemedText>
-                    </View>
-                  )}
-                  
                   {timeLeft ? (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                       <TimerStart size="12" color={timeLeft.isExpired ? '#f43f5e' : '#e11d48'} variant="Outline" />

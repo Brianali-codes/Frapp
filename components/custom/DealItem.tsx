@@ -98,7 +98,6 @@ function FavoriteButton({
 
   return (
     <View className="relative items-center justify-center">
-      {/* Sparkle Particles Burst */}
       {SPARKLE_PARTICLES.map((sparkle, idx) => {
         const sparkleScale = sparkleAnim.interpolate({
           inputRange: [0, 0.4, 1],
@@ -197,9 +196,48 @@ interface DealItemProps {
   onToggleSave?: () => void;
 }
 
-// Global in-memory cache to prevent redundant fetches across deal cards
 let storeMetadataCache: Record<string, StoreMeta> | null = null;
 let isStoreFetchPending = false;
+
+const compileStoreDictionary = (rawStores: CheapSharkStore[]): Record<string, StoreMeta> => {
+  const compiledMap: Record<string, StoreMeta> = {};
+
+  rawStores.forEach((s) => {
+    const iconPath = s.images?.icon || '';
+    const fullIcon = iconPath.startsWith('http')
+      ? iconPath
+      : `https://www.cheapshark.com${iconPath}`;
+
+    const meta: StoreMeta = {
+      name: s.storeName,
+      icon: fullIcon
+    };
+
+    compiledMap[s.storeID] = meta;
+    compiledMap[s.storeName.toLowerCase()] = meta;
+  });
+
+  const aliases: Record<string, string> = {
+    'steam': 'steam',
+    'epic': 'epic games store',
+    'epic games': 'epic games store',
+    'gog': 'gog',
+    'ubisoft': 'ubisoft connect',
+    'uplay': 'ubisoft connect',
+    'origin': 'ea play',
+    'ea': 'ea play',
+    'itch.io': 'itch.io',
+    'itch': 'itch.io',
+  };
+
+  Object.entries(aliases).forEach(([alias, targetKey]) => {
+    if (compiledMap[targetKey]) {
+      compiledMap[alias] = compiledMap[targetKey];
+    }
+  });
+
+  return compiledMap;
+};
 
 export default function DealItem({ 
   giveaway, 
@@ -213,10 +251,7 @@ export default function DealItem({
   const [modalVisible, setModalVisible] = useState(false);
   const [internalIsSaved, setInternalIsSaved] = useState(false);
   
-  // Dynamic Store Map state
   const [storeMap, setStoreMap] = useState<Record<string, StoreMeta>>(storeMetadataCache || {});
-
-  // Extended CheapShark metrics state
   const [extendedData, setExtendedData] = useState<ExtendedDealData | null>(null);
   const [loadingExtended, setLoadingExtended] = useState(false);
 
@@ -240,7 +275,12 @@ export default function DealItem({
   const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const iconColor = isDark ? '#a78bfa' : '#7c3aed';
 
-  // 1. Dynamic Store Metadata Lookup & Storage Sync
+  useEffect(() => {
+    if (modalVisible) {
+      translateY.setValue(0);
+    }
+  }, [modalVisible]);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -251,7 +291,7 @@ export default function DealItem({
       }
 
       try {
-        const storedMap = await AsyncStorage.getItem('cheapshark_stores_map');
+        const storedMap = await AsyncStorage.getItem('cheapshark_stores_map_v5');
         if (storedMap) {
           const parsed = JSON.parse(storedMap);
           storeMetadataCache = parsed;
@@ -261,21 +301,19 @@ export default function DealItem({
 
         if (!isStoreFetchPending) {
           isStoreFetchPending = true;
-          const res = await fetch('https://www.cheapshark.com/api/1.0/stores');
+          const res = await fetch('https://www.cheapshark.com/api/1.0/stores', {
+            headers: { 
+              'Accept': 'application/json',
+              'User-Agent': 'GameDealsApp/1.0'
+            }
+          });
           if (res.ok) {
             const rawStores: CheapSharkStore[] = await res.json();
-            const compiledMap: Record<string, StoreMeta> = {};
+            const compiled = compileStoreDictionary(rawStores);
 
-            rawStores.forEach((s) => {
-              compiledMap[s.storeID] = {
-                name: s.storeName,
-                icon: `https://www.cheapshark.com${s.images.icon}`
-              };
-            });
-
-            storeMetadataCache = compiledMap;
-            await AsyncStorage.setItem('cheapshark_stores_map', JSON.stringify(compiledMap));
-            if (isMounted) setStoreMap(parsed);
+            storeMetadataCache = compiled;
+            await AsyncStorage.setItem('cheapshark_stores_map_v5', JSON.stringify(compiled));
+            if (isMounted) setStoreMap(compiled);
           }
         }
       } catch (error) {
@@ -289,7 +327,6 @@ export default function DealItem({
     return () => { isMounted = false; };
   }, []);
 
-  // 2. Saved State Sync
   useEffect(() => {
     if (externalIsSaved !== undefined) return;
 
@@ -310,48 +347,75 @@ export default function DealItem({
     return () => { isMounted = false; };
   }, [giveaway.id, externalIsSaved]);
 
-  // 3. Fetch CheapShark Ratings, Lowest Price Ever & Live Multi-Store Comparisons
   useEffect(() => {
     if (!modalVisible) return;
 
     let isMounted = true;
     const fetchCheapSharkExtendedMetrics = async () => {
-      const dealId = giveaway.id || (giveaway as any).dealID;
-      if (!dealId) return;
-
       setLoadingExtended(true);
       try {
-        const dealRes = await fetch(`https://www.cheapshark.com/api/1.0/deals?id=${dealId}`);
-        if (!dealRes.ok) throw new Error('Failed to fetch deal metrics');
-        const dealData = await dealRes.json();
+        const headers = { 
+          'Accept': 'application/json',
+          'User-Agent': 'GameDealsApp/1.0'
+        };
+        const rawTitle = giveaway.title || '';
+        
+        const baseTitle = rawTitle.split(/[-–:(\[]/)[0];
+        const cleanTitle = baseTitle.replace(/[™®©!]/g, '').trim();
 
-        const gameID = dealData.gameInfo?.gameID;
+        let searchRes = await fetch(
+          `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(cleanTitle)}&limit=5`,
+          { headers }
+        );
+
+        let searchData = searchRes.ok ? await searchRes.json() : [];
+
+        if ((!Array.isArray(searchData) || searchData.length === 0) && cleanTitle !== rawTitle) {
+          const fallbackClean = rawTitle.replace(/[™®©!]/g, '').trim();
+          searchRes = await fetch(
+            `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(fallbackClean)}&limit=5`,
+            { headers }
+          );
+          if (searchRes.ok) searchData = await searchRes.json();
+        }
+
+        if (!Array.isArray(searchData) || searchData.length === 0) {
+          if (isMounted) setLoadingExtended(false);
+          return;
+        }
+
+        const gameID = searchData[0].gameID;
         let comparisons: StoreDealComparison[] = [];
         let cheapestEver: CheapestPriceEver | undefined = undefined;
+        let metacritic: string | undefined = undefined;
+        let steamPercent: string | undefined = undefined;
+        let steamText: string | undefined = undefined;
 
         if (gameID) {
-          const gameRes = await fetch(`https://www.cheapshark.com/api/1.0/games?id=${gameID}`);
+          const gameRes = await fetch(`https://www.cheapshark.com/api/1.0/games?id=${gameID}`, { headers });
           if (gameRes.ok) {
             const gameData = await gameRes.json();
             if (Array.isArray(gameData.deals)) {
               comparisons = gameData.deals;
             }
             cheapestEver = gameData.cheapestPriceEver;
+            metacritic = gameData.info?.metacriticScore !== '0' ? gameData.info?.metacriticScore : undefined;
+            steamPercent = gameData.info?.steamRatingPercent !== '0' ? gameData.info?.steamRatingPercent : undefined;
+            steamText = gameData.info?.steamRatingText || undefined;
           }
         }
 
         if (isMounted) {
           setExtendedData({
-            metacriticScore: dealData.gameInfo?.metacriticScore !== '0' ? dealData.gameInfo?.metacriticScore : undefined,
-            steamRatingPercent: dealData.gameInfo?.steamRatingPercent !== '0' ? dealData.gameInfo?.steamRatingPercent : undefined,
-            steamRatingText: dealData.gameInfo?.steamRatingText || undefined,
-            steamRatingCount: dealData.gameInfo?.steamRatingCount || undefined,
+            metacriticScore: metacritic,
+            steamRatingPercent: steamPercent,
+            steamRatingText: steamText,
             otherStores: comparisons,
             cheapestPriceEver: cheapestEver
           });
         }
       } catch (error) {
-        console.error('Error fetching extended CheapShark payload:', error);
+        console.warn('Extended metrics fetch failed:', error);
       } finally {
         if (isMounted) setLoadingExtended(false);
       }
@@ -359,7 +423,7 @@ export default function DealItem({
 
     fetchCheapSharkExtendedMetrics();
     return () => { isMounted = false; };
-  }, [modalVisible, giveaway.id]);
+  }, [modalVisible, giveaway.title]);
 
   const handleToggleSave = async () => {
     if (externalOnToggleSave) {
@@ -385,10 +449,24 @@ export default function DealItem({
     }
   };
 
-  const currentStoreId = giveaway.storeID || giveaway.platform;
-  const storeMetaInfo = storeMap[currentStoreId?.toString() || ''];
-  
-  const displayPlatform = storeMetaInfo?.name || t('deals.store', 'Digital Store');
+  const getStoreMeta = (): StoreMeta | null => {
+    const rawTarget = (giveaway.storeID || giveaway.platform || '').toString().trim().toLowerCase();
+    if (!rawTarget) return null;
+
+    if (storeMap[rawTarget]) return storeMap[rawTarget];
+
+    for (const key of Object.keys(storeMap)) {
+      if (key.length > 2 && rawTarget.includes(key)) {
+        return storeMap[key];
+      }
+    }
+
+    return null;
+  };
+
+  const storeMetaInfo = getStoreMeta();
+  const displayPlatform = storeMetaInfo?.name || 
+    (giveaway.platform && !/^\d+$/.test(giveaway.platform) ? giveaway.platform : t('deals.store', 'Store'));
   const currentStoreIcon = storeMetaInfo?.icon || null;
 
   const salePriceNum = Number.isNaN(parseFloat(giveaway.salePrice || '0')) ? 0 : parseFloat(giveaway.salePrice || '0');
@@ -398,7 +476,6 @@ export default function DealItem({
   const totalCashSaved = Math.max(0, normalPriceNum - salePriceNum).toFixed(2);
   const hasValidPrice = giveaway.normalPrice && normalPriceNum > salePriceNum && parseFloat(totalCashSaved) > 0;
 
-  // Lowest Price Ever Logic
   const lowestPriceEverVal = extendedData?.cheapestPriceEver?.price
     ? parseFloat(extendedData.cheapestPriceEver.price)
     : null;
@@ -459,12 +536,11 @@ export default function DealItem({
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dy > 100) {
           Animated.timing(translateY, {
-            toValue: SCREEN_HEIGHT * 0.7,
+            toValue: SCREEN_HEIGHT,
             duration: 200,
             useNativeDriver: true,
           }).start(() => {
             setModalVisible(false);
-            translateY.setValue(0);
           });
         } else {
           Animated.spring(translateY, {
@@ -561,10 +637,9 @@ export default function DealItem({
               <Image source={{ uri: giveaway.thumbnail || giveaway.image }} className="w-full h-full" resizeMode="cover" />
               <View className="absolute inset-0 bg-black/10" />
 
-              {/* Store Logo Overlay (Top Left) */}
               <View className="absolute top-1.5 left-1.5 bg-black/70 p-1 rounded-lg border border-white/10 flex-row items-center justify-center">
                 {currentStoreIcon ? (
-                  <Image source={{ uri: currentStoreIcon }} className="w-3.5 h-3.5 rounded-sm" resizeMode="contain" />
+                  <Image source={{ uri: currentStoreIcon }} style={{ width: 14, height: 14 }} className="w-3.5 h-3.5 rounded-sm" resizeMode="contain" />
                 ) : (
                   <Shop size="12" color="#c084fc" variant="Bold" />
                 )}
@@ -642,7 +717,6 @@ export default function DealItem({
               <Image source={{ uri: giveaway.image || giveaway.thumbnail }} className="w-full h-full" resizeMode="cover" />
               <View className="absolute inset-0 bg-black/10" />
 
-              {/* Savings Badge (Top Left) */}
               {hasValidPrice && (
                 <View className="absolute top-3 left-3 bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
                   <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
@@ -651,10 +725,9 @@ export default function DealItem({
                 </View>
               )}
 
-              {/* Store Logo & Name Overlay (Bottom Left) */}
               <View className="absolute bottom-3 left-3 bg-black/75 px-2 py-1 rounded-lg border border-white/10 flex-row items-center gap-1.5">
                 {currentStoreIcon ? (
-                  <Image source={{ uri: currentStoreIcon }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
+                  <Image source={{ uri: currentStoreIcon }} style={{ width: 16, height: 16 }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
                 ) : (
                   <Shop size="14" color="#c084fc" variant="Bold" />
                 )}
@@ -721,7 +794,7 @@ export default function DealItem({
         </Pressable>
       )}
 
-      {/* DETAIL MODAL WITH CHEAPSHARK ENHANCEMENTS */}
+      {/* DETAIL MODAL WITH ENLARGED CHEAPSHARK COMPARISONS */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -769,10 +842,9 @@ export default function DealItem({
                 />
               </View>
 
-              {/* Dynamic Store Logo Badge Overlay */}
               <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-1 rounded-lg border border-purple-500/30 flex-row items-center gap-2">
                 {currentStoreIcon ? (
-                  <Image source={{ uri: currentStoreIcon }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
+                  <Image source={{ uri: currentStoreIcon }} style={{ width: 16, height: 16 }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
                 ) : (
                   <Shop size="14" color="#c084fc" variant="Bold" />
                 )}
@@ -811,9 +883,7 @@ export default function DealItem({
                   {giveaway.title}
                 </ThemedText>
 
-                {/* Status & Trust Badges Row */}
                 <View className="flex-row flex-wrap gap-2 mb-4">
-                  {/* Community Trust: Steam Rating */}
                   {activeSteamPercent && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                       <Star1 size="14" color="#eab308" variant="Outline" />
@@ -827,7 +897,6 @@ export default function DealItem({
                     </View>
                   )}
 
-                  {/* Community Trust: Metacritic Score */}
                   {activeMetacritic && (
                     <View className="bg-amber-500/20 border border-amber-500/30 px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
                       <ThemedText className="text-[10px] font-montBlack text-amber-500">
@@ -836,14 +905,7 @@ export default function DealItem({
                     </View>
                   )}
 
-                  {giveaway.release_date && giveaway.release_date !== '0' && (
-                    <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
-                      <CalendarTick size="12" color={iconColor} variant="Outline" />
-                      <ThemedText className="text-[10px] font-montBold opacity-85">
-                        {t('deals.released', { defaultValue: 'Released: {{date}}', date: giveaway.release_date })}
-                      </ThemedText>
-                    </View>
-                  )}
+    
 
                   {giveaway.publisher && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
@@ -875,7 +937,6 @@ export default function DealItem({
                   </View>
                 )}
 
-                {/* HISTORICAL LOWEST PRICE EVER SECTION */}
                 {lowestPriceEverVal !== null && (
                   <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-4 flex-row items-center justify-between border border-emerald-500/20">
                     <View className="flex-1 pr-2">
@@ -911,9 +972,9 @@ export default function DealItem({
                   </View>
                 )}
 
-                {/* LIVE MULTI-STORE PRICE COMPARISON SECTION */}
+                {/* ENLARGED LIVE STORE COMPARISONS WITH GAP SPACING */}
                 <View className="mb-4">
-                  <View className="flex-row items-center justify-between mb-2">
+                  <View className="flex-row items-center justify-between mb-2.5">
                     <ThemedText className="font-montBlack text-xs uppercase tracking-wider text-purple-500">
                       {t('deals.live_store_comparisons', 'Live Store Comparisons')}
                     </ThemedText>
@@ -921,7 +982,7 @@ export default function DealItem({
                   </View>
 
                   {extendedData?.otherStores && extendedData.otherStores.length > 0 ? (
-                    <View style={{ backgroundColor: cardBgColor }} className="rounded-2xl p-2.5 space-y-2 border border-white/5">
+                    <View style={{ backgroundColor: cardBgColor }} className="rounded-2xl p-3 gap-2.5 border border-white/5">
                       {extendedData.otherStores.map((comp) => {
                         const compStoreInfo = storeMap[comp.storeID];
                         const compStoreName = compStoreInfo?.name || t('deals.store', 'Digital Store');
@@ -930,34 +991,35 @@ export default function DealItem({
                         const isCheapestStore = compPriceNum <= salePriceNum;
 
                         return (
-                          <View key={comp.dealID} className="flex-row items-center justify-between py-1.5 px-2 rounded-xl bg-black/10">
-                            <View className="flex-row items-center gap-2">
+                          <View key={comp.dealID} className="flex-row items-center justify-between py-2.5 px-3 rounded-xl bg-black/10">
+                            <View className="flex-row items-center gap-2.5 flex-1 pr-2">
                               {compIcon ? (
-                                <Image source={{ uri: compIcon }} className="w-4 h-4 rounded" resizeMode="contain" />
+                                <Image source={{ uri: compIcon }} style={{ width: 20, height: 20 }} className="w-5 h-5 rounded-sm" resizeMode="contain" />
                               ) : (
-                                <Shop size="14" color={iconColor} variant="Outline" />
+                                <Shop size="18" color={iconColor} variant="Outline" />
                               )}
-                              <ThemedText className="font-montBold text-[11px]">
+                              <ThemedText className="font-montBold text-xs flex-shrink" numberOfLines={1}>
                                 {compStoreName}
                               </ThemedText>
                               {isCheapestStore && (
-                                <View className="bg-emerald-500/20 px-1.5 py-0.2 rounded">
-                                  <Text className="text-[8px] font-montBlack text-emerald-400 uppercase">
+                                <View className="bg-emerald-500/20 px-2 py-0.5 rounded-md">
+                                  <Text className="text-[9px] font-montBlack text-emerald-400 uppercase">
                                     {t('deals.best_price', 'Best Price')}
                                   </Text>
                                 </View>
                               )}
                             </View>
 
-                            <View className="flex-row items-center gap-2">
-                              <Text className="text-[11px] font-montBlack text-emerald-500">
+                            <View className="flex-row items-center gap-3">
+                              <Text className="text-sm font-montBlack text-emerald-500">
                                 ${compPriceNum.toFixed(2)}
                               </Text>
                               <Pressable
                                 onPress={() => handleOpenClaimSite(`https://www.cheapshark.com/redirect?dealID=${comp.dealID}`)}
-                                className="bg-purple-600/20 px-2 py-1 rounded-lg border border-purple-500/30 active:opacity-60"
+                                hitSlop={6}
+                                className="bg-purple-600/20 px-3.5 py-1.5 rounded-lg border border-purple-500/30 active:opacity-60"
                               >
-                                <Text className="text-[9px] font-montBold text-purple-400">
+                                <Text className="text-[11px] font-montBold text-purple-400">
                                   {t('deals.view', 'View')}
                                 </Text>
                               </Pressable>

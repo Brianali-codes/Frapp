@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation, TextInput } from 'react-native';
-import { 
-  Moon, 
-  Sun1, 
-  WifiSquare, 
-  Filter, 
-  RowVertical, 
-  Element3, 
-  SearchNormal, 
-  CloseCircle, 
-  Shop, 
-  Game, 
-  Gift, 
-  Flash, 
-  ArchiveAdd,
-  TrendUp 
+import { ScrollView, View, Pressable, Platform, LayoutAnimation, TextInput } from 'react-native';
+import { Image } from 'expo-image';
+import {
+  Moon,
+  Sun1,
+  WifiSquare,
+  Filter,
+  RowVertical,
+  Element3,
+  SearchNormal,
+  CloseCircle,
+  Shop,
+  Game,
+  Gift,
+  Flash,
+  ArchiveAdd
 } from 'iconsax-react-nativejs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -50,7 +50,6 @@ const PLATFORMS = [
   { id: 'itchio', labelKey: 'giveaways.platforms.itchio', labelDefault: 'itch.io', iconUri: 'https://www.svgrepo.com/show/452232/itch-io.svg' },
 ];
 
-
 const GIVEAWAY_TYPES = [
   { id: 'all', labelKey: 'giveaways.types.all', labelDefault: 'All Types', icon: ArchiveAdd },
   { id: 'game', labelKey: 'giveaways.types.game', labelDefault: 'Full Games', icon: Game },
@@ -85,27 +84,30 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
 }
 
 function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+  const greenShimmer = isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.2)';
+  const purpleShimmer = isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)';
 
   return (
     <View
       style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
-      className="rounded-2xl p-4 mb-5 justify-center opacity-80"
+      className="rounded-2xl p-4 mb-5 opacity-80"
     >
-      <View className="flex-row items-center flex-wrap">
-        <View className="w-24 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-8 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-36 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-16 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-12 h-3 rounded mb-1 mr-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-10 h-3 rounded mb-1" style={{ backgroundColor: shimmerBg }} />
+      <View className="flex-row items-center flex-wrap gap-y-1.5">
+        <View className="w-16 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-8 h-4 rounded-md mx-1" style={{ backgroundColor: greenShimmer }} />
+        <View className="w-36 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-24 h-4 rounded-md mx-1" style={{ backgroundColor: purpleShimmer }} />
+        <View className="w-28 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-12 h-4 rounded-md mx-1" style={{ backgroundColor: greenShimmer }} />
+        <View className="w-32 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
       </View>
     </View>
   );
 }
 
 function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
 
   return (
@@ -118,39 +120,50 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
         }}
         className="rounded-2xl overflow-hidden w-full mb-2"
       >
+        {/* Banner Image Skeleton */}
         <View style={{ height: 160, backgroundColor: shimmerBg }} className="w-full relative justify-between p-3">
           <View className="flex-row justify-between items-center w-full">
-            <View className="w-28 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
-            <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.25)' : 'rgba(147,51,234,0.15)' }} />
+            {/* Discount / Save Badge Skeleton */}
+            <View className="w-24 h-5 rounded-md" style={{ backgroundColor: shimmerBg }} />
+            {/* Store Badge Skeleton */}
+            <View className="w-20 h-5 rounded-lg flex-row items-center px-1.5 gap-1" style={{ backgroundColor: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.15)' }}>
+              <View className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-11 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
+            </View>
           </View>
         </View>
 
+        {/* Content Details */}
         <View className="p-4">
-          <View className="mb-3">
-            <View className="w-2/3 h-4 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
-            <View>
-              <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-            </View>
+          <View className="mb-2">
+            {/* Title Skeleton */}
+            <View className="w-3/4 h-4.5 rounded-md mb-2" style={{ backgroundColor: shimmerBg }} />
+            {/* Description Skeleton Lines */}
+            <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
+            <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
           </View>
 
+          {/* Bottom Bar Divider */}
           <View
             style={{ borderTopWidth: 1, borderColor: borderLine }}
             className="flex-row items-center justify-between pt-3 mt-1"
           >
-            <View className="flex-row items-center">
-              <View className="w-28 h-3 rounded mr-1.5" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-4 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
+            {/* Left: Claim Button / Text Skeleton */}
+            <View className="flex-row items-center gap-1.5">
+              <View className="w-24 h-6 rounded" style={{ backgroundColor: isDark ? 'rgba(147, 51, 234, 0.35)' : 'rgba(147, 51, 234, 0.25)' }} />
+              <View className="w-6 h-6 rounded-full" style={{ backgroundColor: isDark ? 'rgba(147, 51, 234, 0.35)' : 'rgba(147, 51, 234, 0.25)' }} />
             </View>
 
-            <View className="flex-row items-center">
-              <View className="w-8 h-3 rounded mr-2" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
+            {/* Right: Original Price & Worth Pill Skeleton */}
+            <View className="flex-row items-center gap-2">
+              <View className="w-24 h-6 rounded" style={{ backgroundColor: shimmerBg }} />
+              
             </View>
           </View>
         </View>
       </View>
 
+      {/* Carousel Pagination Dots Skeleton */}
       <View className="flex-row items-center justify-center mt-2">
         {[0, 1, 2, 3, 4].map((_, dotIndex) => (
           <View
@@ -172,8 +185,10 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
 }
 
 function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string; variant: 'normal' | 'compact' }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const greenPill = isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.2)';
+  const buttons = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const mockItems = [1, 2, 3, 4, 5];
 
   return (
@@ -190,37 +205,73 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
         >
           {variant === 'normal' ? (
             <View>
-              <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full" />
+              {/* Normal Card Top Image Skeleton */}
+              <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full relative justify-between p-3">
+                <View className="flex-row justify-between items-center w-full">
+                  {/* Platform / Type Pill Skeleton */}
+                  <View className="w-16 h-5 rounded-md" style={{ backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)' }} />
+                  {/* Favorite Heart Button Skeleton */}
+                  <View className="w-20 h-6 rounded-xl items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+                </View>
+              </View>
+
+              {/* Normal Card Details */}
               <View className="p-4">
-                <View className="w-3/4 h-4 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-3/4 h-4.5 rounded-md mb-2" style={{ backgroundColor: shimmerBg }} />
                 <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
                 <View className="w-1/2 h-3 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
 
+                {/* Bottom Row */}
                 <View
                   style={{ borderTopWidth: 1, borderColor: borderLine }}
                   className="flex-row items-center justify-between pt-3 mt-1"
                 >
-                  <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
+                  <View className='flex-row gap-2'>
+                    <View className="w-24 h-6 rounded-md" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+                    <View className="w-6 h-6 rounded-md" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+                  </View>
+                
+                  <View className='flex-row gap-2'>
+                    <View className="w-6 h-6 rounded-md" style={{ backgroundColor: shimmerBg }} />
+                    <View className="w-6 h-6 rounded-md" style={{ backgroundColor: shimmerBg }} />
+                    <View className="w-6 h-6 rounded-md" style={{ backgroundColor: shimmerBg }} />
+                  </View>
                 </View>
               </View>
             </View>
           ) : (
             <View className="p-3 flex-row items-center">
+              {/* Compact Thumbnail Image Skeleton */}
               <View
                 style={{ width: 84, height: 84, backgroundColor: shimmerBg }}
-                className="rounded-xl shrink-0 mr-3"
-              />
+                className="rounded-xl shrink-0 mr-3 relative justify-between p-1.5"
+              >
+                <View className="w-5 h-5 rounded-lg" style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)' }} />
+                <View className="w-14 h-3 rounded-sm" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
 
+              </View>
+
+              {/* Compact Card Content */}
               <View className="flex-1 justify-between h-20 py-0.5">
                 <View>
-                  <View className="w-5/6 h-3.5 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-1/2 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
+                  {/* Title Skeleton */}
+                  <View className="w-5/6 h-4 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
+                  {/* Subtitle / Platform Tag Skeleton */}
+                  <View className="w-2/5 h-3 rounded-md" style={{ backgroundColor: shimmerBg }} />
                 </View>
 
-                <View className="flex-row items-center justify-between">
-                  <View className="w-16 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
+                {/* Bottom Row */}
+                <View className="flex-row items-center justify-between mt-auto">
+                  {/* Expiration / Keys left info */}
+                  <View className="w-16 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+                  <View className="flex-row items-center gap-2">
+
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttons }} />
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttons }} />
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttons }} />
+
+
+                  </View>
                 </View>
               </View>
             </View>
@@ -253,7 +304,7 @@ export default function GiveawayScreen() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('compact');
-  
+
   const backgroundColor = useThemeColor({}, 'background');
   const { themeMode, toggleTheme } = useCustomTheme();
   const isDark = themeMode === 'dark';
@@ -263,7 +314,7 @@ export default function GiveawayScreen() {
   // Client-side search filtering
   const filteredGiveaways = useMemo(() => {
     if (!searchQuery.trim()) return giveaways;
-    return giveaways.filter(item => 
+    return giveaways.filter(item =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase().trim())
     );
   }, [giveaways, searchQuery]);
@@ -406,7 +457,7 @@ export default function GiveawayScreen() {
         <View className="flex-row items-center justify-between w-full mb-4">
           <Pressable className="flex-row items-center gap-2 flex-1 pr-2 active:opacity-90">
             <View style={{ backgroundColor: '#9333ea' }} className="w-9 h-9 rounded-xl overflow-hidden items-center justify-center shadow-sm shrink-0">
-              <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+              <Image source={require('../../assets/images/FRAPP_ICON1.png')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
             </View>
             <ThemedText numberOfLines={1} className="text-lg font-montBlack tracking-tight flex-shrink">
               {t('giveaways.title', 'Giveaways.')}
@@ -542,7 +593,11 @@ export default function GiveawayScreen() {
                     className="px-3.5 rounded-full flex-row items-center gap-1.5 shadow-sm"
                   >
                     {platform.iconUri ? (
-                      <Image source={{ uri: platform.iconUri }} className="w-3.5 h-3.5 rounded-sm" resizeMode="contain" />
+                      <Image
+                        source={{ uri: platform.iconUri }}
+                        style={{ width: 14, height: 14 }}
+                        contentFit="contain"
+                      />
                     ) : (
                       <Shop size="13" color={isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a')} variant="Bold" />
                     )}

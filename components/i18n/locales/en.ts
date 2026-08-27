@@ -178,14 +178,25 @@ export const en = {
     retailer: "Retailer",
     store: "Store",
     free_uppercase: "FREE",
+    steam_rating: "{{percent}}% Steam Rating {{text}}",
+    metacritic_score: "Metacritic: {{score}}",
     share_message: "🔥 Deal Alert: {{title}} is down to {{price}} (Saved {{saved}}) on {{platform}}!\nGet it here: {{url}}",
     save_amount: "{{amount}}% OFF",
+    carousel_description:"Score a flawless {{rating}}/10 deal index rating! Instantly pocket ${{saved}} in savings.",
     hot_deal: "Top Value Deal",
+    best_price: "Best Price",
+    verified_promo: "Verified Promo",
+    view: "View Deal",
+    no_competing_offers: "No competing store offers currently registered for this title.",
     rating: "{{percent}}",
-    released: "Ends: ",
     no_description: "Grab this exceptional value offer before the promotion period expires or pricing tiers change!",
     breakdown_title: "View Details",
     breakdown_body: "Pocket a total of {{saved}} off the regular retail price list of {{original}} (reflecting a solid {{percent}}% value markdown layout).",
+    live_store_comparisons:"Live Store Comparisons",
+    lowest_price_ever: "Lowest Price Ever",
+    all_time_low: "All-Time Low",
+    lowest_price_recorded: "Lowest Price Recorded",
+    lowest_price_nodate: "Historical low recorded at ${{price}}",
     summary: {
       prefix: "We parsed through active gaming storefronts and discovered ",
       midActive: " massive discounts live as of ",
@@ -212,6 +223,7 @@ export const en = {
       prev: "Previous",
       next: "Next Games"
     }
+    
   },
   months: {
     january: "January",
@@ -231,14 +243,24 @@ export const en = {
     welcome: "Welcome to Frapp",
     legalTitle: "Legal Agreements",
     legalSubtitle: "Please review the privacy conditions before accessing our global data sync pipelines.",
-    title: "Track Video game giveaways and premium game deals.",
-    title2: "Get Giveaways and Deals",
+    title: "Track Video game giveaways and deals.",
+    title2: "Video Game Giveaways and Deals",
     description: "Frapp deals in both game giveaways and massive video game Deals, We aggregate the latest 100% free claimable rewards alongside deep retail discounts across storefronts so you always play more for less.",
     privacyHeader: "Privacy & Data Core Framework",
     privacyBody: "Frapp is an open-source data aggregator that unifies your disparate data streams, API feeds, and digital touchpoints into a single, cohesive dashboard. Because we operate entirely as a local-first tool, we do not maintain centralized storage, harvest physical account structures, or trace user telemetry histories. All aggregation, processing, and visualization run directly on your hardware—meaning your data is never transmitted to, or logged by, an external master hub. Your localized configuration profiles, historical cache files, and interactive preferences remain securely on your device.",
     consentLabel: "I accept the Terms of Service & Privacy Statement",
     btnStep1: "Continue",
     btnStep2: "Get Started",
-    versionLabel: "Frapp • v1.1.6"
+    versionLabel: "v1.1.6",
+    permissionsTitle: "App Permissions",
+    permissionsSubtitle: "Frapp requires access to your device's Notifications and Alarm permissions, Please grant the necessary permissions to ensure a seamless experience, Android 14+ devices may require you to allow Exact Alarm permissions.",
+    pushTitle: "Push Notifications",
+    pushDesc: "Get instant alerts when free games or huge discounts land.",
+    granted: "Ready",
+    allow: "Allow",
+    alarmTitle: "Exact Reminders",
+    alarmDesc:"Schedule precise 24h expiration alerts for saved library drops.",
+    setup:"Setup",
+
   }
 } as const;

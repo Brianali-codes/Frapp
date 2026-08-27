@@ -1,7 +1,7 @@
 export const fr = {
   header: {
     title: "Paramètres.",
-    subtitle: "Personnalisez le comportement de l'application, gérez les notifications, modifiez l'affichage ou consultez les licences open source."
+    subtitle: "Personnalisez le comportement de l'application, gérez les notifications, modifiez l'affichage ou lisez les licences open source."
   },
   sections: {
     preferences: "Préférences.",
@@ -11,110 +11,110 @@ export const fr = {
   },
   preferences: {
     themeAppearance: "Apparence du thème",
-    themeDark: "Mode sombre",
-    themeLight: "Mode clair",
+    themeDark: "Mode Sombre",
+    themeLight: "Mode Clair",
     appLanguage: "Langue de l'application",
     appLanguageSub: "Changer de langue",
     savedGiveaways: "Ma bibliothèque.",
     savedGiveawaysSub: "Accéder aux jeux enregistrés",
-    notificationSettings: "Paramètres de notification",
-    notificationSettingsSub: "Gérer les notifications push",
+    notificationSettings: "Paramètres des notifications",
+    notificationSettingsSub: "Activer ou désactiver les notifications push",
     appIntroduction: "Présentation",
-    appIntroductionSub: "Revoir la présentation",
+    appIntroductionSub: "Revoir le guide d'accueil",
     checkForUpdates: "Version de l'application",
     checkForUpdatesSub: "Vérifier les mises à jour",
     Report: "Signaler un bug",
-    ReportSub: "Signaler un problème ou un bug",
+    ReportSub: "Signaler un bug ou un problème",
   },
   about: {
     developer: "À propos du développeur",
-    developerSub: "Consulter le portfolio personnel",
-    moreApps: "Autres applications",
+    developerSub: "Découvrir le portfolio",
+    moreApps: "Plus d'applications",
     moreAppsSub: "Explorer les dépôts GitHub",
     socials: "Réseaux sociaux",
-    socialsSub: "Se connecter sur les réseaux",
+    socialsSub: "Rejoignez-nous sur les réseaux",
     privacy: "Politique de confidentialité",
     privacySub: "Consulter notre politique de confidentialité."
   },
   community: {
     supportOpenSource: "Soutenir l'Open Source",
-    supportOpenSourceSub: "Cette application est développée indépendamment et hébergée gratuitement. Si vous appréciez ces offres, ajouter une étoile sur GitHub nous aide énormément !",
+    supportOpenSourceSub: "Cette application est développée indépendamment et hébergée gratuitement. Si vous aimez dénicher ces bons plans, nous laisser une étoile sur GitHub nous aide énormément !",
     starGithub: "Nous donner une étoile sur GitHub",
     buyCoffee: "Offrez-moi un café",
-    buyCoffeeSub: "Aidez-nous à maintenir les serveurs en ligne ! Un petit don nous permet de maintenir le projet et d'ajouter de nouvelles fonctionnalités.",
+    buyCoffeeSub: "Aidez-nous à maintenir les serveurs en ligne ! Un petit don permet de maintenir le projet et d'ajouter de nouvelles fonctionnalités.",
     donateKofi: "Ko-fi",
     donatePatreon: "Patreon"
   },
   providers: {
     gamepower: "Site Gamepower",
-    gamepowerSub: "Source principale des giveaways",
-    cheapshark: "CheapShark API",
-    cheapsharkSub: "API des offres de jeux vidéo"
+    gamepowerSub: "Source principale des jeux gratuits",
+    cheapshark: "API CheapShark",
+    cheapsharkSub: "API de bons plans jeux vidéo"
   },
   report: {
     title: "Signaler un bug.",
-    subtitle: "Signaler un bug ou un problème",
-    sectionTitle: "Sélectionner une catégorie de bug",
+    subtitle: "Signaler un bug ou un dysfonctionnement",
+    sectionTitle: "Sélectionner une catégorie",
     categories: {
       ui: "Problème d'interface (UI/UX)",
-      api: "Erreur API / Données",
+      api: "Erreur d'API / Données",
       crash: "Performance / Plante",
       feature: "Demande de fonctionnalité"
     },
     githubCard: {
       title: "Soumettre directement via GitHub Issues",
-      description: "En cliquant sur le bouton ci-dessous, votre modèle ainsi que les paramètres de votre appareil seront préparés pour ouvrir la page GitHub.",
+      description: "En cliquant sur le bouton ci-dessous, un modèle prérempli avec les informations de votre appareil sera généré sur la page GitHub d'assistance.",
       buttonText: "Signaler {{category}}"
     },
     attributionCard: {
-      title: "Mentions concernant les API tierces",
-      description: "Toutes les données affichées proviennent directement de réseaux externes via les architectures publiques de Gamepower et CheapShark. Frapp ne modifie pas les prix ni la disponibilité."
+      title: "Mentions d'API tierces",
+      description: "Toutes les données affichées proviennent directement des API ouvertes de Gamepower et CheapShark. L'utilisation de ces informations respecte leurs règles de distribution. Frapp ne modifie pas les prix, les offres ni les périodes de distribution. Nous ne pouvons donc pas garantir la disponibilité continue des clés ou des services externes."
     },
     alerts: {
       errorTitle: "Erreur",
-      errorMessage: "Impossible de rediriger vers GitHub. Vérifiez les autorisations de votre navigateur."
+      errorMessage: "Impossible d'ouvrir GitHub. Veuillez vérifier les autorisations de votre navigateur."
     },
     github: {
-      bodyDescription: "Cette action supprimera définitivement tous les giveaways enregistrés. Vous devrez les rechercher et les ajouter à nouveau manuellement.",
-      step1: "Ouvrir l'application",
-      step2: "Naviguer vers...",
-      step3: "Observer..."
+      bodyDescription: "Cette action supprimera définitivement tous les jeux enregistrés de votre bibliothèque. Vous devrez les chercher et les rajouter manuellement.",
+      step1: "Ouvrez l'application",
+      step2: "Accédez à...",
+      step3: "Observez..."
     }
   },
   footer: {
-    build: "Version de Frapp {{version}}"
+    build: "Frapp Version {{version}}"
   },
   updateModal: {
     title: "Mise à jour disponible",
-    subtitle: "{{version}} est disponible !",
+    subtitle: "La version {{version}} est disponible !",
     description: "Une nouvelle version ({{latest}}) est disponible. Mettez à jour votre version actuelle ({{current}}) pour profiter des dernières nouveautés !",
-    later: "Annuler",
+    later: "Plus tard",
     updateNow: "Mettre à jour"
   },
   modals: {
     dismiss: "Tout effacer",
     ok: "OK",
     testFailedTitle: "Échec du test",
-    testFailedMessage: "Impossible d'exécuter la boucle de rendu. Vérifiez vos autorisations locales.",
+    testFailedMessage: "Impossible de lancer la boucle de rendu. Vérifiez les autorisations locales.",
     upToDateTitle: "À jour",
     upToDateMessage: "Vous utilisez déjà la version la plus récente ({{version}}). Aucune mise à jour requise.",
     upToDateAction: "Parfait",
     checkFailedTitle: "Échec de vérification",
-    checkFailedMessage: "Impossible de vérifier les mises à jour. Vérifiez votre connexion Internet et réessayez.",
+    checkFailedMessage: "Impossible d'effectuer la recherche pour le moment. Vérifiez votre connexion Internet et réessayez.",
     failedAction: "Fermer",
-    socialsTitle: "Partager la promo",
+    socialsTitle: "Partager",
     languageTitle: "Choisir la langue"
   },
   giveaways: {
-    title: "Giveaways.",
+    title: "Jeux Gratuits.",
     summary: {
       prefix: "Nous avons trouvé ",
-      midActive: " giveaways de jeux actifs en date du ",
-      midWorth: ", d'une valeur totale de ",
-      suffix: ". Profitez-en avant leur expiration !"
+      midActive: " jeux gratuits actifs au ",
+      midWorth: ", pour une valeur totale de ",
+      suffix: ". Réclamez-les avant expiration !"
     },
     platforms: {
-      all: "Tous",
+      all: "Toutes",
       pc: "PC",
       steam: "Steam",
       epic: "Epic",
@@ -126,17 +126,17 @@ export const fr = {
       switch: "Switch",
       android: "Android",
       ios: "iOS",
-      drmFree: "DRM-Free",
+      drmFree: "Sans DRM",
       itchio: "itch.io"
     },
     error: {
       title: "Connexion interrompue",
-      description: "Impossible de synchroniser avec les serveurs pour le moment. Vérifiez votre connexion et réessayez.",
-      retryButton: "Réessayer"
+      description: "Impossible de contacter les serveurs. Assurez-vous d'être connecté à Internet et réessayez.",
+      retryButton: "Réessayer la connexion"
     },
     empty: {
-      title: "Aucun giveaway trouvé",
-      description: "Aucun giveaway actif n'est disponible pour cette plateforme actuellement.",
+      title: "Aucun jeu gratuit trouvé",
+      description: "Aucun jeu gratuit n'est disponible pour cette plateforme actuellement.",
       viewAllButton: "Voir toutes les plateformes"
     },
     tracking: {
@@ -145,7 +145,7 @@ export const fr = {
       ends_today: "Se termine aujourd'hui",
       expired: "Expiré",
       keys_left: "Clés restantes : {{count}}",
-      instructions_title: "Instructions pour récupérer :"
+      instructions_title: "Instructions pour réclamer :"
     },
     pagination: {
       previous: "Précédent",
@@ -164,29 +164,40 @@ export const fr = {
     },
     delete: {
       title: "Supprimer tous les jeux ?",
-      description: "Cette action supprimera définitivement tous les giveaways épinglés de votre liste enregistrée.",
+      description: "Cette action supprimera définitivement tous les jeux enregistrés de votre liste. Vous devrez les réajouter manuellement.",
       confirmButton: "Tout effacer"
     },
   },
   deals: {
-    title: "Bons plans jeux.",
+    title: "Bons Plans Jeux.",
     titleClaim: "Profiter de l'offre.",
     claim: "Profiter de l'offre",
     retailer: "Revendeur",
     store: "Boutique",
     free_uppercase: "GRATUIT",
-    share_message: "🔥 Alerte bon plan : {{title}} est à {{price}} (Économie : {{saved}}) sur {{platform}} !\nProfitez-en ici : {{url}}",
+    steam_rating: "{{percent}}% d'avis positifs Steam {{text}}",
+    metacritic_score: "Metacritic : {{score}}",
+    share_message: "🔥 Bon plan : {{title}} est à {{price}} (Économie : {{saved}}) sur {{platform}} !\nProfitez-en ici : {{url}}",
     save_amount: "-{{amount}}%",
-    hot_deal: "Meilleure offre",
+    carousel_description: "Excellente note de {{rating}}/10 ! Économisez ${{saved}} immédiatement.",
+    hot_deal: "Meilleure Offre",
+    best_price: "Meilleur Prix",
+    verified_promo: "Offre Vérifiée",
+    view: "Voir l'offre",
+    no_competing_offers: "Aucune autre offre enregistrée pour ce jeu.",
     rating: "{{percent}}",
-    released: "Fin : ",
     no_description: "Profitez de cette offre exceptionnelle avant la fin de la promotion !",
-    breakdown_title: "Voir les détails",
-    breakdown_body: "Économisez un total de {{saved}} par rapport au prix officiel de {{original}} (soit une réduction de {{percent}}%).",
+    breakdown_title: "Détails de l'offre",
+    breakdown_body: "Économisez au total {{saved}} par rapport au prix d'origine de {{original}} (soit une réduction de {{percent}}%).",
+    live_store_comparisons: "Comparateur de boutiques en direct",
+    lowest_price_ever: "Prix le plus bas historique",
+    all_time_low: "Plus bas historique",
+    lowest_price_recorded: "Prix minimum enregistré",
+    lowest_price_nodate: "Plus bas historique enregistré à ${{price}}",
     summary: {
-      prefix: "Nous avons analysé les boutiques et découvert ",
-      midActive: " réductions importantes en date du ",
-      suffix: ". Cliquez sur un jeu pour obtenir votre clé !"
+      prefix: "Nous avons analysé les boutiques et trouvé ",
+      midActive: " réductions majeures actives au ",
+      suffix: ". Cliquez sur un titre pour récupérer votre offre !"
     },
     stores: {
       all: "Toutes les boutiques",
@@ -197,12 +208,12 @@ export const fr = {
     },
     error: {
       title: "Connexion interrompue",
-      description: "Impossible de contacter les serveurs. Assurez-vous que votre appareil est connecté à Internet.",
-      retryButton: "Réessayer"
+      description: "Impossible de contacter les serveurs. Vérifiez votre connexion Internet et réessayez.",
+      retryButton: "Réessayer la connexion"
     },
     empty: {
       title: "Aucun résultat",
-      description: "Aucune offre trouvée dans cette catégorie.",
+      description: "Aucun bon plan trouvé pour cette catégorie de boutique.",
       resetButton: "Réinitialiser les filtres"
     },
     pagination: {
@@ -226,16 +237,25 @@ export const fr = {
   },
   onboarding: {
     welcome: "Bienvenue sur Frapp",
-    legalTitle: "Accords légaux",
-    legalSubtitle: "Veuillez lire les conditions de confidentialité avant de continuer.",
-    title: "Suivez les giveaways et les meilleures réductions de jeux vidéo.",
-    title2: "Obtenez des giveaways et des offres",
-    description: "Frapp réunit jeux gratuits et promotions avantageuses sur plusieurs plateformes pour vous permettre de jouer plus tout en dépensant moins.",
-    privacyHeader: "Confidentialité & Données",
-    privacyBody: "Frapp est un agrégateur de données open source axé sur la confidentialité. Toutes vos données restent stockées localement sur votre appareil.",
-    consentLabel: "J'accepte les conditions d'utilisation et la politique de confidentialité",
+    legalTitle: "Informations légales",
+    legalSubtitle: "Veuillez lire la politique de confidentialité avant d'accéder à nos flux de données.",
+    title: "Suivez les jeux gratuits et promos.",
+    title2: "Jeux Gratuits & Bons Plans Video",
+    description: "Frapp rassemble les offres 100% gratuites et les meilleures réductions sur les jeux vidéo pour vous faire faire des économies au quotidien.",
+    privacyHeader: "Confidentialité & Architecture",
+    privacyBody: "Frapp est un agrégateur open-source axé sur la confidentialité. Toutes les données sont traitées directement en local sur votre appareil sans passer par des serveurs centraux ni collecter de données personnelles.",
+    consentLabel: "J'accepte les Conditions d'utilisation & la Politique de confidentialité",
     btnStep1: "Continuer",
     btnStep2: "Commencer",
-    versionLabel: "Frapp • v1.1.6"
+    versionLabel: "v1.1.6",
+    permissionsTitle: "Autorisations de l'application",
+    permissionsSubtitle: "Frapp nécessite l'accès aux notifications et aux alarmes. Veuillez accorder ces autorisations pour un fonctionnement optimal (l'autorisation des alarmes exactes peut être requise sur Android 14+).",
+    pushTitle: "Notifications Push",
+    pushDesc: "Recevez une alerte immédiate dès qu'un jeu gratuit ou une promo importante est disponible.",
+    granted: "Prêt",
+    allow: "Autoriser",
+    alarmTitle: "Rappels Précis",
+    alarmDesc: "Programmez des rappels 24h avant l'expiration des jeux enregistrés dans votre bibliothèque.",
+    setup: "Configurer"
   }
 } as const;

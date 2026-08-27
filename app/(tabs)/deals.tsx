@@ -72,19 +72,21 @@ function PaginationButton({ text, onPress, isDark }: PaginationButtonProps) {
 // HIGH FIDELITY WORTH SUMMARY SKELETON
 // =========================================================================
 function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+  const greenShimmer = isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.2)';
+  const purpleShimmer = isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)';
 
   return (
     <View
       style={{ backgroundColor: cardBgColor, borderWidth: 1, borderColor: adaptiveBorderColor }}
-      className="rounded-2xl p-4 mb-5 min-h-[64px] justify-center animate-pulse opacity-85"
+      className="rounded-2xl p-4 mb-5 opacity-80 justify-center min-h-[64px]"
     >
       <View className="flex-row items-center flex-wrap gap-y-1.5">
-        <View className="w-44 h-3 rounded mr-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-8 h-3 rounded mr-1" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
-        <View className="w-28 h-3 rounded mr-1" style={{ backgroundColor: shimmerBg }} />
-        <View className="w-16 h-3 rounded mr-1" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
-        <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-44 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-8 h-4 rounded-md mx-1" style={{ backgroundColor: greenShimmer }} />
+        <View className="w-28 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
+        <View className="w-24 h-4 rounded-md mx-1" style={{ backgroundColor: purpleShimmer }} />
+        <View className="w-32 h-3.5 rounded" style={{ backgroundColor: shimmerBg }} />
       </View>
     </View>
   );
@@ -94,11 +96,11 @@ function WorthSummarySkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { is
 // HIGH FIDELITY BEST DEALS CAROUSEL SKELETON
 // =========================================================================
 function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
 
   return (
-    <View className="w-full mb-6 animate-pulse opacity-85">
+    <View className="w-full mb-6 opacity-80">
       <View
         style={{
           borderWidth: 1,
@@ -107,40 +109,50 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
         }}
         className="rounded-2xl overflow-hidden w-full mb-2"
       >
+        {/* Banner Image Skeleton */}
         <View style={{ height: 160, backgroundColor: shimmerBg }} className="w-full relative justify-between p-3">
           <View className="flex-row justify-between items-center w-full">
-            <View className="w-28 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }} />
-            <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.25)' : 'rgba(147,51,234,0.15)' }} />
+            {/* Savings / Discount Badge Skeleton */}
+            <View className="w-24 h-5 rounded-md" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+            {/* Store Badge Skeleton */}
+            <View className="w-20 h-5 rounded-lg flex-row items-center px-1.5 gap-1" style={{ backgroundColor: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.15)' }}>
+              <View className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: shimmerBg }} />
+              <View className="w-11 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
+            </View>
           </View>
         </View>
 
+        {/* Content Details */}
         <View className="p-4">
-          <View className="mb-3">
-            <View className="w-2/3 h-4 rounded mb-2.5" style={{ backgroundColor: shimmerBg }} />
-            <View>
-              <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-            </View>
+          <View className="mb-2">
+            {/* Title Skeleton */}
+            <View className="w-3/4 h-4.5 rounded-md mb-2" style={{ backgroundColor: shimmerBg }} />
+            {/* Description Skeleton Lines */}
+            <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
+            <View className="w-4/5 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
           </View>
 
+          {/* Bottom Bar Divider */}
           <View
             style={{ borderTopWidth: 1, borderColor: borderLine }}
-            className="flex-row items-center justify-between pt-2.5 mt-0.5"
+            className="flex-row items-center justify-between pt-3 mt-1"
           >
-            <View className="flex-row items-center">
-              <View className="w-28 h-3 rounded mr-1" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-3.5 h-3.5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
+            {/* Left: View Deal Link Button Skeleton */}
+            <View className="flex-row items-center gap-1.5">
+              <View className="w-16 h-4 rounded-md" style={{ backgroundColor: isDark ? 'rgba(147, 51, 234, 0.35)' : 'rgba(147, 51, 234, 0.25)' }} />
+              <View className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: isDark ? 'rgba(147, 51, 234, 0.35)' : 'rgba(147, 51, 234, 0.25)' }} />
             </View>
 
-            <View className="flex-row items-center">
-              <View className="w-8 h-3 rounded mr-1.5" style={{ backgroundColor: shimmerBg }} />
-              <View className="w-12 h-4 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
+            {/* Right: Original Price & Sale Price Pill Skeleton */}
+            <View className="flex-row items-center gap-2">
+              <View className="w-20 h-5 rounded" style={{ backgroundColor: shimmerBg }} />
             </View>
           </View>
         </View>
       </View>
 
-      <View className="flex-row items-center justify-center mt-1.5">
+      {/* Carousel Pagination Dots Skeleton */}
+      <View className="flex-row items-center justify-center mt-2">
         {[0, 1, 2, 3, 4].map((_, dotIndex) => (
           <View
             key={dotIndex}
@@ -151,7 +163,7 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
                 ? '#9333ea'
                 : (isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'),
               borderRadius: 999,
-              marginHorizontal: 3,
+              marginHorizontal: 3
             }}
           />
         ))}
@@ -164,8 +176,11 @@ function CarouselSkeleton({ isDark, cardBgColor, adaptiveBorderColor }: { isDark
 // HIGH FIDELITY CARD LIST SKELETON
 // =========================================================================
 function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string; variant: 'normal' | 'compact' }) {
-  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const greenPill = isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.2)';
+  const purpleButton = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+  const buttonBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
   const mockItems = [1, 2, 3, 4, 5];
 
   return (
@@ -178,42 +193,78 @@ function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }:
             borderColor: adaptiveBorderColor,
             backgroundColor: cardBgColor,
           }}
-          className="rounded-2xl overflow-hidden w-full mb-4 animate-pulse opacity-85"
+          className="rounded-2xl overflow-hidden w-full mb-4 opacity-80"
         >
           {variant === 'normal' ? (
             <View>
-              <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full" />
+              {/* Normal Card Top Image Skeleton */}
+              <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full relative justify-between p-3">
+                <View className="flex-col justify-between items-start h-full">
+                  {/* Store / Savings Tag Skeleton */}
+                  <View className="w-32 h-5 rounded-md" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+                  {/* Action Buttons Skeleton */}
+                  <View className="flex-row items-center gap-2">
+                    <View className="w-8 h-8 rounded-xl items-center justify-center" style={{ backgroundColor: buttonBg }} />
+              
+                  </View>
+                </View>
+              </View>
 
+              {/* Normal Card Details */}
               <View className="p-4">
-                <View className="w-3/4 h-4 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
-                <View className="w-full h-3 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-3/4 h-4.5 rounded-md mb-2" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
                 <View className="w-1/2 h-3 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
 
+                {/* Bottom Row */}
                 <View
                   style={{ borderTopWidth: 1, borderColor: borderLine }}
                   className="flex-row items-center justify-between pt-3 mt-1"
                 >
-                  <View className="w-20 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-16 h-5 rounded" style={{ backgroundColor: isDark ? 'rgba(147,51,234,0.15)' : 'rgba(147,51,234,0.1)' }} />
-                </View>
+                  <View className="w-24 h-4 rounded-md" style={{ backgroundColor: shimmerBg }} />
+
+                  <View className='flex-row items-center gap-3'>
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttonBg }} />
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttonBg }} />
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttonBg }} />
+                  </View>
+                   </View>
               </View>
             </View>
           ) : (
             <View className="p-3 flex-row items-center">
+              {/* Compact Thumbnail Image Skeleton */}
               <View
                 style={{ width: 84, height: 84, backgroundColor: shimmerBg }}
-                className="rounded-xl shrink-0 mr-3"
-              />
+                className="rounded-xl shrink-0 mr-3 relative justify-between p-1.5"
+              >
+                <View className="w-5 h-5 rounded-lg" style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)' }} />
+                <View className="w-14 h-3 rounded-sm" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
 
+              </View>
+
+              {/* Compact Card Content */}
               <View className="flex-1 justify-between h-[84px] py-0.5">
                 <View>
-                  <View className="w-5/6 h-3.5 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-1/2 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
+                  {/* Title Skeleton */}
+                  <View className="w-5/6 h-4 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
+                  {/* Store / Deal Tag Skeleton */}
+                  <View className="w-2/5 h-3 rounded-md" style={{ backgroundColor: shimmerBg }} />
                 </View>
 
-                <View className="flex-row items-center justify-between">
-                  <View className="w-16 h-2.5 rounded" style={{ backgroundColor: shimmerBg }} />
-                  <View className="w-12 h-4.5 rounded" style={{ backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)' }} />
+                {/* Bottom Row */}
+                <View className="flex-row items-center justify-between mt-auto">
+                  {/* Original Price / Rating Info Skeleton */}
+                  <View className="w-16 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+
+                  {/* Price Tag & Action Buttons Skeleton */}
+                  <View className="flex-row items-center gap-2">
+                    
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttonBg }} />
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttonBg }} />
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttonBg }} />
+                    
+                  </View>
                 </View>
               </View>
             </View>
@@ -433,7 +484,7 @@ export default function FreeScreen() {
     <View style={{ flex: 1, backgroundColor }}>
       <ScrollView
         ref={scrollRef}
-        className='flex-1 px-4 pt-10'
+        className="flex-1 px-4 pt-10"
         style={{ backgroundColor }}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}

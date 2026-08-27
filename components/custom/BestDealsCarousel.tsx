@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { 
-  View, 
-  ImageBackground, 
+import {
+  View,
+  ImageBackground,
   Image,
-  Pressable, 
-  Platform, 
-  Animated, 
-  Text, 
+  Pressable,
+  Platform,
+  Animated,
+  Text,
   Linking,
   Modal,
   ScrollView,
@@ -19,24 +19,24 @@ import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/ThemedText';
-import { FreeGiveaway } from '@/types'; 
+import { FreeGiveaway } from '@/types';
 import { useCustomTheme } from '@/context/ThemeContext';
-import { 
-  Flash, 
-  ArrowRight, 
-  Share as ShareIcon, 
-  Star1, 
-  CalendarTick, 
-  Game, 
-  Gift, 
+import {
+  Flash,
+  ArrowRight,
+  Share as ShareIcon,
+  Star1,
+  CalendarTick,
+  Game,
+  Gift,
   Heart,
   Shop,
   TrendDown
 } from 'iconsax-react-nativejs';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CORE_BANNER_HEIGHT = 160; 
-const AUTOSCROLL_INTERVAL = 4500; 
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+const CORE_BANNER_HEIGHT = 160;
+const AUTOSCROLL_INTERVAL = 5000;
 
 // Animated Favorite Button Component with Sparkle Burst
 const SPARKLE_COUNT = 6;
@@ -89,7 +89,6 @@ function FavoriteButton({ isSaved, onToggle, cardBgColor, isDark }: FavoriteButt
 
   return (
     <View className="relative items-center justify-center">
-      {/* Sparkle Particles Burst */}
       {SPARKLE_PARTICLES.map((sparkle, idx) => {
         const sparkleScale = sparkleAnim.interpolate({
           inputRange: [0, 0.4, 1],
@@ -183,9 +182,51 @@ interface BestDealsCarouselProps {
   onDealPress?: (item: FreeGiveaway) => void;
 }
 
-// Global in-memory store cache
 let storeMetadataCache: Record<string, StoreMeta> | null = null;
 let isStoreFetchPending = false;
+
+const compileStoreDictionary = (rawStores: CheapSharkStore[]): Record<string, StoreMeta> => {
+  const compiledMap: Record<string, StoreMeta> = {};
+
+  rawStores.forEach((s) => {
+    const iconPath = s.images?.icon || '';
+    const fullIcon = iconPath.startsWith('http')
+      ? iconPath
+      : `https://www.cheapshark.com${iconPath}`;
+
+    const meta: StoreMeta = {
+      name: s.storeName,
+      icon: fullIcon
+    };
+
+    compiledMap[s.storeID] = meta;
+    compiledMap[s.storeName.toLowerCase()] = meta;
+  });
+
+  const aliases: Record<string, string> = {
+    'steam': 'steam',
+    'epic': 'epic games store',
+    'epic games': 'epic games store',
+    'epic games store': 'epic games store',
+    'gog': 'gog',
+    'gog.com': 'gog',
+    'ubisoft': 'ubisoft connect',
+    'uplay': 'ubisoft connect',
+    'origin': 'ea play',
+    'ea': 'ea play',
+    'ea app': 'ea play',
+    'itch.io': 'itch.io',
+    'itch': 'itch.io',
+  };
+
+  Object.entries(aliases).forEach(([alias, targetKey]) => {
+    if (compiledMap[targetKey]) {
+      compiledMap[alias] = compiledMap[targetKey];
+    }
+  });
+
+  return compiledMap;
+};
 
 export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProps) {
   const { t } = useTranslation();
@@ -196,14 +237,13 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
   const [selectedItem, setSelectedItem] = useState<FreeGiveaway | null>(null);
   const [localIsSaved, setLocalIsSaved] = useState(false);
 
-  // Dynamic Store Map State
   const [storeMap, setStoreMap] = useState<Record<string, StoreMeta>>(storeMetadataCache || {});
 
-  // Extended CheapShark metrics state for Modal
   const [extendedData, setExtendedData] = useState<ExtendedDealData | null>(null);
   const [loadingExtended, setLoadingExtended] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(SCREEN_WIDTH - 48);
 
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(0)).current;
   const autoScrollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -217,7 +257,17 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
   const iconBtnBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
   const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
 
-  // 1. Dynamic Store Metadata Lookup & Storage Sync
+  useEffect(() => {
+    if (modalVisible) {
+      translateY.setValue(0);
+    }
+  }, [modalVisible]);
+
+  // Reset slide animation position when active index changes
+  useEffect(() => {
+    slideAnim.setValue(0);
+  }, [activeIndex]);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -228,7 +278,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
       }
 
       try {
-        const storedMap = await AsyncStorage.getItem('cheapshark_stores_map');
+        const storedMap = await AsyncStorage.getItem('cheapshark_stores_map_v5');
         if (storedMap) {
           const parsed = JSON.parse(storedMap);
           storeMetadataCache = parsed;
@@ -238,21 +288,19 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
 
         if (!isStoreFetchPending) {
           isStoreFetchPending = true;
-          const res = await fetch('https://www.cheapshark.com/api/1.0/stores');
+          const res = await fetch('https://www.cheapshark.com/api/1.0/stores', {
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'GameDealsApp/1.0'
+            }
+          });
           if (res.ok) {
             const rawStores: CheapSharkStore[] = await res.json();
-            const compiledMap: Record<string, StoreMeta> = {};
+            const compiled = compileStoreDictionary(rawStores);
 
-            rawStores.forEach((s) => {
-              compiledMap[s.storeID] = {
-                name: s.storeName,
-                icon: `https://www.cheapshark.com${s.images.icon}`
-              };
-            });
-
-            storeMetadataCache = compiledMap;
-            await AsyncStorage.setItem('cheapshark_stores_map', JSON.stringify(compiledMap));
-            if (isMounted) setStoreMap(compiledMap);
+            storeMetadataCache = compiled;
+            await AsyncStorage.setItem('cheapshark_stores_map_v5', JSON.stringify(compiled));
+            if (isMounted) setStoreMap(compiled);
           }
         }
       } catch (error) {
@@ -266,14 +314,6 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
     return () => { isMounted = false; };
   }, []);
 
-  // Reset drag position whenever modal visibility changes
-  useEffect(() => {
-    if (modalVisible) {
-      translateY.setValue(0);
-    }
-  }, [modalVisible]);
-
-  // Sync saved status from AsyncStorage when selectedItem changes
   useEffect(() => {
     if (!selectedItem) return;
 
@@ -296,48 +336,75 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
     checkSavedStatus();
   }, [selectedItem]);
 
-  // Fetch CheapShark ratings, lowest price ever & live multi-store comparison when modal opens
   useEffect(() => {
     if (!modalVisible || !selectedItem) return;
 
     let isMounted = true;
     const fetchCheapSharkExtendedMetrics = async () => {
-      const dealId = selectedItem.id;
-      if (!dealId) return;
-
       setLoadingExtended(true);
       try {
-        const dealRes = await fetch(`https://www.cheapshark.com/api/1.0/deals?id=${dealId}`);
-        if (!dealRes.ok) throw new Error('Failed to fetch deal metrics');
-        const dealData = await dealRes.json();
+        const headers = {
+          'Accept': 'application/json',
+          'User-Agent': 'GameDealsApp/1.0'
+        };
+        const rawTitle = selectedItem.title || '';
 
-        const gameID = dealData.gameInfo?.gameID;
+        const baseTitle = rawTitle.split(/[-–:(\[]/)[0];
+        const cleanTitle = baseTitle.replace(/[™®©!]/g, '').trim();
+
+        let searchRes = await fetch(
+          `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(cleanTitle)}&limit=5`,
+          { headers }
+        );
+
+        let searchData = searchRes.ok ? await searchRes.json() : [];
+
+        if ((!Array.isArray(searchData) || searchData.length === 0) && cleanTitle !== rawTitle) {
+          const fallbackClean = rawTitle.replace(/[™®©!]/g, '').trim();
+          searchRes = await fetch(
+            `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(fallbackClean)}&limit=5`,
+            { headers }
+          );
+          if (searchRes.ok) searchData = await searchRes.json();
+        }
+
+        if (!Array.isArray(searchData) || searchData.length === 0) {
+          if (isMounted) setLoadingExtended(false);
+          return;
+        }
+
+        const gameID = searchData[0].gameID;
         let comparisons: StoreDealComparison[] = [];
         let cheapestEver: CheapestPriceEver | undefined = undefined;
+        let metacritic: string | undefined = undefined;
+        let steamPercent: string | undefined = undefined;
+        let steamText: string | undefined = undefined;
 
         if (gameID) {
-          const gameRes = await fetch(`https://www.cheapshark.com/api/1.0/games?id=${gameID}`);
+          const gameRes = await fetch(`https://www.cheapshark.com/api/1.0/games?id=${gameID}`, { headers });
           if (gameRes.ok) {
             const gameData = await gameRes.json();
             if (Array.isArray(gameData.deals)) {
               comparisons = gameData.deals;
             }
             cheapestEver = gameData.cheapestPriceEver;
+            metacritic = gameData.info?.metacriticScore !== '0' ? gameData.info?.metacriticScore : undefined;
+            steamPercent = gameData.info?.steamRatingPercent !== '0' ? gameData.info?.steamRatingPercent : undefined;
+            steamText = gameData.info?.steamRatingText || undefined;
           }
         }
 
         if (isMounted) {
           setExtendedData({
-            metacriticScore: dealData.gameInfo?.metacriticScore !== '0' ? dealData.gameInfo?.metacriticScore : undefined,
-            steamRatingPercent: dealData.gameInfo?.steamRatingPercent !== '0' ? dealData.gameInfo?.steamRatingPercent : undefined,
-            steamRatingText: dealData.gameInfo?.steamRatingText || undefined,
-            steamRatingCount: dealData.gameInfo?.steamRatingCount || undefined,
+            metacriticScore: metacritic,
+            steamRatingPercent: steamPercent,
+            steamRatingText: steamText,
             otherStores: comparisons,
             cheapestPriceEver: cheapestEver
           });
         }
       } catch (error) {
-        console.error('Error fetching extended CheapShark payload:', error);
+        console.warn('Extended metrics fetch failed in carousel:', error);
       } finally {
         if (isMounted) setLoadingExtended(false);
       }
@@ -374,7 +441,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
         const response = await fetch(url, {
           headers: {
             'Accept': 'application/json',
-            'User-Agent': 'FrappApp/1.1 (React Native)',
+            'User-Agent': 'GameDealsApp/1.0',
           },
         });
         if (!response.ok) throw new Error('API request breakdown');
@@ -392,13 +459,13 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
               title: deal.title || 'Unknown Title',
               thumbnail: deal.thumb || '',
               image: deal.thumb || '',
-              description: deal.salePrice === '0.00' 
+              description: deal.salePrice === '0.00'
                 ? t('deals.no_description', { defaultValue: 'No additional description provided.' })
                 : t('deals.carousel_description', {
-                    defaultValue: 'Score a flawless {{rating}}/10 deal index rating! Instantly pocket ${{saved}} in savings.',
-                    rating: deal.dealRating,
-                    saved: totalSaved
-                  }),
+                  defaultValue: 'Score a flawless {{rating}}/10 deal index rating! Instantly pocket ${{saved}} in savings.',
+                  rating: deal.dealRating,
+                  saved: totalSaved
+                }),
               open_giveaway_url: `https://www.cheapshark.com/redirect?dealID=${deal.dealID}`,
               worth: markdownPrice === 0 ? t('deals.free_uppercase', { defaultValue: 'FREE' }) : `$${deal.salePrice}`,
               platform: deal.storeID,
@@ -420,30 +487,33 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
     fetchBestValueDeals();
   }, [t]);
 
-  // Autoplay cycle (paused while modal is displayed)
+  const nextIndex = items.length > 0 ? (activeIndex === items.length - 1 ? 0 : activeIndex + 1) : 0;
+
   useEffect(() => {
-    if (items.length <= 1 || modalVisible) return;
+    if (items.length <= 1 || modalVisible || containerWidth === 0) {
+      if (autoScrollTimer.current) {
+        clearInterval(autoScrollTimer.current);
+        autoScrollTimer.current = null;
+      }
+      return;
+    }
 
     autoScrollTimer.current = setInterval(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 0.2,
-        duration: 300,
+      Animated.timing(slideAnim, {
+        toValue: -containerWidth,
+        duration: 450,
         useNativeDriver: true,
-      }).start(() => {
-        setActiveIndex((prevIndex) => (prevIndex === items.length - 1 ? 0 : prevIndex + 1));
-
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }).start();
+      }).start(({ finished }) => {
+        if (finished) {
+          setActiveIndex((prev) => (prev === items.length - 1 ? 0 : prev + 1));
+        }
       });
     }, AUTOSCROLL_INTERVAL);
 
     return () => {
       if (autoScrollTimer.current) clearInterval(autoScrollTimer.current);
     };
-  }, [items, fadeAnim, modalVisible]);
+  }, [items, slideAnim, modalVisible, containerWidth]);
 
   const handleCardPress = (item: FreeGiveaway) => {
     onDealPress?.(item);
@@ -457,7 +527,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
     try {
       await WebBrowser.openBrowserAsync(targetUrl, {
         toolbarColor: isDark ? '#2c2c35' : '#f1f2f6',
-        controlsColor: '#9333ea', 
+        controlsColor: '#9333ea',
         secondaryToolbarColor: isDark ? '#1c1c1e' : '#ffffff',
         enableBarCollapsing: true,
         showTitle: true,
@@ -468,10 +538,26 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
     }
   };
 
+  const getStoreMeta = (targetRaw?: string): StoreMeta | null => {
+    const rawTarget = (targetRaw || '').toString().trim().toLowerCase();
+    if (!rawTarget) return null;
+
+    if (storeMap[rawTarget]) return storeMap[rawTarget];
+
+    for (const key of Object.keys(storeMap)) {
+      if (key.length > 2 && rawTarget.includes(key)) {
+        return storeMap[key];
+      }
+    }
+
+    return null;
+  };
+
   const handleShare = async (item: FreeGiveaway) => {
     if (!item.open_giveaway_url) return;
-    const storeInfo = storeMap[item.storeID || item.platform || ''];
-    const platformName = storeInfo?.name || t('deals.store', { defaultValue: 'Digital Store' });
+    const storeMeta = getStoreMeta(item.storeID || item.platform);
+    const platformName = storeMeta?.name ||
+      (item.platform && !/^\d+$/.test(item.platform) ? item.platform : t('deals.store', { defaultValue: 'Digital Store' }));
 
     try {
       const shareMessage = t('deals.share_message', {
@@ -504,14 +590,13 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dy > 100) {
           Animated.timing(translateY, {
-            toValue: SCREEN_HEIGHT * 0.7,
-            duration: 220,
+            toValue: SCREEN_HEIGHT,
+            duration: 200,
             useNativeDriver: true,
           }).start(() => {
             setModalVisible(false);
             setSelectedItem(null);
             setExtendedData(null);
-            translateY.setValue(0);
           });
         } else {
           Animated.spring(translateY, {
@@ -535,16 +620,13 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
   if (items.length === 0) return null;
 
   const currentDeal = items[activeIndex];
-  const currentStoreInfo = storeMap[currentDeal.storeID || currentDeal.platform || ''];
-  const currentStoreName = currentStoreInfo?.name || t('deals.store', { defaultValue: 'Digital Store' });
-  const currentStoreIcon = currentStoreInfo?.icon || null;
 
   const shadowStyle = Platform.select({
-    ios: { 
-      shadowColor: '#000000', 
-      shadowOffset: { width: 0, height: isDark ? 4 : 5 }, 
-      shadowOpacity: isDark ? 0.22 : 0.06, 
-      shadowRadius: isDark ? 8 : 10 
+    ios: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: isDark ? 4 : 5 },
+      shadowOpacity: isDark ? 0.22 : 0.06,
+      shadowRadius: isDark ? 8 : 10
     },
     android: { elevation: isDark ? 2 : 4 }
   });
@@ -553,15 +635,15 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
   const selNormalPriceNum = parseFloat(selectedItem?.normalPrice || '0');
   const selTotalCashSaved = Math.max(0, selNormalPriceNum - selSalePriceNum).toFixed(2);
 
-  const selStoreInfo = storeMap[selectedItem?.storeID || selectedItem?.platform || ''];
-  const selStoreName = selStoreInfo?.name || t('deals.store', { defaultValue: 'Digital Store' });
-  const selStoreIcon = selStoreInfo?.icon || null;
+  const selStoreMeta = getStoreMeta(selectedItem?.storeID || selectedItem?.platform);
+  const selStoreName = selStoreMeta?.name ||
+    (selectedItem?.platform && !/^\d+$/.test(selectedItem.platform) ? selectedItem.platform : t('deals.store', { defaultValue: 'Digital Store' }));
+  const selStoreIcon = selStoreMeta?.icon || null;
 
   const activeSteamPercent = extendedData?.steamRatingPercent || selectedItem?.steamRatingPercent;
   const activeSteamText = extendedData?.steamRatingText;
   const activeMetacritic = extendedData?.metacriticScore;
 
-  // Lowest Price Ever calculations for modal
   const lowestPriceEverVal = extendedData?.cheapestPriceEver?.price
     ? parseFloat(extendedData.cheapestPriceEver.price)
     : null;
@@ -570,56 +652,48 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
     ? new Date(extendedData.cheapestPriceEver.date * 1000).toLocaleDateString()
     : null;
 
-  return (
-    <View className="w-full mb-6">
-      <Pressable
-        onPress={() => handleCardPress(currentDeal)}
-        style={[
-          { 
-            borderWidth: 1, 
-            borderColor: adaptiveBorderColor,
-            backgroundColor: cardBgColor 
-          },
-          shadowStyle
-        ]}
-        className="rounded-2xl overflow-hidden w-full mb-2 active:opacity-95"
-      >
-        <Animated.View style={{ height: CORE_BANNER_HEIGHT, opacity: fadeAnim }} className="w-full relative bg-zinc-900">
-          <ImageBackground source={{ uri: currentDeal.image }} className="w-full h-full" resizeMode="cover">
+  const renderCardContent = (deal: FreeGiveaway, rankIndex: number) => {
+    const storeMeta = getStoreMeta(deal.storeID || deal.platform);
+    const storeName = storeMeta?.name ||
+      (deal.platform && !/^\d+$/.test(deal.platform) ? deal.platform : t('deals.store', { defaultValue: 'Digital Store' }));
+    const storeIcon = storeMeta?.icon || null;
+
+    return (
+      <View style={{ width: containerWidth }} className="w-full">
+        <View style={{ height: CORE_BANNER_HEIGHT }} className="w-full relative bg-zinc-900 overflow-hidden">
+          <ImageBackground source={{ uri: deal.image }} className="w-full h-full" resizeMode="cover">
             <View className="absolute inset-0 bg-black/25" />
 
-            {/* Top-Left Rank & Savings Badges */}
-            <View className="absolute top-3 left-3 flex-row items-center gap-1.5">
-              {currentDeal.savings && (
+            <View className="absolute top-3 left-3 flex-row items-center gap-1.5 z-10">
+              {deal.savings && (
                 <View className="bg-purple-600 px-2.5 py-1 rounded-md shadow-sm">
                   <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
-                    {t('deals.save_amount', { defaultValue: 'SAVE ${{amount}}', amount: currentDeal.savings })}
+                    {t('deals.save_amount', { defaultValue: 'SAVE ${{amount}}', amount: deal.savings })}
                   </Text>
                 </View>
               )}
             </View>
 
-            {/* Top-Right Deal Store Logo & Name Overlay */}
-            <View className="absolute top-3 right-3 bg-black/75 px-2 py-1 rounded-lg border border-white/10 flex-row items-center gap-1.5">
-              {currentStoreIcon ? (
-                <Image source={{ uri: currentStoreIcon }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
+            <View className="absolute top-3 right-3 bg-black/75 px-2 py-1 rounded-lg border border-white/10 flex-row items-center gap-1.5 z-10">
+              {storeIcon ? (
+                <Image source={{ uri: storeIcon }} style={{ width: 16, height: 16 }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
               ) : (
                 <Shop size="14" color="#c084fc" variant="Bold" />
               )}
               <Text className="text-[9px] font-montBlack text-purple-300 uppercase tracking-wider">
-                {currentStoreName}
+                {storeName}
               </Text>
             </View>
           </ImageBackground>
-        </Animated.View>
+        </View>
 
         <View className="p-4 space-y-2">
           <View>
             <ThemedText numberOfLines={1} className="font-montBlack text-base tracking-tight mb-0.5">
-              {currentDeal.title}
+              {deal.title}
             </ThemedText>
             <ThemedText numberOfLines={2} className="text-zinc-500 dark:text-zinc-400 text-xs leading-snug font-mont">
-              {currentDeal.description}
+              {deal.description}
             </ThemedText>
           </View>
 
@@ -632,20 +706,53 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
             </View>
 
             <View className="flex-row items-center gap-1.5">
-              {currentDeal.normalPrice && (
+              {deal.normalPrice && (
                 <Text className="text-[10px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
-                  ${currentDeal.normalPrice}
+                  ${deal.normalPrice}
                 </Text>
               )}
               <ThemedText className="text-[12px] font-montBlack text-emerald-500">
-                {currentDeal.worth}
+                {deal.worth}
               </ThemedText>
             </View>
           </View>
         </View>
+      </View>
+    );
+  };
+
+  return (
+    <View className="w-full mb-6">
+      <Pressable
+        onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+        onPress={() => handleCardPress(currentDeal)}
+        style={[
+          {
+            borderWidth: 1,
+            borderColor: adaptiveBorderColor,
+            backgroundColor: cardBgColor
+          },
+          shadowStyle
+        ]}
+        className="rounded-2xl overflow-hidden w-full mb-2 active:opacity-95"
+      >
+        <View style={{ width: '100%', overflow: 'hidden' }}>
+          <Animated.View
+            style={{
+              flexDirection: 'row',
+              width: containerWidth * 2,
+              transform: [{ translateX: slideAnim }]
+            }}
+          >
+            {/* Current Active Card */}
+            {renderCardContent(currentDeal, activeIndex)}
+
+            {/* Next Card Sliding In */}
+            {items[nextIndex] && renderCardContent(items[nextIndex], nextIndex)}
+          </Animated.View>
+        </View>
       </Pressable>
 
-      {/* Tracker Pagination Dots */}
       <View className="flex-row items-center justify-center gap-1.5 mt-1.5">
         {items.map((_, dotIndex) => {
           const isSelected = activeIndex === dotIndex;
@@ -663,7 +770,6 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
         })}
       </View>
 
-      {/* 70% HEIGHT INTERACTIVE DETAIL MODAL WITH CHEAPSHARK COMPARISONS */}
       <Modal
         visible={modalVisible && !!selectedItem}
         animationType="slide"
@@ -676,7 +782,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
       >
         {selectedItem && (
           <View className="flex-1 justify-end">
-            <Pressable 
+            <Pressable
               style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               onPress={() => {
                 setModalVisible(false);
@@ -685,9 +791,9 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
               }}
             />
 
-            <Animated.View 
-              style={{ 
-                height: SCREEN_HEIGHT * 0.7, 
+            <Animated.View
+              style={{
+                height: SCREEN_HEIGHT * 0.7,
                 backgroundColor: isDark ? '#1e1e24' : '#ffffff',
                 borderTopLeftRadius: 32,
                 borderTopRightRadius: 32,
@@ -696,8 +802,8 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
               }}
               className="w-full flex-col shadow-2xl"
             >
-              <View 
-                {...panResponder.panHandlers} 
+              <View
+                {...panResponder.panHandlers}
                 className="w-full h-[35%] relative bg-zinc-950"
               >
                 {selectedItem.image ? (
@@ -714,16 +820,15 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                 <View className="absolute inset-0 bg-black/35" />
 
                 <View className="absolute top-3 inset-x-0 items-center">
-                  <View 
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }} 
-                    className="w-12 h-1 rounded-full" 
+                  <View
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
+                    className="w-12 h-1 rounded-full"
                   />
                 </View>
 
-                {/* Dynamic Store Logo Badge Overlay */}
                 <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-1 rounded-lg border border-purple-500/30 flex-row items-center gap-2">
                   {selStoreIcon ? (
-                    <Image source={{ uri: selStoreIcon }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
+                    <Image source={{ uri: selStoreIcon }} style={{ width: 16, height: 16 }} className="w-4 h-4 rounded-sm" resizeMode="contain" />
                   ) : (
                     <Shop size="14" color="#c084fc" variant="Bold" />
                   )}
@@ -734,7 +839,7 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
               </View>
 
               <View className="flex-1">
-                <ScrollView 
+                <ScrollView
                   className="flex-1 px-5 pt-4"
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={{ paddingBottom: 20 }}
@@ -762,7 +867,6 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                     {selectedItem.title}
                   </ThemedText>
 
-                  {/* Status & Trust Badges Row */}
                   <View className="flex-row flex-wrap gap-2 mb-4">
                     {activeSteamPercent && (
                       <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
@@ -813,7 +917,6 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                     </View>
                   )}
 
-                  {/* HISTORICAL LOWEST PRICE EVER SECTION */}
                   {lowestPriceEverVal !== null && (
                     <View style={{ backgroundColor: cardBgColor }} className="rounded-xl p-3 mb-4 flex-row items-center justify-between border border-emerald-500/20">
                       <View className="flex-1 pr-2">
@@ -833,14 +936,14 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                         <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
                           {lowestPriceEverDate
                             ? t('deals.lowest_price_record', {
-                                defaultValue: 'Historical low of ${{price}} reached on {{date}}',
-                                price: lowestPriceEverVal.toFixed(2),
-                                date: lowestPriceEverDate
-                              })
+                              defaultValue: 'Historical low of ${{price}} reached on {{date}}',
+                              price: lowestPriceEverVal.toFixed(2),
+                              date: lowestPriceEverDate
+                            })
                             : t('deals.lowest_price_nodate', {
-                                defaultValue: 'Historical low recorded at ${{price}}',
-                                price: lowestPriceEverVal.toFixed(2)
-                              })}
+                              defaultValue: 'Historical low recorded at ${{price}}',
+                              price: lowestPriceEverVal.toFixed(2)
+                            })}
                         </ThemedText>
                       </View>
                       <ThemedText className="font-montBlack text-sm text-emerald-500">
@@ -849,9 +952,9 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                     </View>
                   )}
 
-                  {/* LIVE MULTI-STORE PRICE COMPARISON SECTION */}
+                  {/* ENLARGED LIVE MULTI-STORE PRICE COMPARISON SECTION */}
                   <View className="mb-4">
-                    <View className="flex-row items-center justify-between mb-2">
+                    <View className="flex-row items-center justify-between mb-2.5">
                       <ThemedText className="font-montBlack text-xs uppercase tracking-wider text-purple-500">
                         {t('deals.live_store_comparisons', { defaultValue: 'Live Store Comparisons' })}
                       </ThemedText>
@@ -859,43 +962,44 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                     </View>
 
                     {extendedData?.otherStores && extendedData.otherStores.length > 0 ? (
-                      <View style={{ backgroundColor: cardBgColor }} className="rounded-2xl p-2.5 space-y-2 border border-white/5">
+                      <View style={{ backgroundColor: cardBgColor }} className="rounded-2xl p-3 gap-3 border border-white/5">
                         {extendedData.otherStores.map((comp) => {
-                          const compStoreInfo = storeMap[comp.storeID];
+                          const compStoreInfo = getStoreMeta(comp.storeID);
                           const compStoreName = compStoreInfo?.name || t('deals.store', { defaultValue: 'Digital Store' });
                           const compIcon = compStoreInfo?.icon || null;
                           const compPriceNum = parseFloat(comp.price || '0');
                           const isCheapestStore = compPriceNum <= selSalePriceNum;
 
                           return (
-                            <View key={comp.dealID} className="flex-row items-center justify-between py-1.5 px-2 rounded-xl bg-black/10">
-                              <View className="flex-row items-center gap-2">
+                            <View key={comp.dealID} className="flex-row items-center justify-between py-2.5 px-3 rounded-xl bg-black/10">
+                              <View className="flex-row items-center gap-2.5 flex-1 pr-2">
                                 {compIcon ? (
-                                  <Image source={{ uri: compIcon }} className="w-4 h-4 rounded" resizeMode="contain" />
+                                  <Image source={{ uri: compIcon }} style={{ width: 20, height: 20 }} className="w-5 h-5 rounded-sm" resizeMode="contain" />
                                 ) : (
-                                  <Shop size="14" color={iconColor} variant="Outline" />
+                                  <Shop size="18" color={iconColor} variant="Outline" />
                                 )}
-                                <ThemedText className="font-montBold text-[11px]">
+                                <ThemedText className="font-montBold text-xs flex-shrink" numberOfLines={1}>
                                   {compStoreName}
                                 </ThemedText>
                                 {isCheapestStore && (
-                                  <View className="bg-emerald-500/20 px-1.5 py-0.2 rounded">
-                                    <Text className="text-[8px] font-montBlack text-emerald-400 uppercase">
+                                  <View className="bg-emerald-500/20 px-2 py-0.5 rounded-md">
+                                    <Text className="text-[9px] font-montBlack text-emerald-400 uppercase">
                                       {t('deals.best_price', { defaultValue: 'Best Price' })}
                                     </Text>
                                   </View>
                                 )}
                               </View>
 
-                              <View className="flex-row items-center gap-2">
-                                <Text className="text-[11px] font-montBlack text-emerald-500">
+                              <View className="flex-row items-center gap-3">
+                                <Text className="text-sm font-montBlack text-emerald-500">
                                   ${compPriceNum.toFixed(2)}
                                 </Text>
                                 <Pressable
                                   onPress={() => handleOpenDealLink(`https://www.cheapshark.com/redirect?dealID=${comp.dealID}`)}
-                                  className="bg-purple-600/20 px-2 py-1 rounded-lg border border-purple-500/30 active:opacity-60"
+                                  hitSlop={6}
+                                  className="bg-purple-600/20 px-3.5 py-1.5 rounded-lg border border-purple-500/30 active:opacity-60"
                                 >
-                                  <Text className="text-[9px] font-montBold text-purple-400">
+                                  <Text className="text-[11px] font-montBold text-purple-400">
                                     {t('deals.view', { defaultValue: 'View' })}
                                   </Text>
                                 </Pressable>
@@ -904,18 +1008,13 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
                           );
                         })}
                       </View>
-                    ) : !loadingExtended ? (
-                      <ThemedText className="text-[11px] font-mont opacity-50 italic">
-                        {t('deals.no_competing_offers', { defaultValue: 'No competing store offers currently registered for this title.' })}
-                      </ThemedText>
                     ) : null}
                   </View>
                 </ScrollView>
 
-                {/* Bottom Action Bar */}
-                <View 
-                  style={{ 
-                    borderTopWidth: 1, 
+                <View
+                  style={{
+                    borderTopWidth: 1,
                     borderColor: adaptiveBorderColor,
                     paddingBottom: Platform.OS === 'ios' ? 30 : 15,
                     backgroundColor: isDark ? '#1e1e24' : '#ffffff'
@@ -932,8 +1031,8 @@ export default function BestDealsCarousel({ onDealPress }: BestDealsCarouselProp
 
                     <Pressable
                       onPress={() => handleShare(selectedItem)}
-                      hitSlop={10} 
-                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                      hitSlop={10}
+                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                       className="p-2.5 rounded-xl border active:opacity-60"
                     >
                       <ShareIcon size="16" color={isDark ? "#a78bfa" : "#7c3aed"} variant="Outline" />

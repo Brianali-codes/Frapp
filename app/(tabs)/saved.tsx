@@ -6,9 +6,9 @@ import {
   Platform, 
   LayoutAnimation, 
   UIManager, 
-  Modal, 
-  Image 
+  Modal 
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -24,8 +24,8 @@ import {
   ArchiveBook
 } from 'iconsax-react-nativejs';
 
-import DealItem from '@/components/custom/DealItem'; 
-import GiveawaySkeleton from '@/components/custom/GiveawaySkeleton';
+import DealItem from '@/components/custom/DealItem';
+import GiveawayItem from '@/components/custom/GiveawayItem'; 
 import Button from '@/components/custom/Button';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -40,29 +40,114 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 const LAYOUT_STORAGE_KEY = '@saved_items_layout_variant';
 
 const FILTER_OPTIONS = [
-  { id: 'all', key: 'deals.filters.all', label: 'All Saved', icon: ArchiveBook, iconUri: null },
-  { id: '1', key: 'deals.stores.steam', label: 'Steam', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/0.png' },
-  { id: '2', key: 'deals.stores.gamersgate', label: 'GamersGate', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/1.png' },
-  { id: '3', key: 'deals.stores.gmg', label: 'GreenManGaming', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/2.png' },
-  { id: '7', key: 'deals.stores.gog', label: 'GOG', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/6.png' },
-  { id: '8', key: 'deals.stores.humble', label: 'Humble Store', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/7.png' },
-  { id: '11', key: 'deals.stores.macgamestore', label: 'MacGamestore', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/10.png' },
-  { id: '13', key: 'deals.stores.ubisoft', label: 'Ubisoft Store', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/12.png' },
-  { id: '15', key: 'deals.stores.fanatical', label: 'Fanatical', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/14.png' },
-  { id: '21', key: 'deals.stores.wingamestore', label: 'WinGameStore', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/20.png' },
-  { id: '23', key: 'deals.stores.gamebillet', label: 'GameBillet', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/22.png' },
-  { id: '24', key: 'deals.stores.voidu', label: 'Voidu', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/23.png' },
-  { id: '25', key: 'deals.stores.epic', label: 'Epic Games Store', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/24.png' },
-  { id: '27', key: 'deals.stores.gamesplanet', label: 'Gamesplanet', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/26.png' },
-  { id: '28', key: 'deals.stores.gamesload', label: 'Gamesload', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/27.png' },
-  { id: '29', key: 'deals.stores.2game', label: '2Game', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/28.png' },
-  { id: '30', key: 'deals.stores.indiegala', label: 'IndieGala', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/29.png' },
-  { id: '31', key: 'deals.stores.blizzard', label: 'Blizzard Shop', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/30.png' },
-  { id: '32', key: 'deals.stores.allyouplay', label: 'AllYouPlay', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/31.png' },
-  { id: '33', key: 'deals.stores.dlgamer', label: 'DLGamer', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/32.png' },
-  { id: '34', key: 'deals.stores.noctre', label: 'Noctre', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/33.png' },
-  { id: '35', key: 'deals.stores.dreamgame', label: 'DreamGame', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/34.png' },
+  { id: 'all', key: 'giveaways.platforms.all', label: 'All Saved', icon: ArchiveBook, iconUri: null },
+  { id: 'pc', key: 'giveaways.platforms.pc', label: 'PC', icon: Shop, iconUri: 'https://www.svgrepo.com/show/382713/windows-applications.svg' },
+  { id: 'steam', key: 'giveaways.platforms.steam', label: 'Steam', icon: Shop, iconUri: 'https://www.svgrepo.com/show/452107/steam.svg' },
+  { id: 'epic-games-store', key: 'giveaways.platforms.epic', label: 'Epic', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  { id: 'gog', key: 'giveaways.platforms.gog', label: 'GOG', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/6.png' },
+  { id: 'ps4', key: 'giveaways.platforms.ps4', label: 'PS4', icon: Shop, iconUri: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  { id: 'ps5', key: 'giveaways.platforms.ps5', label: 'PS5', icon: Shop, iconUri: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  { id: 'xbox-series-xs', key: 'giveaways.platforms.xboxSeries', label: 'Xbox Series', icon: Shop, iconUri: 'https://www.svgrepo.com/show/303368/xbox-9-logo.svg' },
+  { id: 'xbox-one', key: 'giveaways.platforms.xboxOne', label: 'Xbox One', icon: Shop, iconUri: 'https://www.svgrepo.com/show/452137/xbox.svg' },
+  { id: 'switch', key: 'giveaways.platforms.switch', label: 'Switch', icon: Shop, iconUri: 'https://www.svgrepo.com/show/388137/nintendo-switch.svg' },
+  { id: 'android', key: 'giveaways.platforms.android', label: 'Android', icon: Shop, iconUri: 'https://www.svgrepo.com/show/475427/android.svg' },
+  { id: 'ios', key: 'giveaways.platforms.ios', label: 'iOS', icon: Shop, iconUri: 'https://www.svgrepo.com/show/494331/apple-round.svg' },
+  { id: 'drm-free', key: 'giveaways.platforms.drmFree', label: 'DRM-Free', icon: Shop, iconUri: 'https://www.svgrepo.com/show/477064/unlock.svg' },
+  { id: 'itchio', key: 'giveaways.platforms.itchio', label: 'itch.io', icon: Shop, iconUri: 'https://www.svgrepo.com/show/452232/itch-io.svg' },
 ];
+
+function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string; variant: 'normal' | 'compact' }) {
+  const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+  const borderLine = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+  const buttons = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+  const mockItems = [1, 2, 3, 4, 5];
+
+  return (
+    <View className="w-full">
+      {mockItems.map((item) => (
+        <View
+          key={item}
+          style={{
+            borderWidth: 1,
+            borderColor: adaptiveBorderColor,
+            backgroundColor: cardBgColor,
+          }}
+          className="rounded-2xl overflow-hidden w-full mb-4 opacity-80"
+        >
+          {variant === 'normal' ? (
+            <View>
+              {/* Normal Card Top Image Skeleton */}
+              <View style={{ height: 150, backgroundColor: shimmerBg }} className="w-full relative justify-between p-3">
+                <View className="flex-row justify-between items-center w-full">
+                  {/* Platform / Type Pill Skeleton */}
+                  <View className="w-16 h-5 rounded-md" style={{ backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)' }} />
+                  {/* Favorite Heart Button Skeleton */}
+                  <View className="w-20 h-6 rounded-xl items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+                </View>
+              </View>
+
+              {/* Normal Card Details */}
+              <View className="p-4">
+                <View className="w-3/4 h-4.5 rounded-md mb-2" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-full h-3 rounded mb-1.5" style={{ backgroundColor: shimmerBg }} />
+                <View className="w-1/2 h-3 rounded mb-3" style={{ backgroundColor: shimmerBg }} />
+
+                {/* Bottom Row */}
+                <View
+                  style={{ borderTopWidth: 1, borderColor: borderLine }}
+                  className="flex-row items-center justify-between pt-3 mt-1"
+                >
+                  <View className="flex-row gap-2">
+                    <View className="w-24 h-6 rounded-md" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+                    <View className="w-6 h-6 rounded-md" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+                  </View>
+
+                  <View className="flex-row gap-2">
+                    <View className="w-6 h-6 rounded-md" style={{ backgroundColor: shimmerBg }} />
+                    <View className="w-6 h-6 rounded-md" style={{ backgroundColor: shimmerBg }} />
+                    <View className="w-6 h-6 rounded-md" style={{ backgroundColor: shimmerBg }} />
+                  </View>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View className="p-3 flex-row items-center">
+              {/* Compact Thumbnail Image Skeleton */}
+              <View
+                style={{ width: 84, height: 84, backgroundColor: shimmerBg }}
+                className="rounded-xl shrink-0 mr-3 relative justify-between p-1.5"
+              >
+                <View className="w-5 h-5 rounded-lg" style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)' }} />
+                <View className="w-14 h-3 rounded-sm" style={{ backgroundColor: isDark ? 'rgba(168, 85, 247, 0.25)' : 'rgba(168, 85, 247, 0.2)' }} />
+              </View>
+
+              {/* Compact Card Content */}
+              <View className="flex-1 justify-between h-20 py-0.5">
+                <View>
+                  {/* Title Skeleton */}
+                  <View className="w-5/6 h-4 rounded mb-2" style={{ backgroundColor: shimmerBg }} />
+                  {/* Subtitle / Platform Tag Skeleton */}
+                  <View className="w-2/5 h-3 rounded-md" style={{ backgroundColor: shimmerBg }} />
+                </View>
+
+                {/* Bottom Row */}
+                <View className="flex-row items-center justify-between mt-auto">
+                  {/* Expiration / Keys left info */}
+                  <View className="w-16 h-3 rounded" style={{ backgroundColor: shimmerBg }} />
+                  <View className="flex-row items-center gap-2">
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttons }} />
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttons }} />
+                    <View className="w-7 h-7 rounded-lg items-center justify-center" style={{ backgroundColor: buttons }} />
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
+      ))}
+    </View>
+  );
+}
 
 export default function SavedItemsScreen() {
   const router = useRouter();
@@ -70,7 +155,7 @@ export default function SavedItemsScreen() {
   const scrollRef = useRef<ScrollView>(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [savedGiveaways, setSavedGiveaways] = useState<FreeGiveaway[]>([]);
+  const [savedGiveaways, setSavedGiveaways] = useState<any[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [layoutVariant, setLayoutVariant] = useState<'normal' | 'compact'>('compact');
   
@@ -100,14 +185,14 @@ export default function SavedItemsScreen() {
     loadStoredPreferences();
   }, []);
 
-  const parseEndDate = (giveaway: FreeGiveaway): Date | null => {
-    const rawDate = giveaway.end_date || (giveaway as any).until || (giveaway as any).endDate;
+  const parseEndDate = (giveaway: any): Date | null => {
+    const rawDate = giveaway.end_date || giveaway.until || giveaway.endDate;
     if (!rawDate || rawDate === 'N/A') return null;
     const parsed = new Date(rawDate);
     return isNaN(parsed.getTime()) ? null : parsed;
   };
 
-  const scheduleExpirationReminders = async (giveaways: FreeGiveaway[]) => {
+  const scheduleExpirationReminders = async (giveaways: any[]) => {
     try {
       await notifee.requestPermission();
       const channelId = await notifee.createChannel({
@@ -131,7 +216,7 @@ export default function SavedItemsScreen() {
 
         if (timeRemaining <= 0 || trackedIds[item.id]) continue;
 
-        const gameTitle = item.title || (item as any).name || 'Your saved game';
+        const gameTitle = item.title || item.name || 'Your saved game';
         const notificationId = `giveaway_${item.id}`;
         const reminderTriggerTime = expiryTimeMs - ONE_DAY_MS;
 
@@ -150,7 +235,7 @@ export default function SavedItemsScreen() {
         } else if (timeRemaining <= ONE_DAY_MS && timeRemaining > 0) {
           await notifee.displayNotification({
             id: notificationId,
-            title: '⏰ Less than 24 Hours Left!',
+            title: 'Less than 24 Hours Left!',
             body: `Hurry! "${gameTitle}" expires soon. Redeem it before it's gone!`,
             android: { channelId, pressAction: { id: 'default' } },
             data: { giveawayId: String(item.id) },
@@ -169,7 +254,7 @@ export default function SavedItemsScreen() {
     try {
       const stored = await AsyncStorage.getItem('saved_giveaways');
       if (stored) {
-        const parsed: FreeGiveaway[] = JSON.parse(stored);
+        const parsed: any[] = JSON.parse(stored);
         setSavedGiveaways(parsed);
         scheduleExpirationReminders(parsed);
       } else {
@@ -192,14 +277,8 @@ export default function SavedItemsScreen() {
   const filteredGiveaways = useMemo(() => {
     return savedGiveaways.filter((item) => {
       if (selectedFilter === 'all') return true;
-      if (selectedFilter === 'free') {
-        return item.worth === 'FREE' || item.salePrice === '0.00' || item.salePrice === '0';
-      }
-      if (selectedFilter === 'deals') {
-        return item.worth !== 'FREE' && item.salePrice !== '0.00' && item.salePrice !== '0';
-      }
-      const platformStr = String(item.platform || item.storeID || '');
-      return platformStr === selectedFilter;
+      const platformStr = String(item.platform || item.platforms || item.storeID || '').toLowerCase();
+      return platformStr.includes(selectedFilter.toLowerCase()) || String(item.storeID) === selectedFilter;
     });
   }, [savedGiveaways, selectedFilter]);
 
@@ -217,7 +296,7 @@ export default function SavedItemsScreen() {
 
   const handleToggleSave = async (giveawayId: string | number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const updatedList = savedGiveaways.filter(item => item.id !== giveawayId);
+    const updatedList = savedGiveaways.filter(item => (item.id || item.dealID) !== giveawayId);
     setSavedGiveaways(updatedList);
 
     try {
@@ -330,7 +409,7 @@ export default function SavedItemsScreen() {
                     className="px-3 rounded-full flex-row items-center gap-1.5 shadow-sm"
                   >
                     {filter.iconUri ? (
-                      <Image source={{ uri: filter.iconUri }} className="w-3.5 h-3.5 rounded-sm" resizeMode="contain" />
+                      <Image source={{ uri: filter.iconUri }} style={{ width: 14, height: 14 }} contentFit="contain" />
                     ) : (
                       <IconComponent size="13" color={isSelected ? '#ffffff' : (isDark ? '#a3a3b5' : '#71717a')} variant="Bold" />
                     )}
@@ -349,9 +428,12 @@ export default function SavedItemsScreen() {
 
         {/* --- MAIN GAMES CONTAINER --- */}
         {isLoading ? (
-          <GiveawaySkeleton loading={true} variant={layoutVariant}>
-            <></>
-          </GiveawaySkeleton>
+          <CardListSkeleton
+            variant={layoutVariant}
+            cardBgColor={cardBgColor}
+            adaptiveBorderColor={adaptiveBorderColor}
+            isDark={isDark}
+          />
         ) : filteredGiveaways.length === 0 ? (
           <View
             style={[
@@ -386,17 +468,37 @@ export default function SavedItemsScreen() {
             />
           </View>
         ) : (
-          <View className="w-full mb-20 gap-4">
-            {filteredGiveaways.map((giveaway) => (
-              <DealItem
-                key={giveaway.id}
-                giveaway={giveaway}
-                variant={layoutVariant}
-                ctaText={t('deals.claim', { defaultValue: 'Claim Now' })}
-                isSaved={true}
-                onToggleSave={() => handleToggleSave(giveaway.id)}
-              />
-            ))}
+          <View className="w-full mb-20 gap-1">
+            {filteredGiveaways.map((item) => {
+              // Differentiate between CheapShark Deal vs GamerPower Giveaway
+              const isDeal = Boolean(item.dealID || item.savings || (item.storeID && item.normalPrice && item.storeID !== '0'));
+              const itemId = item.id || item.dealID;
+
+              if (isDeal) {
+                return (
+                  <DealItem
+                    key={itemId}
+                    deal={item}
+                    giveaway={item}
+                    variant={layoutVariant}
+                    ctaText={t('deals.get_deal', { defaultValue: 'Get Deal' })}
+                    isSaved={true}
+                    onToggleSave={() => handleToggleSave(itemId)}
+                  />
+                );
+              }
+
+              return (
+                <GiveawayItem
+                  key={itemId}
+                  giveaway={item}
+                  variant={layoutVariant}
+                  ctaText={t('deals.claim', { defaultValue: 'Claim Now' })}
+                  isSaved={true}
+                  onToggleSave={() => handleToggleSave(itemId)}
+                />
+              );
+            })}
           </View>
         )}
       </ScrollView>

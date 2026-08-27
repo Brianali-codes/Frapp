@@ -11,9 +11,9 @@ import {
   ScrollView, 
   Dimensions, 
   PanResponder, 
-  Share,
-  Image
+  Share
 } from 'react-native';
+import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
@@ -31,12 +31,13 @@ import {
   Game,
   TimerStart,
   Heart,
-  Star1
+  Star1,
+  Shop
 } from 'iconsax-react-nativejs';
 
 const CORE_BANNER_HEIGHT = 160; 
-const AUTOSCROLL_INTERVAL = 4000; 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const AUTOSCROLL_INTERVAL = 5000; 
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Sparkle Burst Particle Constants
 const SPARKLE_COUNT = 6;
@@ -47,6 +48,72 @@ const SPARKLE_PARTICLES = Array.from({ length: SPARKLE_COUNT }).map((_, i) => {
     y: Math.sin(angle) * 24,
   };
 });
+
+// GamerPower Native Platform Icon Dictionary
+const GAMERPOWER_PLATFORMS_MAP: Record<string, { name: string; icon: string }> = {
+  'steam': { name: 'Steam', icon: 'https://www.svgrepo.com/show/452107/steam.svg' },
+  'epic-games-store': { name: 'Epic Games', icon: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  'epic games': { name: 'Epic Games', icon: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  'epic': { name: 'Epic Games', icon: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  'gog': { name: 'GOG', icon: 'https://www.cheapshark.com/img/stores/icons/6.png' },
+  'ubisoft': { name: 'Ubisoft', icon: 'https://www.cheapshark.com/img/stores/icons/13.png' },
+  'uplay': { name: 'Ubisoft', icon: 'https://www.cheapshark.com/img/stores/icons/13.png' },
+  'origin': { name: 'EA Play', icon: 'https://www.cheapshark.com/img/stores/icons/7.png' },
+  'ea': { name: 'EA Play', icon: 'https://www.cheapshark.com/img/stores/icons/7.png' },
+  'itch.io': { name: 'itch.io', icon: 'https://www.svgrepo.com/show/452232/itch-io.svg' },
+  'itchio': { name: 'itch.io', icon: 'https://www.svgrepo.com/show/452232/itch-io.svg' },
+  'ps5': { name: 'PS5', icon: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  'ps4': { name: 'PS4', icon: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  'playstation': { name: 'PlayStation', icon: 'https://www.svgrepo.com/show/452087/playstation.svg' },
+  'xbox-series-xs': { name: 'Xbox Series', icon: 'https://www.svgrepo.com/show/303368/xbox-9-logo.svg' },
+  'xbox-one': { name: 'Xbox One', icon: 'https://www.svgrepo.com/show/452137/xbox.svg' },
+  'xbox': { name: 'Xbox', icon: 'https://www.svgrepo.com/show/452137/xbox.svg' },
+  'switch': { name: 'Switch', icon: 'https://www.svgrepo.com/show/388137/nintendo-switch.svg' },
+  'android': { name: 'Android', icon: 'https://www.svgrepo.com/show/475427/android.svg' },
+  'ios': { name: 'iOS', icon: 'https://www.svgrepo.com/show/494331/apple-round.svg' },
+  'drm-free': { name: 'DRM-Free', icon: 'https://www.svgrepo.com/show/477064/unlock.svg' },
+  'pc': { name: 'PC', icon: 'https://www.svgrepo.com/show/382713/windows-applications.svg' },
+};
+
+interface CheapSharkStore {
+  storeID: string;
+  storeName: string;
+  isActive: number;
+  images: {
+    banner: string;
+    logo: string;
+    icon: string;
+  };
+}
+
+interface StoreMeta {
+  name: string;
+  icon: string;
+}
+
+let storeMetadataCache: Record<string, StoreMeta> | null = null;
+let isStoreFetchPending = false;
+
+const compileStoreDictionary = (rawStores: CheapSharkStore[]): Record<string, StoreMeta> => {
+  const compiledMap: Record<string, StoreMeta> = {};
+
+  rawStores.forEach((s) => {
+    const iconPath = s.images?.icon || '';
+    const fullIcon = iconPath.startsWith('http')
+      ? iconPath
+      : `https://www.cheapshark.com${iconPath}`;
+
+    const meta: StoreMeta = {
+      name: s.storeName,
+      icon: fullIcon
+    };
+
+    compiledMap[s.storeID] = meta;
+    compiledMap[s.storeName.toLowerCase()] = meta;
+  });
+
+  return compiledMap;
+};
 
 interface FavoriteButtonProps {
   isSaved: boolean;
@@ -100,7 +167,6 @@ function FavoriteButton({
 
   return (
     <View className="relative items-center justify-center">
-      {/* Sparkle Particles Burst */}
       {SPARKLE_PARTICLES.map((sparkle, idx) => {
         const sparkleScale = sparkleAnim.interpolate({
           inputRange: [0, 0.4, 1],
@@ -165,8 +231,10 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Giveaway | null>(null);
   const [localIsSaved, setLocalIsSaved] = useState(false);
+  const [storeMap, setStoreMap] = useState<Record<string, StoreMeta>>(storeMetadataCache || {});
+  const [containerWidth, setContainerWidth] = useState(SCREEN_WIDTH - 48);
   
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(0)).current;
 
   // Touch claim animation scale state
@@ -194,6 +262,81 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
   const iconBtnBorder = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
 
   const padZero = (n: number) => String(n).padStart(2, '0');
+
+  // Load store metadata for store logos and names
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadStoreMetadata = async () => {
+      if (storeMetadataCache) {
+        if (isMounted) setStoreMap(storeMetadataCache);
+        return;
+      }
+
+      try {
+        const storedMap = await AsyncStorage.getItem('cheapshark_stores_map_v5');
+        if (storedMap) {
+          const parsed = JSON.parse(storedMap);
+          storeMetadataCache = parsed;
+          if (isMounted) setStoreMap(parsed);
+          return;
+        }
+
+        if (!isStoreFetchPending) {
+          isStoreFetchPending = true;
+          const res = await fetch('https://www.cheapshark.com/api/1.0/stores', {
+            headers: { 
+              'Accept': 'application/json',
+              'User-Agent': 'GameDealsApp/1.0'
+            }
+          });
+          if (res.ok) {
+            const rawStores: CheapSharkStore[] = await res.json();
+            const compiled = compileStoreDictionary(rawStores);
+
+            storeMetadataCache = compiled;
+            await AsyncStorage.setItem('cheapshark_stores_map_v5', JSON.stringify(compiled));
+            if (isMounted) setStoreMap(compiled);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to synchronize CheapShark store dictionary:', error);
+      } finally {
+        isStoreFetchPending = false;
+      }
+    };
+
+    loadStoreMetadata();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Reset slide animation position when active index changes
+  useEffect(() => {
+    slideAnim.setValue(0);
+  }, [activeIndex]);
+
+  // Helper to retrieve resolved Store Name & Icon
+  const getStoreMeta = (item: Giveaway | null): StoreMeta | null => {
+    if (!item) return null;
+    const rawTarget = (item.platforms || item.platform || (item as any).storeID || '').toString().trim().toLowerCase();
+    if (!rawTarget) return null;
+
+    for (const key of Object.keys(GAMERPOWER_PLATFORMS_MAP)) {
+      if (rawTarget === key || rawTarget.includes(key)) {
+        return GAMERPOWER_PLATFORMS_MAP[key];
+      }
+    }
+
+    if (storeMap[rawTarget]) return storeMap[rawTarget];
+
+    for (const key of Object.keys(storeMap)) {
+      if (key.length > 2 && rawTarget.includes(key)) {
+        return storeMap[key];
+      }
+    }
+
+    return null;
+  };
 
   // Reset drag animation whenever modal visibility changes
   useEffect(() => {
@@ -317,8 +460,10 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
     fetchTopWorth();
   }, []);
 
+  const nextIndex = items.length > 0 ? (activeIndex === items.length - 1 ? 0 : activeIndex + 1) : 0;
+
   useEffect(() => {
-    if (items.length <= 1 || modalVisible) {
+    if (items.length <= 1 || modalVisible || containerWidth === 0) {
       if (autoScrollTimer.current) {
         clearInterval(autoScrollTimer.current);
         autoScrollTimer.current = null;
@@ -327,25 +472,21 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
     }
 
     autoScrollTimer.current = setInterval(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 0.2,
-        duration: 300,
+      Animated.timing(slideAnim, {
+        toValue: -containerWidth,
+        duration: 450,
         useNativeDriver: true,
-      }).start(() => {
-        setActiveIndex((prevIndex) => (prevIndex === items.length - 1 ? 0 : prevIndex + 1));
-        
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }).start();
+      }).start(({ finished }) => {
+        if (finished) {
+          setActiveIndex((prev) => (prev === items.length - 1 ? 0 : prev + 1));
+        }
       });
     }, AUTOSCROLL_INTERVAL);
 
     return () => {
       if (autoScrollTimer.current) clearInterval(autoScrollTimer.current);
     };
-  }, [items, fadeAnim, modalVisible]);
+  }, [items, slideAnim, modalVisible, containerWidth]);
 
   const handleCardPress = (item: Giveaway) => {
     setSelectedItem(item);
@@ -381,12 +522,14 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
     try {
       const worthVal = item.worth || 'N/A';
       const plainSavedVal = worthVal.replace(/[^0-9.]/g, '');
+      const meta = getStoreMeta(item);
+      const platformName = meta?.name || item.platform || item.platforms || 'PC';
       
       const shareMessage = t('deals.share_message', {
         title: item.title,
         price: t('deals.free_uppercase'),
         saved: plainSavedVal || '0',
-        platform: item.platform || 'PC',
+        platform: platformName,
         url: targetUrl
       });
 
@@ -442,6 +585,10 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
 
   const currentItem = items[activeIndex];
 
+  const selectedStoreMeta = getStoreMeta(selectedItem);
+  const selectedDisplayPlatform = selectedStoreMeta?.name || selectedItem?.platform || selectedItem?.platforms || t('deals.store', 'Digital Store');
+  const selectedStoreIcon = selectedStoreMeta?.icon || null;
+
   const shadowStyle = Platform.select({
     ios: { 
       shadowColor: '#000000', 
@@ -452,53 +599,52 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
     android: { elevation: isDark ? 2 : 4 }
   });
 
-  const worthValue = currentItem.worth || 'N/A';
-  const hasWorth = worthValue !== 'N/A' && worthValue !== '0' && worthValue !== '$0.00';
   const selectedItemWorth = selectedItem?.worth || 'N/A';
   const selectedItemHasWorth = selectedItemWorth !== 'N/A' && selectedItemWorth !== '0' && selectedItemWorth !== '$0.00';
 
-  return (
-    <View className="w-full mb-6">
-      <Pressable
-        onPress={() => handleCardPress(currentItem)}
-        style={[
-          { 
-            borderWidth: 1, 
-            borderColor: adaptiveBorderColor,
-            backgroundColor: cardBgColor 
-          },
-          shadowStyle
-        ]}
-        className="rounded-2xl overflow-hidden w-full mb-2 active:opacity-95"
-      >
-        <Animated.View style={{ height: CORE_BANNER_HEIGHT, opacity: fadeAnim }} className="w-full relative bg-zinc-900">
-          <ImageBackground source={{ uri: currentItem.image }} className="w-full h-full" resizeMode="cover">
+  const renderCardContent = (item: Giveaway, rankIndex: number) => {
+    const meta = getStoreMeta(item);
+    const platform = meta?.name || item.platform || item.platforms || t('deals.store', 'Digital Store');
+    const storeIcon = meta?.icon || null;
+    const worth = item.worth || 'N/A';
+
+    return (
+      <View style={{ width: containerWidth }} className="w-full">
+        <View style={{ height: CORE_BANNER_HEIGHT }} className="w-full relative bg-zinc-900 overflow-hidden">
+          <ImageBackground source={{ uri: item.image }} className="w-full h-full" resizeMode="cover">
             <View className="absolute inset-0 bg-black/15" />
 
-            <View className="absolute top-3 left-3 bg-black/75 px-2.5 py-1 rounded-md border border-white/10">
+            {/* TOP LEFT VALUE BADGE */}
+            <View className="absolute top-3 left-3 bg-black/75 px-2.5 py-1 rounded-md border border-white/10 z-10">
               <View className="flex-row items-center gap-1">
                 <Flash size="10" color="#eab308" variant="Bold" />
                 <Text className="text-[9px] font-montBlack text-yellow-500 tracking-wider">
-                  TOP #{activeIndex + 1} VALUE
+                  TOP #{rankIndex + 1} VALUE
                 </Text>
               </View>
             </View>
 
-            <View className="absolute top-3 right-3 bg-emerald-500 px-2.5 py-0.5 rounded-md shadow-sm">
-              <Text className="text-[10px] font-montBlack text-white uppercase tracking-wider">
-                {hasWorth ? t('deals.hot_deal') : t('deals.free_uppercase')}
+            {/* TOP RIGHT STORE ICON & NAME BADGE */}
+            <View className="absolute top-3 right-3 bg-black/75 px-2 py-1 rounded-lg border border-white/10 flex-row items-center gap-1.5 z-10">
+              {storeIcon ? (
+                <Image source={{ uri: storeIcon }} style={{ width: 16, height: 16 }} contentFit="contain" />
+              ) : (
+                <Shop size="14" color="#c084fc" variant="Bold" />
+              )}
+              <Text className="text-[9px] font-montBlack text-purple-300 uppercase tracking-wider">
+                {platform}
               </Text>
             </View>
           </ImageBackground>
-        </Animated.View>
+        </View>
 
         <View className="p-4 space-y-2">
           <View>
             <ThemedText numberOfLines={1} className="font-montBlack text-base tracking-tight mb-0.5">
-              {currentItem.title}
+              {item.title}
             </ThemedText>
             <ThemedText numberOfLines={2} className="text-zinc-500 dark:text-zinc-400 text-xs leading-snug font-mont">
-              {currentItem.description}
+              {item.description}
             </ThemedText>
           </View>
 
@@ -510,9 +656,43 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
               <ArrowRight size="11" color="#9333ea" variant="Bold" />
             </View>
             <ThemedText className="text-[10px] line-through decoration-red-500 font-montBlack text-emerald-500">
-              {worthValue}
+              {worth}
             </ThemedText>
           </View>
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    <View className="w-full mb-6">
+      <Pressable
+        onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+        onPress={() => handleCardPress(currentItem)}
+        style={[
+          { 
+            borderWidth: 1, 
+            borderColor: adaptiveBorderColor,
+            backgroundColor: cardBgColor 
+          },
+          shadowStyle
+        ]}
+        className="rounded-2xl overflow-hidden w-full mb-2 active:opacity-95"
+      >
+        <View style={{ width: '100%', overflow: 'hidden' }}>
+          <Animated.View 
+            style={{ 
+              flexDirection: 'row', 
+              width: containerWidth * 2,
+              transform: [{ translateX: slideAnim }]
+            }}
+          >
+            {/* Current Active Card */}
+            {renderCardContent(currentItem, activeIndex)}
+
+            {/* Next Card Sliding In */}
+            {items[nextIndex] && renderCardContent(items[nextIndex], nextIndex)}
+          </Animated.View>
         </View>
       </Pressable>
 
@@ -572,8 +752,8 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                 {selectedItem.image ? (
                   <Image
                     source={{ uri: selectedItem.image }}
-                    className="w-full h-full"
-                    resizeMode="cover"
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit="cover"
                   />
                 ) : (
                   <View className="w-full h-full items-center justify-center bg-zinc-900">
@@ -589,9 +769,15 @@ export default function HighestWorthCarousel({ onClaimPress }: HighestWorthCarou
                   />
                 </View>
 
-                <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-0.5 rounded border border-purple-500/30">
-                  <Text className="text-[9px] font-montBlack text-purple-400 tracking-wider uppercase">
-                    {selectedItem.platform || 'Multi-platform'}
+                {/* MODAL HEADER STORE ICON BADGE */}
+                <View className="absolute bottom-3 left-4 bg-neutral-900/90 px-2.5 py-1 rounded-lg border border-purple-500/30 flex-row items-center gap-2">
+                  {selectedStoreIcon ? (
+                    <Image source={{ uri: selectedStoreIcon }} style={{ width: 16, height: 16 }} contentFit="contain" />
+                  ) : (
+                    <Shop size="14" color="#c084fc" variant="Bold" />
+                  )}
+                  <Text className="text-[10px] font-montBlack text-purple-400 tracking-wider uppercase">
+                    {selectedDisplayPlatform}
                   </Text>
                 </View>
               </View>
