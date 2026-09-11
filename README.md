@@ -34,11 +34,18 @@ FRAPP acts as a centralized messenger for deal-hunting and budget gaming. It mon
 
 <h1></h1>
 
-## ScreenShots and Screens
+## ScreenShots
 
 <div style="display: flex;" align="center">
-  <img width="1920" height="1080" alt="1" src="https://github.com/user-attachments/assets/5581bac0-f7fd-471d-84f7-b040861d2f15" />
-  <img width="1920" height="1080" alt="2" src="https://github.com/user-attachments/assets/d538d82c-bfb6-4c11-b390-4563abb734d8" />
+
+
+<img width="1920" height="1080" alt="1" src="https://github.com/user-attachments/assets/f0acb5a1-c4a7-4019-8a5a-aedc54593df0" />
+<img width="1920" height="1080" alt="2" src="https://github.com/user-attachments/assets/6a89c8fe-660d-4722-adde-76ed99a5d035" />
+<img width="1920" height="1080" alt="3" src="https://github.com/user-attachments/assets/64a69ade-103b-42a6-8235-9bea3e31761e" />
+<img width="1920" height="1080" alt="4" src="https://github.com/user-attachments/assets/f71fd1aa-fd1f-4397-bcd1-ce3fd3489fc0" />
+<img width="1920" height="1080" alt="5" src="https://github.com/user-attachments/assets/70e0a628-9ff5-43a8-8501-6d57a1cd3a4c" />
+
+  
 </div>
 
 
