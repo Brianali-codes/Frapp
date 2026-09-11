@@ -4,15 +4,13 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import notifee, { AndroidNotificationSetting, AuthorizationStatus } from '@notifee/react-native';
 import { ThemedText } from '@/components/ThemedText';
-import {
-  SecuritySafe,
-  Eye,
-  ArrowRight2,
-  TickCircle,
-  Notification,
-  TimerStart,
-  ShieldTick
-} from 'iconsax-react-nativejs';
+import SecuritySafe from 'iconsax-react-nativejs/dist/cjs/SecuritySafe';
+import Eye from 'iconsax-react-nativejs/dist/cjs/Eye';
+import ArrowRight2 from 'iconsax-react-nativejs/dist/cjs/ArrowRight2';
+import TickCircle from 'iconsax-react-nativejs/dist/cjs/TickCircle';
+import Notification from 'iconsax-react-nativejs/dist/cjs/Notification';
+import TimerStart from 'iconsax-react-nativejs/dist/cjs/TimerStart';
+import ShieldTick from 'iconsax-react-nativejs/dist/cjs/ShieldTick';
 import LottieView from 'lottie-react-native';
 
 import { useThemeColor } from '@/hooks/useThemeColor';

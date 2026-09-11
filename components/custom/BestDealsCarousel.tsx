@@ -21,18 +21,15 @@ import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/ThemedText';
 import { FreeGiveaway } from '@/types';
 import { useCustomTheme } from '@/context/ThemeContext';
-import {
-  Flash,
-  ArrowRight,
-  Share as ShareIcon,
-  Star1,
-  CalendarTick,
-  Game,
-  Gift,
-  Heart,
-  Shop,
-  TrendDown
-} from 'iconsax-react-nativejs';
+import ArrowRight from 'iconsax-react-nativejs/dist/cjs/ArrowRight';
+import ShareIcon from 'iconsax-react-nativejs/dist/cjs/Share';
+import Star1 from 'iconsax-react-nativejs/dist/cjs/Star1';
+import CalendarTick from 'iconsax-react-nativejs/dist/cjs/CalendarTick';
+import Game from 'iconsax-react-nativejs/dist/cjs/Game';
+import Gift from 'iconsax-react-nativejs/dist/cjs/Gift';
+import Heart from 'iconsax-react-nativejs/dist/cjs/Heart';
+import Shop from 'iconsax-react-nativejs/dist/cjs/Shop';
+import TrendDown from 'iconsax-react-nativejs/dist/cjs/TrendDown';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const CORE_BANNER_HEIGHT = 160;

@@ -4,28 +4,26 @@ import { ThemedText } from '@/components/ThemedText';
 import { APP_REPO_URL, APP_URLS } from '@/constants/app';
 import React, { useState, useEffect, useRef } from 'react';
 import { Linking, View, ScrollView, Pressable, Platform, Image, Modal } from 'react-native';
-import {
-  Moon,
-  Sun1,
-  Notification,
-  Global,
-  Heart,
-  Coffee,
-  ArrowRight2,
-  InfoCircle,
-  Refresh2,
-  CloseCircle,
-  ToggleOnCircle,
-  ToggleOffCircle,
-  User,
-  Mobile,
-  Share,
-  Lock1,
-  TickCircle,
-  Warning2,
-  Star,
-  Star1,
-} from 'iconsax-react-nativejs';
+import Moon from 'iconsax-react-nativejs/dist/cjs/Moon';
+import Sun1 from 'iconsax-react-nativejs/dist/cjs/Sun1';
+import Notification from 'iconsax-react-nativejs/dist/cjs/Notification';
+import Global from 'iconsax-react-nativejs/dist/cjs/Global';
+import Heart from 'iconsax-react-nativejs/dist/cjs/Heart';
+import Coffee from 'iconsax-react-nativejs/dist/cjs/Coffee';
+import ArrowRight2 from 'iconsax-react-nativejs/dist/cjs/ArrowRight2';
+import InfoCircle from 'iconsax-react-nativejs/dist/cjs/InfoCircle';
+import Refresh2 from 'iconsax-react-nativejs/dist/cjs/Refresh2';
+import CloseCircle from 'iconsax-react-nativejs/dist/cjs/CloseCircle';
+import ToggleOnCircle from 'iconsax-react-nativejs/dist/cjs/ToggleOnCircle';
+import ToggleOffCircle from 'iconsax-react-nativejs/dist/cjs/ToggleOffCircle';
+import User from 'iconsax-react-nativejs/dist/cjs/User';
+import Mobile from 'iconsax-react-nativejs/dist/cjs/Mobile';
+import Share from 'iconsax-react-nativejs/dist/cjs/Share';
+import Lock1 from 'iconsax-react-nativejs/dist/cjs/Lock1';
+import TickCircle from 'iconsax-react-nativejs/dist/cjs/TickCircle';
+import Warning2 from 'iconsax-react-nativejs/dist/cjs/Warning2';
+import Star from 'iconsax-react-nativejs/dist/cjs/Star';
+import Star1 from 'iconsax-react-nativejs/dist/cjs/Star1';
 import { useRouter } from 'expo-router';
 import notifee, { AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';

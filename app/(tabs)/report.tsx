@@ -3,17 +3,15 @@ import { ThemedText } from '@/components/ThemedText';
 import { APP_URLS } from '@/constants/app';
 import React, { useState } from 'react';
 import { Alert, Linking, View, ScrollView, Pressable, Platform, Image } from 'react-native';
-import { 
-  Setting, 
-  Moon, 
-  Flag, 
-  InfoCircle,
-  BrushBig,     
-  Danger,       
-  Wifi,         
-  LampCharge,    
-  Sun1
-} from 'iconsax-react-nativejs';
+import Setting from 'iconsax-react-nativejs/dist/cjs/Setting';
+import Moon from 'iconsax-react-nativejs/dist/cjs/Moon';
+import Flag from 'iconsax-react-nativejs/dist/cjs/Flag';
+import InfoCircle from 'iconsax-react-nativejs/dist/cjs/InfoCircle';
+import BrushBig from 'iconsax-react-nativejs/dist/cjs/BrushBig';
+import Danger from 'iconsax-react-nativejs/dist/cjs/Danger';
+import Wifi from 'iconsax-react-nativejs/dist/cjs/Wifi';
+import LampCharge from 'iconsax-react-nativejs/dist/cjs/LampCharge';
+import Sun1 from 'iconsax-react-nativejs/dist/cjs/Sun1';
 import { useRouter } from 'expo-router';
 
 // Import translation hooks and explicit context instance

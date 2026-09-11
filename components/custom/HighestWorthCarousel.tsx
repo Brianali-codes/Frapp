@@ -21,19 +21,20 @@ import { ThemedText } from '@/components/ThemedText';
 import { API_ENDPOINTS } from '@/constants/api';
 import { Giveaway } from '@/types';
 import { useCustomTheme } from '@/context/ThemeContext';
-import { 
-  Flash, 
-  ArrowRight, 
-  Share as ShareIcon, 
-  Gift, 
-  CalendarTick, 
-  InfoCircle, 
-  Game,
-  TimerStart,
-  Heart,
-  Star1,
-  Shop
-} from 'iconsax-react-nativejs';
+import ArrowCircleRight from 'iconsax-react-nativejs/dist/cjs/ArrowCircleRight';
+import ExportSquare from 'iconsax-react-nativejs/dist/cjs/ExportSquare';
+import ShareIcon from 'iconsax-react-nativejs/dist/cjs/Share';
+import CalendarTick from 'iconsax-react-nativejs/dist/cjs/CalendarTick';
+import Game from 'iconsax-react-nativejs/dist/cjs/Game';
+import Gift from 'iconsax-react-nativejs/dist/cjs/Gift';
+import InfoCircle from 'iconsax-react-nativejs/dist/cjs/InfoCircle';
+import TimerStart from 'iconsax-react-nativejs/dist/cjs/TimerStart';
+import Heart from 'iconsax-react-nativejs/dist/cjs/Heart';
+import Star1 from 'iconsax-react-nativejs/dist/cjs/Star1';
+import Shop from 'iconsax-react-nativejs/dist/cjs/Shop';
+import Flash from 'iconsax-react-nativejs/dist/cjs/Flash';
+import ArrowRight from 'iconsax-react-nativejs/dist/cjs/ArrowRight';
+
 
 const CORE_BANNER_HEIGHT = 160; 
 const AUTOSCROLL_INTERVAL = 5000; 

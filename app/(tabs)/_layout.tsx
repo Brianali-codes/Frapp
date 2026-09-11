@@ -3,7 +3,10 @@ import React from 'react';
 import { Platform, View, Dimensions, TouchableOpacity } from 'react-native';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { ThemedText } from '@/components/ThemedText';
-import { DollarCircle, Gift, HeartCircle, Setting } from 'iconsax-react-nativejs';
+import DollarCircle from 'iconsax-react-nativejs/dist/cjs/DollarCircle';
+import Gift from 'iconsax-react-nativejs/dist/cjs/Gift';
+import HeartCircle from 'iconsax-react-nativejs/dist/cjs/HeartCircle';
+import Setting from 'iconsax-react-nativejs/dist/cjs/Setting';
 
 const TABS = [
   { name: 'index', href: '/', title: 'Get', icon: Gift },

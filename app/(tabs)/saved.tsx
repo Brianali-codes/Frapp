@@ -13,16 +13,14 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, { TriggerType, AndroidImportance } from '@notifee/react-native';
-import { 
-  Moon, 
-  Sun1, 
-  Heart, 
-  Trash, 
-  Element3, 
-  RowVertical, 
-  Shop, 
-  ArchiveBook
-} from 'iconsax-react-nativejs';
+import Moon from 'iconsax-react-nativejs/dist/cjs/Moon';
+import Sun1 from 'iconsax-react-nativejs/dist/cjs/Sun1';
+import Heart from 'iconsax-react-nativejs/dist/cjs/Heart';
+import Trash from 'iconsax-react-nativejs/dist/cjs/Trash';
+import Element3 from 'iconsax-react-nativejs/dist/cjs/Element3';
+import RowVertical from 'iconsax-react-nativejs/dist/cjs/RowVertical';
+import Shop from 'iconsax-react-nativejs/dist/cjs/Shop';
+import ArchiveBook from 'iconsax-react-nativejs/dist/cjs/ArchiveBook';
 
 import DealItem from '@/components/custom/DealItem';
 import GiveawayItem from '@/components/custom/GiveawayItem'; 
@@ -54,7 +52,46 @@ const FILTER_OPTIONS = [
   { id: 'ios', key: 'giveaways.platforms.ios', label: 'iOS', icon: Shop, iconUri: 'https://www.svgrepo.com/show/494331/apple-round.svg' },
   { id: 'drm-free', key: 'giveaways.platforms.drmFree', label: 'DRM-Free', icon: Shop, iconUri: 'https://www.svgrepo.com/show/477064/unlock.svg' },
   { id: 'itchio', key: 'giveaways.platforms.itchio', label: 'itch.io', icon: Shop, iconUri: 'https://www.svgrepo.com/show/452232/itch-io.svg' },
+  
+  // CheapShark Store ID Filters
+  { id: '1', key: 'deals.stores.steam', label: 'Steam', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/0.png' },
+  { id: '2', key: 'deals.stores.gamersgate', label: 'GamersGate', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/1.png' },
+  { id: '3', key: 'deals.stores.gmg', label: 'GreenManGaming', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/2.png' },
+  { id: '7', key: 'deals.stores.gog', label: 'GOG', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/6.png' },
+  { id: '8', key: 'deals.stores.humble', label: 'Humble Store', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/7.png' },
+  { id: '11', key: 'deals.stores.macgamestore', label: 'MacGamestore', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/10.png' },
+  { id: '13', key: 'deals.stores.ubisoft', label: 'Ubisoft Store', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/12.png' },
+  { id: '15', key: 'deals.stores.fanatical', label: 'Fanatical', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/14.png' },
+  { id: '21', key: 'deals.stores.wingamestore', label: 'WinGameStore', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/20.png' },
+  { id: '23', key: 'deals.stores.gamebillet', label: 'GameBillet', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/22.png' },
+  { id: '24', key: 'deals.stores.voidu', label: 'Voidu', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/23.png' },
+  { id: '25', key: 'deals.stores.epic', label: 'Epic Games Store', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/24.png' },
+  { id: '27', key: 'deals.stores.gamesplanet', label: 'Gamesplanet', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/26.png' },
+  { id: '28', key: 'deals.stores.gamesload', label: 'Gamesload', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/27.png' },
+  { id: '29', key: 'deals.stores.2game', label: '2Game', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/28.png' },
+  { id: '30', key: 'deals.stores.indiegala', label: 'IndieGala', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/29.png' },
+  { id: '31', key: 'deals.stores.blizzard', label: 'Blizzard Shop', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/30.png' },
+  { id: '32', key: 'deals.stores.allyouplay', label: 'AllYouPlay', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/31.png' },
+  { id: '33', key: 'deals.stores.dlgamer', label: 'DLGamer', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/32.png' },
+  { id: '34', key: 'deals.stores.noctre', label: 'Noctre', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/33.png' },
+  { id: '35', key: 'deals.stores.dreamgame', label: 'DreamGame', icon: Shop, iconUri: 'https://www.cheapshark.com/img/stores/icons/34.png' },
 ];
+
+const STORE_ID_TO_PLATFORM_KEYWORDS: Record<string, string[]> = {
+  '1': ['steam'],
+  '7': ['gog'],
+  '8': ['humble'],
+  '13': ['ubisoft', 'uplay'],
+  '25': ['epic'],
+  '30': ['indiegala'],
+  '31': ['blizzard', 'battle.net'],
+};
+
+const PLATFORM_SLUG_TO_STORE_IDS: Record<string, string[]> = {
+  'steam': ['1'],
+  'gog': ['7'],
+  'epic-games-store': ['25'],
+};
 
 function CardListSkeleton({ isDark, cardBgColor, adaptiveBorderColor, variant }: { isDark: boolean; cardBgColor: string; adaptiveBorderColor: string; variant: 'normal' | 'compact' }) {
   const shimmerBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
@@ -277,8 +314,33 @@ export default function SavedItemsScreen() {
   const filteredGiveaways = useMemo(() => {
     return savedGiveaways.filter((item) => {
       if (selectedFilter === 'all') return true;
-      const platformStr = String(item.platform || item.platforms || item.storeID || '').toLowerCase();
-      return platformStr.includes(selectedFilter.toLowerCase()) || String(item.storeID) === selectedFilter;
+
+      const itemStoreID = String(item.storeID || '').trim();
+      const itemPlatformStr = String(item.platform || item.platforms || '').toLowerCase();
+
+      // Direct Store ID Match (CheapShark deals)
+      if (itemStoreID && itemStoreID === selectedFilter) {
+        return true;
+      }
+
+      // Direct Platform String Match (GamerPower giveaways)
+      if (itemPlatformStr && itemPlatformStr.includes(selectedFilter.toLowerCase())) {
+        return true;
+      }
+
+      // Fallback: Store ID filter clicked -> Check string keywords (e.g. Filter '1' matches giveaway platform 'Steam')
+      const storeKeywords = STORE_ID_TO_PLATFORM_KEYWORDS[selectedFilter];
+      if (storeKeywords && storeKeywords.some((kw) => itemPlatformStr.includes(kw))) {
+        return true;
+      }
+
+      // Fallback: Platform slug filter clicked -> Check numeric store IDs (e.g. Filter 'steam' matches deal storeID '1')
+      const mappedStoreIDs = PLATFORM_SLUG_TO_STORE_IDS[selectedFilter];
+      if (mappedStoreIDs && mappedStoreIDs.includes(itemStoreID)) {
+        return true;
+      }
+
+      return false;
     });
   }, [savedGiveaways, selectedFilter]);
 
@@ -395,7 +457,7 @@ export default function SavedItemsScreen() {
             >
               {FILTER_OPTIONS.map((filter) => {
                 const isSelected = selectedFilter === filter.id;
-                const IconComponent = filter.icon;
+                const IconComponent = filter.icon || Shop;
                 return (
                   <Pressable
                     key={filter.id}

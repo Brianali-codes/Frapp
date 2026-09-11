@@ -11,8 +11,3 @@ export const APP_URLS = {
     ANDROID_SETTINGS: `android.settings.APP_NOTIFICATION_SETTINGS?package=${appconfig.expo.android.package}`
 }
 
-// com.brianali.Frapp
-export const DEVICE_SETTINGS_URL = Platform.select({
-    ios: APP_URLS.IOS_SETTINGS,
-    android: APP_URLS.ANDROID_SETTINGS
-}) || ""

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useFocusEffect } from 'expo-router';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Image,
   Linking,
@@ -21,18 +22,16 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { FreeGiveaway } from '@/types';
 import { useCustomTheme } from '@/context/ThemeContext';
-import {
-  ArrowCircleRight,
-  ExportSquare,
-  Share as ShareIcon,
-  Star1,
-  CalendarTick,
-  Game,
-  Gift,
-  Heart,
-  Shop,
-  TrendDown
-} from 'iconsax-react-nativejs';
+import ArrowCircleRight from 'iconsax-react-nativejs/dist/cjs/ArrowCircleRight';
+import ExportSquare from 'iconsax-react-nativejs/dist/cjs/ExportSquare';
+import ShareIcon from 'iconsax-react-nativejs/dist/cjs/Share';
+import Star1 from 'iconsax-react-nativejs/dist/cjs/Star1';
+import CalendarTick from 'iconsax-react-nativejs/dist/cjs/CalendarTick';
+import Game from 'iconsax-react-nativejs/dist/cjs/Game';
+import Gift from 'iconsax-react-nativejs/dist/cjs/Gift';
+import Heart from 'iconsax-react-nativejs/dist/cjs/Heart';
+import Shop from 'iconsax-react-nativejs/dist/cjs/Shop';
+import TrendDown from 'iconsax-react-nativejs/dist/cjs/TrendDown';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -239,9 +238,9 @@ const compileStoreDictionary = (rawStores: CheapSharkStore[]): Record<string, St
   return compiledMap;
 };
 
-export default function DealItem({ 
-  giveaway, 
-  variant = 'normal', 
+export default function DealItem({
+  giveaway,
+  variant = 'normal',
   ctaText,
   isSaved: externalIsSaved,
   onToggleSave: externalOnToggleSave
@@ -250,7 +249,7 @@ export default function DealItem({
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [internalIsSaved, setInternalIsSaved] = useState(false);
-  
+
   const [storeMap, setStoreMap] = useState<Record<string, StoreMeta>>(storeMetadataCache || {});
   const [extendedData, setExtendedData] = useState<ExtendedDealData | null>(null);
   const [loadingExtended, setLoadingExtended] = useState(false);
@@ -302,7 +301,7 @@ export default function DealItem({
         if (!isStoreFetchPending) {
           isStoreFetchPending = true;
           const res = await fetch('https://www.cheapshark.com/api/1.0/stores', {
-            headers: { 
+            headers: {
               'Accept': 'application/json',
               'User-Agent': 'GameDealsApp/1.0'
             }
@@ -327,25 +326,41 @@ export default function DealItem({
     return () => { isMounted = false; };
   }, []);
 
-  useEffect(() => {
-    if (externalIsSaved !== undefined) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (externalIsSaved !== undefined) return;
 
-    let isMounted = true;
-    const checkSavedStatus = async () => {
-      try {
-        const stored = await AsyncStorage.getItem('saved_giveaways');
-        if (stored && isMounted) {
-          const parsed: FreeGiveaway[] = JSON.parse(stored);
-          const exists = parsed.some((item) => item.id === giveaway.id);
-          setInternalIsSaved(exists);
+      let isActive = true;
+
+      const checkSavedStatus = async () => {
+        try {
+          const stored = await AsyncStorage.getItem('saved_giveaways');
+
+          if (!isActive) return;
+
+          if (stored) {
+            const parsed: FreeGiveaway[] = JSON.parse(stored);
+
+            const exists = parsed.some(
+              (item) => item.id === giveaway.id
+            );
+
+            setInternalIsSaved(exists);
+          } else {
+            setInternalIsSaved(false);
+          }
+        } catch (error) {
+          console.error('Failed to read saved list:', error);
         }
-      } catch (error) {
-        console.error('Failed to read saved list:', error);
-      }
-    };
-    checkSavedStatus();
-    return () => { isMounted = false; };
-  }, [giveaway.id, externalIsSaved]);
+      };
+
+      checkSavedStatus();
+
+      return () => {
+        isActive = false;
+      };
+    }, [giveaway.id, externalIsSaved])
+  );
 
   useEffect(() => {
     if (!modalVisible) return;
@@ -354,12 +369,12 @@ export default function DealItem({
     const fetchCheapSharkExtendedMetrics = async () => {
       setLoadingExtended(true);
       try {
-        const headers = { 
+        const headers = {
           'Accept': 'application/json',
           'User-Agent': 'GameDealsApp/1.0'
         };
         const rawTitle = giveaway.title || '';
-        
+
         const baseTitle = rawTitle.split(/[-–:(\[]/)[0];
         const cleanTitle = baseTitle.replace(/[™®©!]/g, '').trim();
 
@@ -465,7 +480,7 @@ export default function DealItem({
   };
 
   const storeMetaInfo = getStoreMeta();
-  const displayPlatform = storeMetaInfo?.name || 
+  const displayPlatform = storeMetaInfo?.name ||
     (giveaway.platform && !/^\d+$/.test(giveaway.platform) ? giveaway.platform : t('deals.store', 'Store'));
   const currentStoreIcon = storeMetaInfo?.icon || null;
 
@@ -905,7 +920,7 @@ export default function DealItem({
                     </View>
                   )}
 
-    
+
 
                   {giveaway.publisher && (
                     <View style={{ backgroundColor: cardBgColor }} className="px-2.5 py-1 rounded-xl flex-row items-center gap-1.5">
@@ -956,14 +971,14 @@ export default function DealItem({
                       <ThemedText className="font-mont text-[10px] leading-relaxed opacity-85">
                         {lowestPriceEverDate
                           ? t('deals.lowest_price_record', {
-                              defaultValue: 'Historical low of ${{price}} reached on {{date}}',
-                              price: lowestPriceEverVal.toFixed(2),
-                              date: lowestPriceEverDate
-                            })
+                            defaultValue: 'Historical low of ${{price}} reached on {{date}}',
+                            price: lowestPriceEverVal.toFixed(2),
+                            date: lowestPriceEverDate
+                          })
                           : t('deals.lowest_price_nodate', {
-                              defaultValue: 'Historical low recorded at ${{price}}',
-                              price: lowestPriceEverVal.toFixed(2)
-                            })}
+                            defaultValue: 'Historical low recorded at ${{price}}',
+                            price: lowestPriceEverVal.toFixed(2)
+                          })}
                       </ThemedText>
                     </View>
                     <ThemedText className="font-montBlack text-sm text-emerald-500">

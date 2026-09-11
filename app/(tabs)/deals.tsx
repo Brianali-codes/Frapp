@@ -1,7 +1,17 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ScrollView, View, Pressable, Image, Platform, LayoutAnimation, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Setting, Moon, Sun1, WifiSquare, Element3, RowVertical, Filter, CloseCircle, SearchNormal, Shop, Flash } from 'iconsax-react-nativejs';
+import Setting from 'iconsax-react-nativejs/dist/cjs/Setting';
+import Moon from 'iconsax-react-nativejs/dist/cjs/Moon';
+import Sun1 from 'iconsax-react-nativejs/dist/cjs/Sun1';
+import WifiSquare from 'iconsax-react-nativejs/dist/cjs/WifiSquare';
+import Element3 from 'iconsax-react-nativejs/dist/cjs/Element3';
+import RowVertical from 'iconsax-react-nativejs/dist/cjs/RowVertical';
+import Filter from 'iconsax-react-nativejs/dist/cjs/Filter';
+import CloseCircle from 'iconsax-react-nativejs/dist/cjs/CloseCircle';
+import SearchNormal from 'iconsax-react-nativejs/dist/cjs/SearchNormal';
+import Shop from 'iconsax-react-nativejs/dist/cjs/Shop';
+import Flash from 'iconsax-react-nativejs/dist/cjs/Flash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import i18nInstanceSource from '@/components/i18n';

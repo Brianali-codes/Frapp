@@ -14,7 +14,7 @@ import { useAssets } from 'expo-asset';
 import { ThemedText } from '@/components/ThemedText';
 import Button from '@/components/custom/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CloseCircle } from 'iconsax-react-nativejs';
+import CloseCircle from 'iconsax-react-nativejs/dist/cjs/CloseCircle';
 import { useTranslation } from 'react-i18next';
 import {
   useFonts,

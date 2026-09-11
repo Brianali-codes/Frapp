@@ -1,13 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Linking, 
-  View, 
-  Platform, 
-  Pressable, 
-  Share, 
-  Text, 
-  Modal, 
-  ScrollView, 
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
+import {
+  Linking,
+  View,
+  Platform,
+  Pressable,
+  Share,
+  Text,
+  Modal,
+  ScrollView,
   Dimensions,
   PanResponder,
   Animated
@@ -20,19 +21,18 @@ import { ThemedView } from '@/components/ThemedView';
 import { FreeGiveaway } from '@/types';
 import { useCustomTheme } from '@/context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { 
-  ArrowCircleRight, 
-  ExportSquare, 
-  Share as ShareIcon, 
-  CalendarTick, 
-  Game, 
-  Gift,
-  InfoCircle,
-  TimerStart,
-  Heart,
-  Star1,
-  Shop
-} from 'iconsax-react-nativejs';
+import ArrowCircleRight from 'iconsax-react-nativejs/dist/cjs/ArrowCircleRight';
+import ExportSquare from 'iconsax-react-nativejs/dist/cjs/ExportSquare';
+import ShareIcon from 'iconsax-react-nativejs/dist/cjs/Share';
+import CalendarTick from 'iconsax-react-nativejs/dist/cjs/CalendarTick';
+import Game from 'iconsax-react-nativejs/dist/cjs/Game';
+import Gift from 'iconsax-react-nativejs/dist/cjs/Gift';
+import InfoCircle from 'iconsax-react-nativejs/dist/cjs/InfoCircle';
+import TimerStart from 'iconsax-react-nativejs/dist/cjs/TimerStart';
+import Heart from 'iconsax-react-nativejs/dist/cjs/Heart';
+import Star1 from 'iconsax-react-nativejs/dist/cjs/Star1';
+import Shop from 'iconsax-react-nativejs/dist/cjs/Shop';
+
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -195,9 +195,9 @@ interface StoreMeta {
 interface GiveawayItemProps {
   giveaway: FreeGiveaway;
   variant?: 'normal' | 'compact' | 'minimal';
-  ctaText?: string; 
-  isSaved?: boolean;             
-  onToggleSave?: () => void;     
+  ctaText?: string;
+  isSaved?: boolean;
+  onToggleSave?: () => void;
 }
 
 let storeMetadataCache: Record<string, StoreMeta> | null = null;
@@ -224,12 +224,12 @@ const compileStoreDictionary = (rawStores: CheapSharkStore[]): Record<string, St
   return compiledMap;
 };
 
-export default function GiveawayItem({ 
-  giveaway, 
-  variant = 'normal', 
+export default function GiveawayItem({
+  giveaway,
+  variant = 'normal',
   ctaText,
   isSaved = false,
-  onToggleSave = () => {} 
+  onToggleSave = () => { }
 }: GiveawayItemProps) {
   const { themeMode } = useCustomTheme();
   const { t } = useTranslation();
@@ -279,7 +279,7 @@ export default function GiveawayItem({
         if (!isStoreFetchPending) {
           isStoreFetchPending = true;
           const res = await fetch('https://www.cheapshark.com/api/1.0/stores', {
-            headers: { 
+            headers: {
               'Accept': 'application/json',
               'User-Agent': 'GameDealsApp/1.0'
             }
@@ -339,29 +339,47 @@ export default function GiveawayItem({
     return () => clearInterval(timerInterval);
   }, [giveaway.end_date]);
 
-  useEffect(() => {
-    const checkSavedStatus = async () => {
-      try {
-        const stored = await AsyncStorage.getItem('saved_giveaways');
-        if (stored) {
-          const parsed: FreeGiveaway[] = JSON.parse(stored);
-          const exists = parsed.some((item) => item.id === giveaway.id);
-          setLocalIsSaved(exists);
-        } else {
-          setLocalIsSaved(isSaved);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const checkSavedStatus = async () => {
+        try {
+          const stored = await AsyncStorage.getItem('saved_giveaways');
+
+          if (!isActive) return;
+
+          if (stored) {
+            const parsed: FreeGiveaway[] = JSON.parse(stored);
+
+            const exists = parsed.some(
+              (item) => item.id === giveaway.id
+            );
+
+            setLocalIsSaved(exists);
+          } else {
+            setLocalIsSaved(false);
+          }
+        } catch (error) {
+          if (isActive) {
+            console.error('Failed to read saved list:', error);
+            setLocalIsSaved(isSaved);
+          }
         }
-      } catch (error) {
-        console.error('Failed to read saved list:', error);
-        setLocalIsSaved(isSaved);
-      }
-    };
-    checkSavedStatus();
-  }, [giveaway.id, isSaved]);
+      };
+
+      checkSavedStatus();
+
+      return () => {
+        isActive = false;
+      };
+    }, [giveaway.id, isSaved])
+  );
 
   const handleToggle = async () => {
     const nextSavedState = !localIsSaved;
     setLocalIsSaved(nextSavedState);
-    
+
     onToggleSave();
 
     try {
@@ -404,7 +422,7 @@ export default function GiveawayItem({
     try {
       await WebBrowser.openBrowserAsync(targetUrl, {
         toolbarColor: isDark ? '#2c2c35' : '#f1f2f6',
-        controlsColor: '#9333ea', 
+        controlsColor: '#9333ea',
         secondaryToolbarColor: isDark ? '#1c1c1e' : '#ffffff',
         enableBarCollapsing: true,
         showTitle: true,
@@ -459,7 +477,7 @@ export default function GiveawayItem({
   };
 
   const storeMetaInfo = getStoreMeta();
-  const displayPlatform = storeMetaInfo?.name || 
+  const displayPlatform = storeMetaInfo?.name ||
     (giveaway.platforms || giveaway.platform ? (giveaway.platforms || giveaway.platform) : t('deals.store', 'Digital Store'));
   const currentStoreIcon = storeMetaInfo?.icon || null;
 
@@ -569,7 +587,7 @@ export default function GiveawayItem({
                     </Text>
                   )}
                 </View>
-                
+
                 <View className="flex-row items-center gap-1.5">
                   <FavoriteButton
                     isSaved={localIsSaved}
@@ -581,12 +599,12 @@ export default function GiveawayItem({
                     hitSlop={8}
                   />
                   <Animated.View style={{ transform: [{ scale: claimScale }] }}>
-                    <Pressable 
+                    <Pressable
                       onPressIn={handleClaimPressIn}
                       onPressOut={handleClaimPressOut}
-                      onPress={handleOpenClaimSite} 
-                      hitSlop={8} 
-                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                      onPress={handleOpenClaimSite}
+                      hitSlop={8}
+                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                       className="p-1.5 rounded-lg border"
                     >
                       <ExportSquare size="13" color={iconColor} variant="Outline" />
@@ -659,7 +677,7 @@ export default function GiveawayItem({
                     </Text>
                   )}
                 </View>
-                
+
                 <View className="flex-row items-center gap-1.5">
                   <FavoriteButton
                     isSaved={localIsSaved}
@@ -671,12 +689,12 @@ export default function GiveawayItem({
                     hitSlop={10}
                   />
                   <Animated.View style={{ transform: [{ scale: claimScale }] }}>
-                    <Pressable 
+                    <Pressable
                       onPressIn={handleClaimPressIn}
                       onPressOut={handleClaimPressOut}
-                      onPress={handleOpenClaimSite} 
-                      hitSlop={10} 
-                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                      onPress={handleOpenClaimSite}
+                      hitSlop={10}
+                      style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                       className="p-1.5 rounded-lg border"
                     >
                       <ExportSquare size="15" color={iconColor} variant="Outline" />
@@ -740,12 +758,12 @@ export default function GiveawayItem({
                 {giveaway.description}
               </ThemedText>
 
-              <View 
-                style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} 
+              <View
+                style={{ borderTopWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}
                 className="flex-row items-center justify-between pt-2.5 mt-0.5"
               >
                 <Animated.View style={{ transform: [{ scale: claimScale }] }}>
-                  <Pressable 
+                  <Pressable
                     onPressIn={handleClaimPressIn}
                     onPressOut={handleClaimPressOut}
                     onPress={handleOpenClaimSite}
@@ -782,12 +800,12 @@ export default function GiveawayItem({
                     />
 
                     <Animated.View style={{ transform: [{ scale: claimScale }] }}>
-                      <Pressable 
+                      <Pressable
                         onPressIn={handleClaimPressIn}
                         onPressOut={handleClaimPressOut}
-                        onPress={handleOpenClaimSite} 
-                        hitSlop={10} 
-                        style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                        onPress={handleOpenClaimSite}
+                        hitSlop={10}
+                        style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                         className="p-2 rounded-xl border"
                       >
                         <ExportSquare size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
@@ -795,7 +813,7 @@ export default function GiveawayItem({
                     </Animated.View>
 
                     <Pressable onPress={handleShare} hitSlop={10} style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} className="p-2 rounded-xl border active:opacity-60">
-                       <ShareIcon size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
+                      <ShareIcon size="15" color={isDark ? '#a78bfa' : '#9333ea'} variant="Outline" />
                     </Pressable>
                   </View>
                 </View>
@@ -813,14 +831,14 @@ export default function GiveawayItem({
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-end">
-          <Pressable 
+          <Pressable
             style={{ ...Platform.select({ web: { cursor: 'default' } }), position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
             onPress={() => setModalVisible(false)}
           />
 
-          <Animated.View 
-            style={{ 
-              height: SCREEN_HEIGHT * 0.7, 
+          <Animated.View
+            style={{
+              height: SCREEN_HEIGHT * 0.7,
               backgroundColor: isDark ? '#1e1e24' : '#ffffff',
               borderTopLeftRadius: 32,
               borderTopRightRadius: 32,
@@ -829,8 +847,8 @@ export default function GiveawayItem({
             }}
             className="w-full flex-col shadow-2xl"
           >
-            <View 
-              {...panResponder.panHandlers} 
+            <View
+              {...panResponder.panHandlers}
               className="w-full h-[35%] relative bg-zinc-950"
             >
               {imageUri ? (
@@ -847,9 +865,9 @@ export default function GiveawayItem({
               <View className="absolute inset-0 bg-black/35" />
 
               <View className="absolute top-3 inset-x-0 items-center">
-                <View 
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }} 
-                  className="w-12 h-1 rounded-full" 
+                <View
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}
+                  className="w-12 h-1 rounded-full"
                 />
               </View>
 
@@ -866,7 +884,7 @@ export default function GiveawayItem({
             </View>
 
             <View className="flex-1">
-              <ScrollView 
+              <ScrollView
                 className="flex-1 px-5 pt-4"
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
@@ -875,7 +893,7 @@ export default function GiveawayItem({
                   <ThemedText className="font-mont text-xs tracking-wider uppercase opacity-60">
                     {giveaway.type || 'Free Game Loot'}
                   </ThemedText>
-                  
+
                   <View className="flex-row items-center gap-2">
                     {hasWorth && (
                       <Text className="text-[11px] font-montBold line-through text-zinc-400 dark:text-zinc-500">
@@ -948,9 +966,9 @@ export default function GiveawayItem({
                 )}
               </ScrollView>
 
-              <View 
-                style={{ 
-                  borderTopWidth: 1, 
+              <View
+                style={{
+                  borderTopWidth: 1,
                   borderColor: adaptiveBorderColor,
                   paddingBottom: Platform.OS === 'ios' ? 30 : 15,
                   backgroundColor: isDark ? '#1e1e24' : '#ffffff'
@@ -969,8 +987,8 @@ export default function GiveawayItem({
 
                   <Pressable
                     onPress={handleShare}
-                    hitSlop={10} 
-                    style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }} 
+                    hitSlop={10}
+                    style={{ backgroundColor: iconBtnBg, borderColor: iconBtnBorder }}
                     className="p-2.5 rounded-xl border active:opacity-60"
                   >
                     <ShareIcon size="16" color={isDark ? "#a78bfa" : "#7c3aed"} variant="Broken" />
