@@ -116,7 +116,12 @@ Follow these steps to set up the development environment:
   ```bash
     expo start
   ```
-
+8. **Building for different architectures**
+   ```bash
+   npx expo prebuild
+   ```
+   This generates and android folder
+   Navigate to the android/gradle-properties file and update the different architectures listed to your preference, defaults to a universal apk containing all 4 architectures.
 
 ## License
 
