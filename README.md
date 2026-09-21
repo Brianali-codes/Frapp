@@ -28,7 +28,7 @@
 ## About
 
 > [!NOTE]  
-> **Contributions are welcome.** If you want to help improve the application, optimize the tracking, or add new features, feel free to fork the repository and submit a pull request.
+> **Contributions are welcome.** If you want to help improve the application, optimize the performance, or add new features, feel free to fork the repository and submit a pull request.
 
 FRAPP acts as a centralized messenger for deal-hunting and budget gaming. It monitors platforms like Steam, Epic Games Store, GOG, and itch.io, tracking both 100% free giveaways and active premium game discounts so you can expand your library without scouring multiple storefronts daily.
 
