@@ -5,7 +5,7 @@
 <h1 align="center">FRAPP</h1>
 <p align="center">
   <a href="https://github.com/brianali-codes/frapp"><img src="https://img.shields.io/github/downloads/brianali-codes/frapp/total.svg" alt="Github All Releases" /></a>
-  <a href="https://choosealicense.com/licenses/mit/"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License" /></a>
+  <a href="https://choosealicense.com/licenses/gpl-3.0/"><img src="https://img.shields.io/badge/License-GPL--3.0-blue.svg" alt="GPL-3.0 License" /></a>
   <img src="https://img.shields.io/badge/Latest_version-v1.1.6-green" alt="Latest Version v1.1.6"/>
 </p>
 <p align="center">
@@ -15,7 +15,7 @@
   <a href="#running-locally">Running Locally</a> •
   <a href="https://github.com/brianali-codes/frapp/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md" target="_blank">Request Feature</a> •
   <a href="https://github.com/brianali-codes/frapp/issues/new?assignees=&labels=bug&projects=&template=feature_request.md" target="_blank">Report Bug</a> •
-  <a href="https://choosealicense.com/licenses/mit/" target="_blank">License</a>
+  <a href="https://choosealicense.com/licenses/GPL-3.0/" target="_blank">License</a>
   
 </p>
 <p align="center">
@@ -128,4 +128,4 @@ Follow these steps to set up the development environment:
 
 ## License
 
-This project contains the MIT LICENCE
+This project contains the GPL-3.0 LICENCE
