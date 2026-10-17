@@ -24,6 +24,7 @@
 </p>
 
 
+[![Get it on Orion Store](https://raw.githubusercontent.com/RookieEnough/Orion-Store/refs/heads/main/assets/orion-badge.png)](https://rookieenough.github.io/Orion-Data/redirect.html?id=frapp&icon=https%3A%2F%2Fraw.githubusercontent.com%2FBrianali-codes%2FFrapp%2Frefs%2Fheads%2Fmain%2Fassets%2Fimages%2FFRAPP_ICON1.png)
 
 
 <div style="display: flex;" align="center">
