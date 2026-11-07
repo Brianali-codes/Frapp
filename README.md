@@ -23,9 +23,20 @@
   Never miss a limited-time offer or massive discount across major distribution platforms, powered by the GamerPower and CheapShark APIs.
 </p>
 
+<p align="center">
+  <a href="https://rankcert.com/product/frapp" target="_blank" rel="nofollow noopener">
+    <img src="https://rankcert.com/badge/frapp?style=card&theme=light" alt="Frapp - Certified on RankCert" width="250" height="70" />
+  </a>
+  
+  <a href="https://rookieenough.github.io/Orion-Data/redirect.html?id=frapp&icon=https%3A%2F%2Fraw.githubusercontent.com%2FBrianali-codes%2FFrapp%2Frefs%2Fheads%2Fmain%2Fassets%2Fimages%2FFRAPP_ICON1.png" target="_blank" rel="nofollow noopener">
+    <img src="https://raw.githubusercontent.com/RookieEnough/Orion-Store/refs/heads/main/assets/orion-badge.png" alt="Get it on Orion Store" width="250" height="70" />
+  </a>
+  
+  <a href="https://ko-fi.com/brianalicodes" target="_blank">
+  <img width="250" height="70" alt="buymeacofee" src="https://github.com/user-attachments/assets/5eadacfb-c20e-48d9-b592-a306c96e5833" />
+  </a>
 
-[![Get it on Orion Store](https://raw.githubusercontent.com/RookieEnough/Orion-Store/refs/heads/main/assets/orion-badge.png)](https://rookieenough.github.io/Orion-Data/redirect.html?id=frapp&icon=https%3A%2F%2Fraw.githubusercontent.com%2FBrianali-codes%2FFrapp%2Frefs%2Fheads%2Fmain%2Fassets%2Fimages%2FFRAPP_ICON1.png)
-
+</p>
 
 <div style="display: flex;" align="center">
 
